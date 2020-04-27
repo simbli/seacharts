@@ -8,7 +8,7 @@ Electronic Navigational Charts module for reading sea chart shapefiles
 
 ## Features
 
-- Read and process depth data shapefiles into coordinate dictionaries
+- Read and process depth data shapefiles into polygon coordinate lists
 - Split different ocean depths into separate layers of polygons
 
 
