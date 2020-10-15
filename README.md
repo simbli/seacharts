@@ -1,96 +1,116 @@
 # ENC
-Electronic Navigational Charts module for reading sea chart shapefiles
+Electronic Navigational Charts module for reading sea depth data.
 
-[![platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey)](https://gitlab.stud.idi.ntnu.no/tdt4140-2020/52/-/commits/master)
-[![python version](https://img.shields.io/badge/python-3.7-blue)](https://gitlab.stud.idi.ntnu.no/tdt4140-2020/52/-/commits/master)
-[![license](https://img.shields.io/badge/license-MIT-green)](https://gitlab.stud.idi.ntnu.no/tdt4140-2020/52/-/commits/master)
+[![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
+[![python version](https://img.shields.io/badge/python-3.9-blue)]()
+[![license](https://img.shields.io/badge/license-MIT-green)]()
 
 
 ## Features
 
-- Read and process depth data shapefiles into polygon coordinate lists
-- Split different ocean depths into separate layers of polygons
+- Read and process depth data 
+[FileGDB](https://gdal.org/drivers/vector/filegdb.html) files into points and
+polygon coordinate lists.
 
 
 ## Code style
-This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/) convention for Python code.
-
+This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/) 
+convention for Python code.
 
 
 ## Prerequisites
 
-Download and install [Python 3.7](https://www.python.org/downloads/) (or a newer version).
+First, ensure that [Python 3.9](https://www.python.org/downloads/) 
+(or another compatible version) and the required
+[C++ build tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019) 
+are installed.
 
-Additionally, [Fiona](https://github.com/Toblerity/Fiona) is required in order to use this module. Install it using the [Conda](https://docs.conda.io/en/latest/) package manager:
+Next, install the required Python packages (in a virtual environment):
+```
+pip install wheel
+pip install pipwin
+pipwin install numpy
+pipwin install pandas
+pipwin install shapely
+pipwin install gdal
+pipwin install fiona
+```
 
-```
-conda install -c conda-forge fiona
-```
 
 ## Usage
-This module supports reading and processing shapefiles given in the format found [here](https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
+This module supports reading and processing the `FGDB` files for sea depth data 
+found [here](https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
 
 ### Downloading regional datasets
-Follow the above link to download the `Depth data` dataset from the [Norwegian Mapping Authority](https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority), by adding it to the Download queue and navigating to the separate [download page](https://kartkatalog.geonorge.no/nedlasting). Choose one or more county areas, and select the `WGS84 Geografisk` projection and `Shape` format. Finally, select your appropriate usergroup and purpose, and click `Download` to obtain the zip file.
+Follow the above link to download the `Depth data` (`Sjøkart - Dybdedata`) 
+dataset from the [Norwegian Mapping Authority](https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority), 
+by adding it to the Download queue and navigating to the separate 
+[download page](https://kartkatalog.geonorge.no/nedlasting). 
+Choose one or more county areas (e.g. `Møre og Romsdal`), and 
+select the `EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0` 
+format. Finally, select your appropriate user group and purpose, and click 
+`Download` to obtain the ZIP file(s).
 
 ### Unpacking depth data example
-Place the downloaded zip file(s) in the path `data/external/zipped_charts`, where the top-level folder `data` is located in the same directory as the executing script.
+Place the downloaded ZIP file(s) in the path `data/external/`, where the 
+top-level folder `data` is located in the same directory as the executing 
+script.
 
-Import the module and use the `unpack_chart_files` function to unzip the downloaded zip file(s) and extract desired map features:
+Import the module, initialize an instance of `ENCParser` with appropriate 
+settings, and use its `parse_external_data` method to extract desired 
+ENC features from the downloaded ZIP file(s):
 
 ```python
 import enc
 
-regions = ['trondelag']
+origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
+window_size = (20000, 16000)  # w, h (east, north) distance in meters
+region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-terrains = [('ocean', ('depth', ), ('Dybdeareal', )), 
-            ('surface', ('shore', 'land'), ('Torrfall', 'Landareal')), 
-            ('objects', ('rocks', 'shallows'), ('Skjaer', 'Grunne'))]
-
-min_longitude, min_latitude = 10.213, 63.401
-max_longitude, max_latitude = 10.654, 63.601
-bounding_box = min_longitude, min_latitude, max_longitude, max_latitude
-
-ocean_depths = [0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500]   # depth bins in meters
-
-enc.unpack_chart_files(regions, terrains, bounding_box, ocean_depths)
+parser = enc.ENCParser(origin, window_size, region)
+parser.parse_external_data()  # used only to parse newly downloaded data
 ```
 
-Note that `regions` contains the Norwegian counties corresponding to each downloaded zip file, and `terrains` have the form `<terrain_category>, <features_to_be_extracted>, <Norwegian_feature_names>` for each self-defined feature category.
+Note that `region` may be one or several Norwegian county names
+(or the whole country if the `Hele landet` data set is available), 
+corresponding to each downloaded ZIP file. Furthermore, a user-defined set of 
+sea `depths` bins and `features` to be extracted may be passed to the parser as 
+additional keyword arguments.
 
 ### Reading feature shapefiles example
-
-After the depth data is unpacked and extracted from the downloaded zip files, the shapefile data can be read by calling the `read_shapes` function for each feature category:
+After the data is extracted from the downloaded ZIP file(s), the shapefile 
+data can be read by calling the `read_feature_shapes` function for each 
+feature layer. The returned data is compatible with the 
+[Shapely](https://pypi.org/project/Shapely/) package for further geometric 
+manipulation and analysis of shapes:
 
 ```python
 import enc
 
-region = 'trondelag'
+origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
+window_size = (20000, 16000)  # w, h (east, north) distance in meters
+region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-min_longitude, min_latitude = 10.213, 63.401
-max_longitude, max_latitude = 10.654, 63.601
-bounding_box = min_longitude, min_latitude, max_longitude, max_latitude
+parser = enc.ENCParser(origin, window_size, region)
+data = parser.read_feature_shapes('seabed')
 
-category, feature = 'ocean', 'depth_100'
-shapes = enc.read_shapes(category, feature, region, bounding_box)
 
-for polygon_coordinates, min_depth, index in shapes:
-    print('{} {} polygon number {}:'.format(category, feature, index))
-    print('\tminimum depth in meters =', min_depth)
-    print('\tnumber of points =', len(polygon_coordinates))
-    print()
+from shapely.geometry import Polygon
 
-category, feature = 'surface', 'land'
-shapes = enc.read_shapes(category, feature, region, bounding_box)
+depth, coords = data[-1]
+polygon = Polygon(coords)
 
-for polygon_coordinates, min_depth, index in shapes:
-    print('{} {} polygon number {}:'.format(category, feature, index))
-    print('\tminimum depth in meters =', min_depth)
-    print('\tnumber of points =', len(polygon_coordinates))
-    print()
+print(f"\nNumber of extracted seabed polygons: {len(data)}")
+print(f"Minimum sea depth inside the last polygon: {depth}")
+print(f"Number of points in the last polygon: {len(coords)}")
+print(f"Area of the last polygon: {int(polygon.area)}")
+
 ```
 
-Note that the `bounding_box` here may be different from the area used to extract the map data from the ENC datasets. This allows one to load smaller areas of interest into memory during runtime.
+Note that the `origin` and `window_size` arguments here may be different 
+from the one used to extract the external ENC data, allowing for loading of 
+smaller areas of interest into memory during runtime. 
+
 
 ## Contributors
 
