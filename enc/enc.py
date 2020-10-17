@@ -43,34 +43,37 @@ class ENCParser:
         if self._is_tuple_with_length_two(origin):
             self.origin = tuple(float(i) for i in origin)
         else:
-            raise OriginFormatError
-
+            raise OriginFormatError("Origin should be a tuple of the form "
+                                    "(easting, northing) in meters")
         if self._is_tuple_with_length_two(window_size):
             self.window_size = tuple(float(i) for i in window_size)
         else:
-            raise SizeFormatError
-
+            raise SizeFormatError("Window size should be a tuple of the form "
+                                  "(horizontal_width, vertical_height) in "
+                                  "meters")
         if isinstance(region, str):
             self.region = (_Region(region),)
         elif self._is_sequence_of_strings(region):
             self.region = tuple(_Region(r) for r in region)
         else:
-            raise RegionFormatError
-
+            raise RegionFormatError(
+                f"Region '{region}' not valid, should be string or "
+                f"sequence of strings")
         if features is None:
             self.features = tuple(_Feature(f) for f in supported_features)
         elif self._is_sequence_of_strings(features):
             self.features = tuple(_Feature(f) for f in features)
         else:
-            raise FeaturesFormatError
-
+            raise FeaturesFormatError(
+                f"Features '{features}' not valid, should be "
+                f"sequence of strings")
         if depths is None:
             self.depths = _default_depths
         elif isinstance(depths, Sequence):
             self.depths = tuple(int(i) for i in depths)
         else:
-            raise DepthBinsFormatError
-
+            raise DepthBinsFormatError(
+                f"Depth bins should be a sequence of numbers")
         t_r_corner = (self.origin[i] + self.window_size[i] for i in range(2))
         self._bounding_box = *self.origin, *t_r_corner
 
@@ -97,7 +100,8 @@ class ENCParser:
                         depth_label = 'minimumsdybde'
                     elif feature.name == 'shallows':
                         depth_label = 'dybde'
-                    feature.shape_type = file.schema['geometry'].lstrip('Multi')
+                    geometry = file.schema['geometry']
+                    feature.shape_type = geometry.lstrip('Multi')
                     data += list(self._parse_records(file, depth_label))
         return data
 
@@ -156,8 +160,9 @@ class _Region:
             else:
                 self.name = name
         else:
-            raise RegionNameError(name)
-
+            raise RegionNameError(
+                f"Region '{name}' not valid, possible candidates are "
+                f"{supported_regions}")
         self.file_name = self._validate_file_name()
 
     @property
@@ -178,9 +183,15 @@ class _Region:
                 if self._file_name_matches_template(file_name):
                     return file_name
                 else:
-                    raise InvalidRegionFileError(self.name, self.id)
+                    raise InvalidRegionFileError(
+                        f"Region '{self.name}' should have the form "
+                        f"{_Region.prefix}_<int>_{self.id}_"
+                        f"{_Region.projection}_{_Region.data_type}"
+                        f"_{_Region.suffix}")
         else:
-            raise RegionFileNotFoundError(self.name, _path_external)
+            raise RegionFileNotFoundError(
+                f"Region '{self.name}' not found in path "
+                f"'{os.path.join(*_path_external)}'")
 
     def _file_name_matches_template(self, string):
         items = string.split('_')
@@ -194,71 +205,44 @@ class _Feature:
         if isinstance(name, str) and name in supported_features:
             self.name = name
         else:
-            raise FeatureValueError(name)
-
+            raise FeatureValueError(
+                f"Feature name '{name}' not valid, possible candidates are "
+                f"{supported_features}")
         self.id = _supported_terrain[name]
         self.shape_type = None
 
 
 class OriginFormatError(TypeError):
-    def __init__(self):
-        self.message = ("Origin should be a tuple of the form "
-                        "(easting, northing) in meters")
-        super().__init__(self.message)
+    pass
 
 
 class SizeFormatError(TypeError):
-    def __init__(self):
-        self.message = ("Window size should be a tuple of the form "
-                        "(horizontal_width, vertical_height) in meters")
-        super().__init__(self.message)
+    pass
 
 
 class RegionFormatError(TypeError):
-    def __init__(self, o):
-        self.message = (f"Region '{o}' not valid, should be string "
-                        f"or sequence of strings")
-        super().__init__(self.message)
+    pass
 
 
 class FeaturesFormatError(TypeError):
-    def __init__(self, o):
-        self.message = (f"Features '{o}' not valid, should be "
-                        f"sequence of strings")
-        super().__init__(self.message)
+    pass
 
 
 class DepthBinsFormatError(TypeError):
-    def __init__(self):
-        self.message = f"Depth bins should be a sequence of numbers"
-        super().__init__(self.message)
+    pass
 
 
 class RegionNameError(NameError):
-    def __init__(self, name):
-        self.message = (f"Region '{name}' not valid, possible candidates "
-                        f"are {supported_regions}")
-        super().__init__(self.message)
+    pass
 
 
 class RegionFileNotFoundError(FileExistsError):
-    def __init__(self, file, folder_path):
-        folder = os.path.join(*folder_path)
-        self.message = f"Region '{file}' not found in path '{folder}'"
-        super().__init__(self.message)
+    pass
 
 
 class InvalidRegionFileError(NameError):
-    def __init__(self, name, id_string):
-        self.message = (f"Region '{name}' should have the form "
-                        f"{_Region.prefix}_<int>_{id_string}_"
-                        f"{_Region.projection}_{_Region.data_type}"
-                        f"_{_Region.suffix}")
-        super().__init__(self.message)
+    pass
 
 
 class FeatureValueError(ValueError):
-    def __init__(self, name):
-        self.message = (f"Feature name '{name}' not valid, possible "
-                        f"candidates are {supported_features}")
-        super().__init__(self.message)
+    pass
