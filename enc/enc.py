@@ -43,14 +43,17 @@ class ENCParser:
         if self._is_tuple_with_length_two(origin):
             self.origin = tuple(float(i) for i in origin)
         else:
-            raise OriginFormatError("Origin should be a tuple of the form "
-                                    "(easting, northing) in meters")
+            raise OriginFormatError(
+                "Origin should be a tuple of the form "
+                "(easting, northing) in meters"
+            )
         if self._is_tuple_with_length_two(window_size):
             self.window_size = tuple(float(i) for i in window_size)
         else:
-            raise SizeFormatError("Window size should be a tuple of the form "
-                                  "(horizontal_width, vertical_height) in "
-                                  "meters")
+            raise SizeFormatError(
+                "Window size should be a tuple of the form "
+                "(horizontal_width, vertical_height) in meters"
+            )
         if isinstance(region, str):
             self.region = (_Region(region),)
         elif self._is_sequence_of_strings(region):
@@ -58,7 +61,8 @@ class ENCParser:
         else:
             raise RegionFormatError(
                 f"Region '{region}' not valid, should be string or "
-                f"sequence of strings")
+                f"sequence of strings"
+            )
         if features is None:
             self.features = tuple(_Feature(f) for f in supported_features)
         elif self._is_sequence_of_strings(features):
@@ -66,14 +70,16 @@ class ENCParser:
         else:
             raise FeaturesFormatError(
                 f"Features '{features}' not valid, should be "
-                f"sequence of strings")
+                f"sequence of strings"
+            )
         if depths is None:
             self.depths = _default_depths
         elif isinstance(depths, Sequence):
             self.depths = tuple(int(i) for i in depths)
         else:
             raise DepthBinsFormatError(
-                f"Depth bins should be a sequence of numbers")
+                f"Depth bins should be a sequence of numbers"
+            )
         t_r_corner = (self.origin[i] + self.window_size[i] for i in range(2))
         self._bounding_box = *self.origin, *t_r_corner
 
@@ -162,7 +168,8 @@ class _Region:
         else:
             raise RegionNameError(
                 f"Region '{name}' not valid, possible candidates are "
-                f"{supported_regions}")
+                f"{supported_regions}"
+            )
         self.file_name = self._validate_file_name()
 
     @property
@@ -187,11 +194,13 @@ class _Region:
                         f"Region '{self.name}' should have the form "
                         f"{_Region.prefix}_<int>_{self.id}_"
                         f"{_Region.projection}_{_Region.data_type}"
-                        f"_{_Region.suffix}")
+                        f"_{_Region.suffix}"
+                    )
         else:
             raise RegionFileNotFoundError(
                 f"Region '{self.name}' not found in path "
-                f"'{os.path.join(*_path_external)}'")
+                f"'{os.path.join(*_path_external)}'"
+            )
 
     def _file_name_matches_template(self, string):
         items = string.split('_')
@@ -207,7 +216,8 @@ class _Feature:
         else:
             raise FeatureValueError(
                 f"Feature name '{name}' not valid, possible candidates are "
-                f"{supported_features}")
+                f"{supported_features}"
+            )
         self.id = _supported_terrain[name]
         self.shape_type = None
 
