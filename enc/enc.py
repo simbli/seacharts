@@ -85,11 +85,29 @@ class Parser:
         t_r_corner = (self.origin[i] + self.window_size[i] for i in range(2))
         self._bounding_box = *self.origin, *t_r_corner
 
+    def process_external_data(self):
+        """Opens a regional FGDB file and writes reduced data to shapefiles
+
+        This method must be called at least once before any of the read methods
+        read_feature_coordinates   or   read_feature_shapes   in order to
+        create the necessary shapefiles from which the simplified coordinates
+        and depth data is read.
+
+        :return: None
+        """
+        print("Processing features from region...")
+        for feature in self.features:
+            layer = self._load_all_regional_shapes(feature)
+            self._write_data_to_shape_file(feature, layer)
+            print(f"    Feature layer extracted: '{feature.name}'")
+        print("External data processing complete.\n")
+
     def read_feature_coordinates(self, feature):
-        """Reads and returns all shapes of a feature
+        """Reads and returns the regional depths and coordinates of a feature
 
         :param feature: str or Feature object
-        :return:
+        :return: [(depth, polygon_points), ...] if features are polygons
+                     or [(depth, point_tuple), ...] if features are points
         """
         if isinstance(feature, str):
             feature = _Feature(feature)
@@ -97,6 +115,11 @@ class Parser:
             return list(self._parse_records(file, 'depth'))
 
     def read_feature_shapes(self, feature):
+        """Reads and returns the regional shapes of a feature
+
+        :param feature: str or Feature object
+        :return: list of Area or Position objects
+        """
         layer = self.read_feature_coordinates(feature)
         if len(layer) > 0:
             if isinstance(layer[0][1], tuple):
@@ -105,14 +128,6 @@ class Parser:
                 return [Area(points, depth) for depth, points in layer]
         else:
             return []
-
-    def process_external_data(self):
-        print("Processing features from region...")
-        for feature in self.features:
-            layer = self._load_all_regional_shapes(feature)
-            self._write_data_to_shape_file(feature, layer)
-            print(f"    Feature layer extracted: '{feature.name}'")
-        print("External data processing complete.\n")
 
     def _load_all_regional_shapes(self, feature):
         data, depth_label = [], None
