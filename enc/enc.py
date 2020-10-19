@@ -3,6 +3,8 @@ from typing import Sequence, Union
 
 import fiona
 
+from enc.shapes import Area, Position
+
 _path_charts = 'data', 'charts'
 _path_external = 'data', 'external'
 _external_chart_files = next(os.walk(os.path.join(*_path_external)))[2]
@@ -21,7 +23,7 @@ supported_regions = ('Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland',
                      'Vestland', 'Viken')
 
 
-class ENCParser:
+class Parser:
     """Class for parsing Navigational Electronic Chart data sets
 
     This class reads data sets issued by the Norwegian Mapping Authority
@@ -83,18 +85,34 @@ class ENCParser:
         t_r_corner = (self.origin[i] + self.window_size[i] for i in range(2))
         self._bounding_box = *self.origin, *t_r_corner
 
-    def read_feature_shapes(self, f):
-        feature = f if isinstance(f, _Feature) else _Feature(f)
+    def read_feature_coordinates(self, feature):
+        """Reads and returns all shapes of a feature
+
+        :param feature: str or Feature object
+        :return:
+        """
+        if isinstance(feature, str):
+            feature = _Feature(feature)
         with self._shape_file_reader(feature) as file:
             return list(self._parse_records(file, 'depth'))
 
-    def parse_external_data(self):
-        print("Parsing features from region...")
+    def read_feature_shapes(self, feature):
+        layer = self.read_feature_coordinates(feature)
+        if len(layer) > 0:
+            if isinstance(layer[0][1], tuple):
+                return [Position(point, depth) for depth, point in layer]
+            else:
+                return [Area(points, depth) for depth, points in layer]
+        else:
+            return []
+
+    def process_external_data(self):
+        print("Processing features from region...")
         for feature in self.features:
-            data = self._load_all_regional_shapes(feature)
-            self._write_data_to_shape_file(feature, data)
+            layer = self._load_all_regional_shapes(feature)
+            self._write_data_to_shape_file(feature, layer)
             print(f"    Feature layer extracted: '{feature.name}'")
-        print("External data parsing complete.")
+        print("External data processing complete.\n")
 
     def _load_all_regional_shapes(self, feature):
         data, depth_label = [], None
