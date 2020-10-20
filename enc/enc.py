@@ -10,9 +10,11 @@ _path_external = 'data', 'external'
 _external_chart_files = next(os.walk(os.path.join(*_path_external)))[2]
 _default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
 _supported_geometry = ('Polygon', 'Point')
-_supported_terrain = {'seabed': 'dybdeareal', 'land': 'landareal',
-                      'rocks': 'skjer', 'shallows': 'grunne',
-                      'shore': 'torrfall'}
+_supported_terrain = {'seabed': ('Polygon', 'dybdeareal', 'minimumsdybde'),
+                      'land': ('Polygon', 'landareal', None),
+                      'rocks': ('Point', 'skjer', None),
+                      'shallows': ('Point', 'grunne', 'dybde'),
+                      'shore': ('Polygon', 'torrfall', None)}
 
 supported_projection = 'EUREF89 UTM sone 33, 2d'
 supported_features = tuple(f for f in _supported_terrain.keys())
@@ -130,17 +132,11 @@ class Parser:
             return []
 
     def _load_all_regional_shapes(self, feature):
-        data, depth_label = [], None
+        data = []
         for r in self.region:
             if feature.id in fiona.listlayers(r.zip_path):
+                depth_label = feature.depth_label
                 with fiona.open(r.zip_path, 'r', layer=feature.id) as file:
-                    self.depth_label = False
-                    if feature.name == 'seabed':
-                        depth_label = 'minimumsdybde'
-                    elif feature.name == 'shallows':
-                        depth_label = 'dybde'
-                    geometry = file.schema['geometry']
-                    feature.shape_type = geometry.lstrip('Multi')
                     data += list(self._parse_records(file, depth_label))
         return data
 
@@ -251,8 +247,9 @@ class _Feature:
                 f"Feature name '{name}' not valid, possible candidates are "
                 f"{supported_features}"
             )
-        self.id = _supported_terrain[name]
-        self.shape_type = None
+        self.shape_type = _supported_terrain[name][0]
+        self.id = _supported_terrain[name][1]
+        self.depth_label = _supported_terrain[name][2]
 
 
 class OriginFormatError(TypeError):
