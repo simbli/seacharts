@@ -1,22 +1,21 @@
 import os
 
-_path_external = 'data', 'external'
-_external_chart_files = next(os.walk(os.path.join(*_path_external)))[2]
-supported_regions = ('Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland',
-                     'Nordsjøen', 'Norge', 'Oslo', 'Rogaland', 'Svalbard',
-                     'Troms og Finnmark', 'Trøndelag',
-                     'Vestfold og Telemark',
-                     'Vestland', 'Viken')
-
 
 class Region:
     prefix = 'Basisdata'
     data_type = 'Dybdedata'
     projection = '25833'
     suffix = 'FGDB.zip'
+    path_external = 'data', 'external'
+    external_chart_files = next(os.walk(os.path.join(*path_external)))[2]
+    supported = ('Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland',
+                 'Nordsjøen', 'Norge', 'Oslo', 'Rogaland', 'Svalbard',
+                 'Troms og Finnmark', 'Trøndelag',
+                 'Vestfold og Telemark',
+                 'Vestland', 'Viken')
 
     def __init__(self, name: str):
-        if name in supported_regions:
+        if name in self.supported:
             if name == 'Hele landet':
                 self.name = 'Norge'
             else:
@@ -24,7 +23,7 @@ class Region:
         else:
             raise ValueError(
                 f"Invalid region name '{name}', "
-                f"possible candidates are {supported_regions}"
+                f"possible candidates are {self.supported}"
             )
         self.file_name = self.validate_file_name()
 
@@ -38,10 +37,10 @@ class Region:
     @property
     def zip_path(self):
         gdb = self.file_name.replace('.zip', '.gdb')
-        return '/'.join(('zip:/', *_path_external, self.file_name, gdb))
+        return '/'.join(('zip:/', *self.path_external, self.file_name, gdb))
 
     def validate_file_name(self):
-        for file_name in _external_chart_files:
+        for file_name in self.external_chart_files:
             if self.id in file_name:
                 if self.file_name_matches_template(file_name):
                     return file_name
@@ -55,7 +54,7 @@ class Region:
         else:
             raise FileExistsError(
                 f"Region FGDB file for '{self.name}' not found at "
-                f"'{os.path.join(*_path_external)}'"
+                f"'{os.path.join(*self.path_external)}'"
             )
 
     def file_name_matches_template(self, string):

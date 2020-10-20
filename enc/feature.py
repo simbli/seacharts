@@ -5,25 +5,23 @@ import fiona
 
 from enc.region import Region
 
-_path_charts = 'data', 'charts'
-_supported_terrain = {'seabed': ('Polygon', 'dybdeareal', 'minimumsdybde'),
-                      'land': ('Polygon', 'landareal', None),
-                      'rocks': ('Point', 'skjer', None),
-                      'shallows': ('Point', 'grunne', 'dybde'),
-                      'shore': ('Polygon', 'torrfall', None)}
-supported_features = tuple(f for f in _supported_terrain.keys())
-
 
 class Feature:
+    path_charts = 'data', 'charts'
+    supported = {'seabed': ('Polygon', 'dybdeareal', 'minimumsdybde'),
+                 'land': ('Polygon', 'landareal', None),
+                 'rocks': ('Point', 'skjer', None),
+                 'shallows': ('Point', 'grunne', 'dybde'),
+                 'shore': ('Polygon', 'torrfall', None)}
+
     def __init__(self, name, region):
-        if isinstance(name, str) and name in supported_features:
+        if isinstance(name, str) and name in self.supported:
             self.name = name
         else:
             raise ValueError(
                 f"Invalid feature name '{name}', "
-                f"possible candidates are {supported_features}"
+                f"possible candidates are {self.supported}"
             )
-
         if isinstance(region, str):
             self.region = (Region(region),)
         elif isinstance(region, Sequence):
@@ -33,10 +31,9 @@ class Feature:
                 f"Invalid region format for '{region}', should be string or "
                 f"sequence of strings"
             )
-
-        self.shape_type = _supported_terrain[name][0]
-        self.id = _supported_terrain[name][1]
-        self.depth_label = _supported_terrain[name][2]
+        self.shape_type = self.supported[name][0]
+        self.id = self.supported[name][1]
+        self.depth_label = self.supported[name][2]
 
     def read_shapefile(self, bounding_box):
         with self.shapefile_reader() as file:
@@ -73,10 +70,10 @@ class Feature:
         return fiona.open(region.zip_path, 'r', layer=self.id)
 
     def shapefile_reader(self):
-        return fiona.open(os.path.join(*_path_charts, self.name))
+        return fiona.open(os.path.join(*self.path_charts, self.name))
 
     def shapefile_writer(self):
-        path = os.path.join(*_path_charts)
+        path = os.path.join(*self.path_charts)
         if not os.path.exists(path):
             os.makedirs(path)
         path = os.path.join(path, self.name)
@@ -85,6 +82,6 @@ class Feature:
                   'geometry': self.shape_type}
         return fiona.open(path, 'w', schema=schema, driver=driver, crs=crs)
 
-    @staticmethod
-    def all_supported_features(region):
-        return tuple(Feature(f, region) for f in supported_features)
+    @classmethod
+    def all_supported_features(cls, region):
+        return tuple(Feature(f, region) for f in cls.supported)

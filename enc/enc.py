@@ -3,10 +3,6 @@ from typing import Sequence, Union
 from enc.feature import Feature
 from enc.shapes import Area, Position
 
-_default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
-_supported_geometry = ('Polygon', 'Point')
-supported_projection = 'EUREF89 UTM sone 33, 2d'
-
 
 class Parser:
     """Class for parsing Navigational Electronic Chart data sets
@@ -21,6 +17,10 @@ class Parser:
     :param features: Sequence of supported features to be extracted
     :param region: str or Sequence[str] of Norwegian regions
     """
+
+    default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
+    supported_projection = 'EUREF89 UTM sone 33, 2d'
+    supported_geometry = ('Polygon', 'Point')
 
     def __init__(self, origin: tuple, window_size: tuple,
                  region: Union[str, Sequence],
@@ -39,7 +39,7 @@ class Parser:
                 "Window size should be a tuple of size two"
             )
         if depths is None:
-            self.depths = _default_depths
+            self.depths = self.default_depths
         elif not isinstance(features, str) and isinstance(depths, Sequence):
             self.depths = tuple(int(i) for i in depths)
         else:
