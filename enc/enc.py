@@ -3,6 +3,7 @@ from typing import Sequence, Union
 
 import fiona
 
+from enc.feature import Feature, supported_features
 from enc.shapes import Area, Position
 
 _path_charts = 'data', 'charts'
@@ -10,14 +11,8 @@ _path_external = 'data', 'external'
 _external_chart_files = next(os.walk(os.path.join(*_path_external)))[2]
 _default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
 _supported_geometry = ('Polygon', 'Point')
-_supported_terrain = {'seabed': ('Polygon', 'dybdeareal', 'minimumsdybde'),
-                      'land': ('Polygon', 'landareal', None),
-                      'rocks': ('Point', 'skjer', None),
-                      'shallows': ('Point', 'grunne', 'dybde'),
-                      'shore': ('Polygon', 'torrfall', None)}
 
 supported_projection = 'EUREF89 UTM sone 33, 2d'
-supported_features = tuple(f for f in _supported_terrain.keys())
 supported_regions = ('Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland',
                      'Nordsjøen', 'Norge', 'Oslo', 'Rogaland', 'Svalbard',
                      'Troms og Finnmark', 'Trøndelag',
@@ -68,9 +63,9 @@ class Parser:
                 f"sequence of strings"
             )
         if features is None:
-            self.features = tuple(_Feature(f) for f in supported_features)
+            self.features = tuple(Feature(f) for f in supported_features)
         elif self._is_sequence_of_strings(features):
-            self.features = tuple(_Feature(f) for f in features)
+            self.features = tuple(Feature(f) for f in features)
         else:
             raise FeaturesFormatError(
                 f"Features '{features}' not valid, should be "
@@ -112,7 +107,7 @@ class Parser:
                      or [(depth, point_tuple), ...] if features are points
         """
         if isinstance(feature, str):
-            feature = _Feature(feature)
+            feature = Feature(feature)
         with self._shape_file_reader(feature) as file:
             return list(self._parse_records(file, 'depth'))
 
@@ -238,20 +233,6 @@ class _Region:
         return True if form == template else False
 
 
-class _Feature:
-    def __init__(self, name: str):
-        if isinstance(name, str) and name in supported_features:
-            self.name = name
-        else:
-            raise FeatureValueError(
-                f"Feature name '{name}' not valid, possible candidates are "
-                f"{supported_features}"
-            )
-        self.shape_type = _supported_terrain[name][0]
-        self.id = _supported_terrain[name][1]
-        self.depth_label = _supported_terrain[name][2]
-
-
 class OriginFormatError(TypeError):
     pass
 
@@ -281,8 +262,4 @@ class RegionFileNotFoundError(FileExistsError):
 
 
 class InvalidRegionFileError(NameError):
-    pass
-
-
-class FeatureValueError(ValueError):
     pass
