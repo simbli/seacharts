@@ -1,10 +1,7 @@
 
 from typing import Sequence, Union
 
-import fiona
-
-from enc.feature import Feature, supported_features
-from enc.region import Region
+from enc.feature import Feature
 from enc.shapes import Area, Position
 
 _default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
@@ -30,49 +27,36 @@ class Parser:
                  region: Union[str, Sequence],
                  features: Sequence = None,
                  depths: Sequence = None):
-
-        if self._is_tuple_with_length_two(origin):
+        if isinstance(origin, tuple) and len(origin) == 2:
             self.origin = tuple(float(i) for i in origin)
         else:
             raise OriginFormatError(
                 "Origin should be a tuple of the form "
                 "(easting, northing) in meters"
             )
-        if self._is_tuple_with_length_two(window_size):
+        if isinstance(window_size, tuple) and len(window_size) == 2:
             self.window_size = tuple(float(i) for i in window_size)
         else:
-            raise SizeFormatError(
+            raise WindowSizeFormatError(
                 "Window size should be a tuple of the form "
                 "(horizontal_width, vertical_height) in meters"
             )
-        if isinstance(region, str):
-            self.region = (Region(region),)
-        elif self._is_sequence_of_strings(region):
-            self.region = tuple(Region(r) for r in region)
-        else:
-            raise RegionFormatError(
-                f"Region '{region}' not valid, should be string or "
-                f"sequence of strings"
-            )
-        if features is None:
-            self.features = tuple(Feature(f) for f in supported_features)
-        elif self._is_sequence_of_strings(features):
-            self.features = tuple(Feature(f) for f in features)
-        else:
-            raise FeaturesFormatError(
-                f"Features '{features}' not valid, should be "
-                f"sequence of strings"
-            )
         if depths is None:
             self.depths = _default_depths
-        elif isinstance(depths, Sequence):
+        elif not isinstance(features, str) and isinstance(depths, Sequence):
             self.depths = tuple(int(i) for i in depths)
         else:
             raise DepthBinsFormatError(
                 f"Depth bins should be a sequence of numbers"
             )
-        t_r_corner = (self.origin[i] + self.window_size[i] for i in range(2))
-        self._bounding_box = *self.origin, *t_r_corner
+        if features is None:
+            self.features = Feature.all_supported_features(region)
+        elif not isinstance(features, str) and isinstance(features, Sequence):
+            self.features = tuple(Feature(f, region) for f in features)
+        else:
+            raise FeaturesFormatError(
+                f"Features should be a sequence of strings"
+            )
 
     def process_external_data(self):
         """Opens a regional FGDB file and writes reduced data to shapefiles
@@ -86,7 +70,7 @@ class Parser:
         """
         print("Processing features from region...")
         for feature in self.features:
-            layer = self._load_all_regional_shapes(feature)
+            layer = list(feature.load_all_regional_shapes(self.bounding_box))
             feature.write_data_to_shapefile(layer)
             print(f"    Feature layer extracted: '{feature.name}'")
         print("External data processing complete.\n")
@@ -98,10 +82,14 @@ class Parser:
         :return: [(depth, polygon_points), ...] if features are polygons
                      or [(depth, point_tuple), ...] if features are points
         """
-        if isinstance(feature, str):
-            feature = Feature(feature)
-        with feature.shapefile_reader as file:
-            return list(self._parse_records(file, 'depth'))
+        if isinstance(feature, str) and Feature.is_supported(feature):
+            feature = next((f for f in self.features if f.name == feature))
+        if isinstance(feature, Feature):
+            return list(feature.read_shapefile(self.bounding_box))
+        else:
+            raise FeaturesFormatError(
+                f"Features should be a sequence of strings"
+            )
 
     def read_feature_shapes(self, feature):
         """Reads and returns the regional shapes of a feature
@@ -118,49 +106,26 @@ class Parser:
         else:
             return []
 
-    def _load_all_regional_shapes(self, feature):
-        data = []
-        for r in self.region:
-            if feature.id in fiona.listlayers(r.zip_path):
-                depth_label = feature.depth_label
-                with feature.fgdb_reader(r) as file:
-                    data += list(self._parse_records(file, depth_label))
-        return data
+    @property
+    def top_right_corner(self):
+        return tuple(i + j for i, j in zip(self.origin, self.window_size))
 
-    def _parse_records(self, file, depth_label):
-        for record in file.filter(bbox=self._bounding_box):
-            depth = record['properties'][depth_label] if depth_label else 0
-            coords = record['geometry']["coordinates"]
-            if file.schema['geometry'] == 'Point':
-                shape = coords
-            else:
-                shape = coords[0]
-            yield depth, shape
-
-    @staticmethod
-    def _is_tuple_with_length_two(o):
-        return isinstance(o, tuple) and len(o) == 2
-
-    @staticmethod
-    def _is_sequence_of_strings(o):
-        return isinstance(o, Sequence) and all(isinstance(s, str) for s in o)
+    @property
+    def bounding_box(self):
+        return *self.origin, *self.top_right_corner
 
 
 class OriginFormatError(TypeError):
     pass
 
 
-class SizeFormatError(TypeError):
-    pass
-
-
-class RegionFormatError(TypeError):
-    pass
-
-
-class FeaturesFormatError(TypeError):
+class WindowSizeFormatError(TypeError):
     pass
 
 
 class DepthBinsFormatError(TypeError):
+    pass
+
+
+class FeaturesFormatError(TypeError):
     pass
