@@ -1,6 +1,5 @@
 import os
 
-_path_charts = 'data', 'charts'
 _path_external = 'data', 'external'
 _external_chart_files = next(os.walk(os.path.join(*_path_external)))[2]
 supported_regions = ('Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland',

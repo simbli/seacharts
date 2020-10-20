@@ -1,10 +1,10 @@
-import os
+
 from typing import Sequence, Union
 
 import fiona
 
 from enc.feature import Feature, supported_features
-from enc.region import Region, _path_charts
+from enc.region import Region
 from enc.shapes import Area, Position
 
 _default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
@@ -87,7 +87,7 @@ class Parser:
         print("Processing features from region...")
         for feature in self.features:
             layer = self._load_all_regional_shapes(feature)
-            self._write_data_to_shape_file(feature, layer)
+            feature.write_data_to_shapefile(layer)
             print(f"    Feature layer extracted: '{feature.name}'")
         print("External data processing complete.\n")
 
@@ -100,7 +100,7 @@ class Parser:
         """
         if isinstance(feature, str):
             feature = Feature(feature)
-        with self._shape_file_reader(feature) as file:
+        with feature.shapefile_reader as file:
             return list(self._parse_records(file, 'depth'))
 
     def read_feature_shapes(self, feature):
@@ -123,7 +123,7 @@ class Parser:
         for r in self.region:
             if feature.id in fiona.listlayers(r.zip_path):
                 depth_label = feature.depth_label
-                with fiona.open(r.zip_path, 'r', layer=feature.id) as file:
+                with feature.fgdb_reader(r) as file:
                     data += list(self._parse_records(file, depth_label))
         return data
 
@@ -136,29 +136,6 @@ class Parser:
             else:
                 shape = coords[0]
             yield depth, shape
-
-    def _write_data_to_shape_file(self, feature, data):
-        with self._shape_file_writer(feature) as file:
-            for depth, shape in data:
-                file.write({'properties': {'depth': depth},
-                            'geometry': {'type': feature.shape_type,
-                                         'coordinates': shape}})
-
-    @staticmethod
-    def _shape_file_reader(feature):
-        return fiona.open(os.path.join(*_path_charts, feature.name))
-
-    @staticmethod
-    def _shape_file_writer(feature):
-        path = os.path.join(*_path_charts)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        path = os.path.join(path, feature.name)
-        driver, crs = 'ESRI Shapefile', {'init': 'epsg:25833'}
-        schema = {'properties': {'depth': 'float'},
-                  'geometry': feature.shape_type}
-
-        return fiona.open(path, 'w', schema=schema, driver=driver, crs=crs)
 
     @staticmethod
     def _is_tuple_with_length_two(o):
