@@ -24,7 +24,7 @@ class Shape(ABC):
 class Position(Shape):
     def __init__(self, point, depth=None):
         if not self.is_coordinate_tuple(point):
-            raise PositionFormatError(
+            raise TypeError(
                 f"Position should be a tuple of the form "
                 f"(easting, northing) in meters"
             )
@@ -53,7 +53,7 @@ class Position(Shape):
 class Line(Shape):
     def __init__(self, start, end, depth=None):
         if not all(isinstance(p, Position) for p in (start, end)):
-            raise LineFormatError(
+            raise TypeError(
                 f"Line should contain exactly 2 {Position} objects"
             )
         self.start = start
@@ -71,7 +71,7 @@ class Line(Shape):
 class Area(Shape):
     def __init__(self, points, depth=None):
         if not all(self.is_coordinate_tuple(p) for p in points):
-            raise AreaFormatError(
+            raise TypeError(
                 f"Area should be a sequence of (E, N) coordinate tuples"
             )
         super().__init__(Polygon(points), depth)
@@ -83,15 +83,3 @@ class Area(Shape):
     @property
     def size(self):
         return self._geometry.area
-
-
-class PositionFormatError(TypeError):
-    pass
-
-
-class LineFormatError(TypeError):
-    pass
-
-
-class AreaFormatError(TypeError):
-    pass
