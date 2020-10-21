@@ -22,7 +22,7 @@ class Region:
                 self.name = name
         else:
             raise ValueError(
-                f"Invalid region name '{name}', "
+                f"ENC: Invalid region name '{name}', "
                 f"possible candidates are {self.supported}"
             )
         self.file_name = self.validate_file_name()
@@ -46,14 +46,14 @@ class Region:
                     return file_name
                 else:
                     raise ValueError(
-                        f"Region '{self.name}' should have the form "
+                        f"ENC: Region '{self.name}' should have the form "
                         f"{Region.prefix}_<int>_{self.id}_"
                         f"{Region.projection}_{Region.data_type}"
                         f"_{Region.suffix}"
                     )
         else:
             raise FileExistsError(
-                f"Region FGDB file for '{self.name}' not found at "
+                f"ENC: Region FGDB file for '{self.name}' not found at "
                 f"'{os.path.join(*self.path_external)}'"
             )
 

@@ -1,2 +1,2 @@
-from .enc import Parser
+from .enc import ENC
 from .shapes import Area, Line, Position, Ship

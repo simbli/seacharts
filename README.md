@@ -51,14 +51,15 @@ select the `EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0`
 format. Finally, select your appropriate user group and purpose, and click 
 `Download` to obtain the ZIP file(s).
 
-### Processing external data example
+### Processing ENC data into shapefiles
 Place the downloaded ZIP file(s) in the path `data/external/`, where the 
 top-level folder `data` is located in the same directory as the executing 
 script.
 
-Import the module, initialize an instance of `enc.Parser` with appropriate 
-settings, and use its `process_external_data` method to extract desired 
-ENC features from the downloaded ZIP file(s):
+Import the module, initialize an instance of `enc.ENC` with appropriate 
+settings, and set its `parse_new_map_data` keyword argument to `True` in order 
+to unpack and parse desired ENC features from the downloaded ZIP file(s) into 
+shapefiles:
 
 ```python
 import enc
@@ -67,22 +68,21 @@ origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-parser = enc.Parser(origin, window_size, region)
-parser.process_external_data()  # used only to unpack newly downloaded data
+charts = enc.ENC(origin, window_size, region, parse_new_map_data=True)
 ```
 
 Note that `region` may be one or several Norwegian county names
 (or the whole country if the `Hele landet` data set is available), 
 corresponding to each downloaded ZIP file. Furthermore, a user-defined set of 
-sea `depths` bins and `features` to be extracted may be passed to the parser as 
+sea `depths` bins and `features` to be extracted may be passed to `ENC` as 
 additional keyword arguments.
 
-### Reading feature shapefile examples
-After the data is extracted from the downloaded ZIP file(s) shown above, the 
-shapefiles can be read by calling the `read_feature_coordinates` method for
-each feature layer. The returned data is compatible with the 
-[Shapely](https://pypi.org/project/Shapely/) package for further geometric 
-manipulation and analysis of shapes:
+### Reading feature shapefiles
+After the data is parsed from the downloaded ZIP file(s) as shown above, the 
+resulting shapefiles can be read by calling the `read_feature_coordinates` 
+method for each feature layer independently. The returned data is compatible 
+with the [Shapely](https://pypi.org/project/Shapely/) package for further 
+geometric manipulation and analysis of shapes:
 
 ```python
 import enc
@@ -91,8 +91,8 @@ origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-parser = enc.Parser(origin, window_size, region)
-coordinates = parser.read_feature_coordinates('seabed')
+charts = enc.ENC(origin, window_size, region)
+coordinates = charts.read_feature_coordinates('seabed')
 
 from shapely.geometry import Polygon
 
@@ -105,9 +105,12 @@ print(f"Number of points in the last polygon: {len(points)}")
 print(f"Area of the last polygon: {int(polygon.area)}")
 ```
 
-Note that the `origin` and `window_size` arguments here may be different 
-from the one used to extract the external ENC data, allowing for loading of 
-smaller areas of interest into memory during runtime.
+Note that the `parse_new_map_data` argument may be omitted or set to `False` if 
+the desired regional feature data has already been unpacked and processed into 
+shapefiles in a previous call. Additionally, the `origin` and `window_size` 
+arguments here may be different from the one used to extract the external 
+ENC data, allowing for loading of more specific (smaller) areas of interest 
+into memory during runtime.  
 
 An optional geometric API based on [Shapely](https://pypi.org/project/Shapely/)
 is provided for convenience through use of the `read_feature_shapes` method and 
@@ -120,8 +123,8 @@ origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-parser = enc.Parser(origin, window_size, region)
-areas = parser.read_feature_shapes('seabed')
+charts = enc.ENC(origin, window_size, region)
+areas = charts.read_feature_shapes('seabed')
 area = areas[-1]
 
 print(f"Number of extracted seabed area polygons: {len(areas)}")

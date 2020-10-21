@@ -19,7 +19,7 @@ class Feature:
             self.name = name
         else:
             raise ValueError(
-                f"Invalid feature name '{name}', "
+                f"ENC: Invalid feature name '{name}', "
                 f"possible candidates are {self.supported}"
             )
         if isinstance(region, str):
@@ -28,8 +28,8 @@ class Feature:
             self.region = tuple(Region(r) for r in region)
         else:
             raise TypeError(
-                f"Invalid region format for '{region}', should be string or "
-                f"sequence of strings"
+                f"ENC: Invalid region format for '{region}', should be "
+                f"string or sequence of strings"
             )
         self.shape_type = self.supported[name][0]
         self.id = self.supported[name][1]
