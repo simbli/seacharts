@@ -17,8 +17,7 @@ class ENC:
                  depths: Sequence = None):
 
         self.parser = Parser(origin, window_size, region, features, depths)
-        if parse_new_map_data:
-            self.parser.process_external_data()
+        self.parser.update_charts_data(parse_new_map_data)
 
     def read_feature_coordinates(self, feature):
         return self.parser.read_feature_coordinates(feature)

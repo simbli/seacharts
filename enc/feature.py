@@ -34,6 +34,11 @@ class Feature:
         self.shape_type = self.supported[name][0]
         self.id = self.supported[name][1]
         self.depth_label = self.supported[name][2]
+        self.shapefile_path = os.path.join(*self.path_charts, self.name)
+
+    @property
+    def shapefile_exists(self):
+        return os.path.isdir(self.shapefile_path)
 
     def read_shapefile(self, bounding_box):
         with self.shapefile_reader() as file:
@@ -70,7 +75,7 @@ class Feature:
         return fiona.open(region.zip_path, 'r', layer=self.id)
 
     def shapefile_reader(self):
-        return fiona.open(os.path.join(*self.path_charts, self.name))
+        return fiona.open(self.shapefile_path)
 
     def shapefile_writer(self):
         path = os.path.join(*self.path_charts)

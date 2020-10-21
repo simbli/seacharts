@@ -71,8 +71,8 @@ class Parser:
         for feature in self.features:
             layer = list(feature.load_all_regional_shapes(self.bounding_box))
             feature.write_data_to_shapefile(layer)
-            print(f"   Feature layer extracted: {feature.name}")
-        print("External data processing complete.\n")
+            print(f"  Feature layer extracted: {feature.name}")
+        print("External data processing complete\n")
 
     def read_feature_coordinates(self, feature):
         """Reads and returns the regional depths and coordinates of a feature
@@ -111,3 +111,15 @@ class Parser:
                 f"{list(f.name for f in self.features)}"
             )
         return feature
+
+    def update_charts_data(self, new_data):
+        if not new_data:
+            for feature in self.features:
+                if not feature.shapefile_exists:
+                    print(f"ENC: Missing shapefile for feature "
+                          f"'{feature.name}', initializing new parsing of "
+                          f"downloaded ENC data")
+                    new_data = True
+                    break
+        if new_data:
+            self.process_external_data()
