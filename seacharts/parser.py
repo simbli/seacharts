@@ -1,7 +1,7 @@
 from typing import Sequence
 
-from enc.feature import Feature
-from enc.shapes import Area, Position
+from seacharts.feature import Feature
+from seacharts.shapes import Area, Position
 
 
 class Parser:

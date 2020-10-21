@@ -1,5 +1,5 @@
-# ENC
-Electronic Navigational Charts module for reading sea depth data.
+# SeaCharts
+Python-based application for reading Electronic Navigational Charts (ENC)
 
 [![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
 [![python version](https://img.shields.io/badge/python-3.7-blue)]()
@@ -56,19 +56,19 @@ Place the downloaded ZIP file(s) in the path `data/external/`, where the
 top-level folder `data` is located in the same directory as the executing 
 script.
 
-Import the module, initialize an instance of `enc.ENC` with appropriate 
+Import the module, initialize an instance of `seacharts.ENC` with appropriate 
 settings, and set its `parse_new_map_data` keyword argument to `True` in order 
 to unpack and parse desired ENC features from the downloaded ZIP file(s) into 
 shapefiles:
 
 ```python
-import enc
+import seacharts
 
 origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = enc.ENC(origin, window_size, region, parse_new_map_data=True)
+charts = seacharts.ENC(origin, window_size, region, parse_new_map_data=True)
 ```
 
 Note that `region` may be one or several Norwegian county names
@@ -85,13 +85,13 @@ with the [Shapely](https://pypi.org/project/Shapely/) package for further
 geometric manipulation and analysis of shapes:
 
 ```python
-import enc
+import seacharts
 
 origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = enc.ENC(origin, window_size, region)
+charts = seacharts.ENC(origin, window_size, region)
 coordinates = charts.read_feature_coordinates('seabed')
 
 from shapely.geometry import Polygon
@@ -114,16 +114,16 @@ into memory during runtime.
 
 An optional geometric API based on [Shapely](https://pypi.org/project/Shapely/)
 is provided for convenience through use of the `read_feature_shapes` method and 
-the accompanying `enc.shapes` classes:
+the accompanying `seacharts.shapes` classes:
 
 ```python
-import enc
+import seacharts
 
 origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = enc.ENC(origin, window_size, region)
+charts = seacharts.ENC(origin, window_size, region)
 areas = charts.read_feature_shapes('seabed')
 area = areas[-1]
 

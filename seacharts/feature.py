@@ -3,7 +3,7 @@ from typing import Sequence
 
 import fiona
 
-from enc.region import Region
+from seacharts.region import Region
 
 
 class Feature:
