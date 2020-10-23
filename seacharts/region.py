@@ -1,5 +1,7 @@
 import os
 
+import fiona
+
 
 class Region:
     prefix = 'Basisdata'
@@ -7,6 +9,8 @@ class Region:
     projection = '25833'
     suffix = 'FGDB.zip'
     path_external = 'data', 'external'
+    translation = str.maketrans('æøå ', 'eoa_')
+    file_template = (prefix, suffix, data_type, projection)
     external_chart_files = next(os.walk(os.path.join(*path_external)))[2]
     supported = ('Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland',
                  'Nordsjøen', 'Norge', 'Oslo', 'Rogaland', 'Svalbard',
@@ -14,51 +18,51 @@ class Region:
                  'Vestfold og Telemark',
                  'Vestland', 'Viken')
 
-    def __init__(self, name: str):
-        if name in self.supported:
-            if name == 'Hele landet':
-                self.name = 'Norge'
+    def __init__(self, area):
+        if isinstance(area, str):
+            area = (area,)
+        for name in area:
+            if name not in self.supported:
+                raise ValueError(
+                    f"ENC: Invalid region name '{name}', "
+                    f"possible candidates are {self.supported}"
+                )
+        self.names = area
+        self.labels = [name.translate(self.translation) for name in area]
+        self.file_paths = list(self.validate_files())
+
+    def validate_files(self):
+        for name, label in zip(self.names, self.labels):
+            for file_name in self.external_chart_files:
+                if label in file_name:
+                    if self.matches_template(file_name):
+                        yield self.zipped_form(file_name)
+                        break
+                    else:
+                        raise ValueError(
+                            f"ENC: Region '{name}' should have the form "
+                            f"{self.prefix}_<int>_{label}_"
+                            f"{self.projection}_{self.data_type}"
+                            f"_{self.suffix}"
+                        )
             else:
-                self.name = name
-        else:
-            raise ValueError(
-                f"ENC: Invalid region name '{name}', "
-                f"possible candidates are {self.supported}"
-            )
-        self.file_name = self.validate_file_name()
+                raise FileExistsError(
+                    f"ENC: Region FGDB file for '{name}' not found at "
+                    f"'{os.path.join(*self.path_external)}'"
+                )
 
-    @property
-    def id(self):
-        string = self.name
-        for s, r in [('æ', 'e'), ('ø', 'o'), ('å', 'a'), (' ', '_')]:
-            string = string.replace(s, r)
-        return string
-
-    @property
-    def zip_path(self):
-        gdb = self.file_name.replace('.zip', '.gdb')
-        return '/'.join(('zip:/', *self.path_external, self.file_name, gdb))
-
-    def validate_file_name(self):
-        for file_name in self.external_chart_files:
-            if self.id in file_name:
-                if self.file_name_matches_template(file_name):
-                    return file_name
-                else:
-                    raise ValueError(
-                        f"ENC: Region '{self.name}' should have the form "
-                        f"{Region.prefix}_<int>_{self.id}_"
-                        f"{Region.projection}_{Region.data_type}"
-                        f"_{Region.suffix}"
-                    )
-        else:
-            raise FileExistsError(
-                f"ENC: Region FGDB file for '{self.name}' not found at "
-                f"'{os.path.join(*self.path_external)}'"
-            )
-
-    def file_name_matches_template(self, string):
+    def matches_template(self, string):
         items = string.split('_')
         form = (items[0], items[-1], items[-2], items[-3])
-        template = (self.prefix, self.suffix, self.data_type, self.projection)
-        return True if form == template else False
+        return True if form == self.file_template else False
+
+    def zipped_form(self, file_name):
+        gdb = file_name.replace('.zip', '.gdb')
+        return '/'.join(('zip:/', *self.path_external, file_name, gdb))
+
+    def read_fgdb_files(self, feature, bounding_box):
+        for path in self.file_paths:
+            if feature.id in fiona.listlayers(path):
+                with fiona.open(path, 'r', layer=feature.id) as file:
+                    for record in file.filter(bbox=bounding_box):
+                        yield record

@@ -1,9 +1,6 @@
 import os
-from typing import Sequence
 
 import fiona
-
-from seacharts.region import Region
 
 
 class Feature:
@@ -14,22 +11,13 @@ class Feature:
                  'shallows': ('Point', 'grunne', 'dybde'),
                  'shore': ('Polygon', 'torrfall', None)}
 
-    def __init__(self, name, region):
+    def __init__(self, name):
         if isinstance(name, str) and name in self.supported:
             self.name = name
         else:
             raise ValueError(
                 f"ENC: Invalid feature name '{name}', "
                 f"possible candidates are {self.supported}"
-            )
-        if isinstance(region, str):
-            self.region = (Region(region),)
-        elif isinstance(region, Sequence):
-            self.region = tuple(Region(r) for r in region)
-        else:
-            raise TypeError(
-                f"ENC: Invalid region format for '{region}', should be "
-                f"string or sequence of strings"
             )
         self.shape_type = self.supported[name][0]
         self.id = self.supported[name][1]
@@ -41,41 +29,24 @@ class Feature:
         return os.path.isdir(self.shapefile_path)
 
     def read_shapefile(self, bounding_box):
-        with self.shapefile_reader() as file:
+        with fiona.open(self.shapefile_path) as file:
             for record in file.filter(bbox=bounding_box):
-                yield self.parse_record(record)
+                yield record
 
-    def load_all_regional_shapes(self, bounding_box):
-        for r in self.region:
-            if self.id in fiona.listlayers(r.zip_path):
-                with self.fgdb_reader(r) as file:
-                    for record in file.filter(bbox=bounding_box):
-                        yield self.parse_record(record)
-
-    def parse_record(self, record):
-        if self.depth_label:
-            depth = record['properties'][self.depth_label]
-        else:
-            depth = 0
-        coords = record['geometry']["coordinates"]
-        if self.shape_type == 'Point':
-            shape = coords
-        else:
-            shape = coords[0]
-        return depth, shape
+    def select_data(self, record, external_label=False):
+        label = self.depth_label if external_label else 'depth'
+        depth = record['properties'][label] if label else 0
+        coords = record['geometry']['coordinates']
+        if self.shape_type == 'Polygon':
+            coords = coords[0]
+        return depth, coords
 
     def write_data_to_shapefile(self, data):
         with self.shapefile_writer() as file:
-            for depth, shape in data:
+            for depth, coords in data:
                 file.write({'properties': {'depth': depth},
                             'geometry': {'type': self.shape_type,
-                                         'coordinates': shape}})
-
-    def fgdb_reader(self, region):
-        return fiona.open(region.zip_path, 'r', layer=self.id)
-
-    def shapefile_reader(self):
-        return fiona.open(self.shapefile_path)
+                                         'coordinates': coords}})
 
     def shapefile_writer(self):
         path = os.path.join(*self.path_charts)
@@ -86,7 +57,3 @@ class Feature:
         schema = {'properties': {'depth': 'float'},
                   'geometry': self.shape_type}
         return fiona.open(path, 'w', schema=schema, driver=driver, crs=crs)
-
-    @classmethod
-    def all_supported_features(cls, region):
-        return tuple(Feature(f, region) for f in cls.supported)

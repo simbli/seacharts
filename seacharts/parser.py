@@ -1,6 +1,7 @@
 from typing import Sequence
 
 from seacharts.feature import Feature
+from seacharts.region import Region
 from seacharts.shapes import Area, Position
 
 
@@ -43,16 +44,24 @@ class Parser:
             raise TypeError(
                 "ENC: Depth bins should be a sequence of numbers"
             )
+        if isinstance(region, str) or isinstance(region, Sequence):
+            self.region = Region(region)
+        else:
+            raise TypeError(
+                f"ENC: Invalid region format for '{region}', should be "
+                f"string or sequence of strings"
+            )
         if features is None:
-            self.features = Feature.all_supported_features(region)
+            self.features = list(Feature(f) for f in Feature.supported)
         elif isinstance(features, Sequence):
             if all(isinstance(f, Feature) for f in features):
                 self.features = list(features)
             else:
-                self.features = list(Feature(f, region) for f in features)
+                self.features = list(Feature(f) for f in features)
         else:
             raise TypeError(
-                "ENC: Features should be a sequence of strings"
+                f"ENC: Invalid feature format for '{features}', "
+                f"should be a sequence of strings or {Feature} objects"
             )
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
         self.bounding_box = *self.origin, *tr_corner
@@ -69,7 +78,8 @@ class Parser:
         """
         print("ENC: Processing features from region...")
         for feature in self.features:
-            layer = list(feature.load_all_regional_shapes(self.bounding_box))
+            records = self.region.read_fgdb_files(feature, self.bounding_box)
+            layer = list(feature.select_data(r, True) for r in records)
             feature.write_data_to_shapefile(layer)
             print(f"  Feature layer extracted: {feature.name}")
         print("External data processing complete\n")
@@ -83,7 +93,8 @@ class Parser:
         """
         if not isinstance(feature, Feature):
             feature = self.get_feature_by_name(feature)
-        layer = list(feature.read_shapefile(self.bounding_box))
+        records = feature.read_shapefile(self.bounding_box)
+        layer = list(feature.select_data(r) for r in records)
         if len(layer) == 0:
             raise ValueError(
                 f"ENC: Feature {feature.name} returned no shapes within"
