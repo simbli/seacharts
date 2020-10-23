@@ -68,7 +68,7 @@ origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = seacharts.ENC(origin, window_size, region, parse_new_map_data=True)
+charts = seacharts.ENC(origin, window_size, region, new_data=True)
 ```
 
 Note that `region` may be one or several Norwegian county names
