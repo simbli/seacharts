@@ -69,6 +69,7 @@ window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
 charts = seacharts.ENC(origin, window_size, region, new_data=True)
+
 ```
 
 Note that `region` may be one or several Norwegian county names
@@ -103,6 +104,7 @@ print(f"Number of extracted seabed polygons: {len(coordinates)}")
 print(f"Minimum sea depth inside the last polygon: {depth}")
 print(f"Number of points in the last polygon: {len(points)}")
 print(f"Area of the last polygon: {int(polygon.area)}")
+
 ```
 
 Note that the `parse_new_map_data` argument may be omitted or set to `False` if 
@@ -114,7 +116,7 @@ into memory during runtime.
 
 An optional geometric API based on [Shapely](https://pypi.org/project/Shapely/)
 is provided for convenience through use of the `read_feature_shapes` method and 
-the accompanying `seacharts.shapes` classes:
+the accompanying `seacharts.features` classes:
 
 ```python
 import seacharts
@@ -123,14 +125,17 @@ origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = seacharts.ENC(origin, window_size, region)
-areas = charts.read_feature_shapes('seabed')
-area = areas[-1]
+charts = seacharts.ENC(origin, window_size, region, new_data=True)
+layer = charts.read_feature_shapes('seabed')
+feature = layer[-1]
 
-print(f"Number of extracted seabed area polygons: {len(areas)}")
-print(f"Minimum sea depth inside the last area polygon: {area.depth}")
-print(f"Number of points in the last area polygon: {len(area.coordinates)}")
-print(f"Size of the last area polygon: {int(area.size)}")
+print("Feature name:                    ", feature.name)
+print("Feature shape:                   ", feature.shape)
+print("Feature category:                ", feature.category)
+print("Number of feature polygon points:", len(feature.coordinates))
+print("Minimum sea depth inside feature:", int(feature.depth))
+print("Area of the feature polygon:     ", int(feature.area))
+
 ```
 
 

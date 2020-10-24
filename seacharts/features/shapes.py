@@ -1,11 +1,11 @@
+import inspect
 from abc import ABC, abstractmethod
 from math import sqrt
 
-from shapely.affinity import rotate
 from shapely.geometry import LinearRing, LineString, Point, Polygon
 
 
-class Shape(ABC):
+class Feature(ABC):
     def __init__(self, geometry, depth=None):
         self.depth = 0 if depth is None else depth
         self._geometry = geometry
@@ -13,18 +13,26 @@ class Shape(ABC):
     def __repr__(self):
         return f"{self.__class__.__name__}{self.coordinates}"
 
+    @property
+    def name(self):
+        return self.__class__.__name__.lower()
+
+    @property
+    def category(self):
+        return inspect.getmodule(self).__name__.split('.')[-1]
+
+    @property
+    def shape(self):
+        return self.__class__.__bases__[0].__name__.lower()
+
     @abstractmethod
     def coordinates(self):
         raise NotImplementedError
 
-    @staticmethod
-    def is_coordinate_tuple(point):
-        return isinstance(point, tuple) and len(point) == 2
 
-
-class Position(Shape):
+class Position(Feature):
     def __init__(self, point, depth=None):
-        if not self.is_coordinate_tuple(point):
+        if not (isinstance(point, tuple) and len(point) == 2):
             raise TypeError(
                 f"Position should be a tuple of the form "
                 f"(easting, northing) in meters"
@@ -51,7 +59,7 @@ class Position(Shape):
         return LinearRing((p.coordinates for p in positions)).is_ccw
 
 
-class Line(Shape):
+class Line(Feature):
     def __init__(self, start, end, depth=None):
         if not all(isinstance(p, Position) for p in (start, end)):
             raise TypeError(
@@ -69,9 +77,9 @@ class Line(Shape):
         return tuple(self._geometry.coords)
 
 
-class Area(Shape):
+class Area(Feature):
     def __init__(self, points, depth=None):
-        if not all(self.is_coordinate_tuple(p) for p in points):
+        if not all(isinstance(p, tuple) and len(p) == 2 for p in points):
             raise TypeError(
                 f"Area should be a sequence of (E, N) coordinate tuples"
             )
@@ -82,37 +90,5 @@ class Area(Shape):
         return tuple(self._geometry.exterior.coords)
 
     @property
-    def size(self):
+    def area(self):
         return self._geometry.area
-
-
-class Ship(Shape):
-    ship_dimensions = (13.6, 74.7)
-
-    def __init__(self, center, heading=0.0, scale=1.0):
-        if isinstance(center, Position):
-            self.center = center
-        else:
-            raise TypeError(
-                f"Ship center should be a {Position} object"
-            )
-        if isinstance(heading, int) or isinstance(heading, float):
-            self.heading = heading
-        else:
-            raise TypeError(
-                f"Ship heading should be a number in degrees"
-            )
-        x, y = center.coordinates
-        w, h = (i * scale for i in self.ship_dimensions)
-        x_min, x_max = x - w / 2, x + w / 2
-        y_min, y_max = y - h / 2, y + h / 2 - w
-        left_aft, right_aft = (x_min, y_min), (x_max, y_min)
-        left_bow, right_bow = (x_min, y_max), (x_max, y_max)
-        points = (left_aft, left_bow, (x, y + h / 2), right_aft, right_bow)
-        angle, origin = -self.heading, self.center.coordinates
-        geometry = rotate(Polygon(points), angle=angle, origin=origin)
-        super().__init__(geometry)
-
-    @property
-    def coordinates(self):
-        return self.center.coordinates
