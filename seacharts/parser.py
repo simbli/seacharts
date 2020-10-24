@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from seacharts.feature import Feature
+from seacharts.layer import Layer
 from seacharts.region import Region
 from seacharts.shapes import Area, Position
 
@@ -39,26 +39,26 @@ class Parser:
                 f"string or sequence of strings"
             )
         if features is None:
-            self.features = list(Feature(f) for f in Feature.supported)
+            self.layers = list(Layer(x) for x in Layer.supported)
         elif isinstance(features, Sequence):
-            if all(isinstance(f, Feature) for f in features):
-                self.features = list(features)
+            if all(isinstance(x, Layer) for x in features):
+                self.layers = list(features)
             else:
-                self.features = list(Feature(f) for f in features)
+                self.layers = list(Layer(x) for x in features)
         else:
             raise TypeError(
-                f"ENC: Invalid feature format for '{features}', "
-                f"should be a sequence of strings or {Feature} objects"
+                f"ENC: Invalid feature layer format for '{features}', "
+                f"should be a sequence of strings or {Layer} objects"
             )
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
         self.bounding_box = *self.origin, *tr_corner
 
     def update_charts_data(self, new_data):
         if not new_data:
-            for feature in self.features:
-                if not feature.shapefile_exists:
-                    print(f"ENC: Missing shapefile for feature "
-                          f"'{feature.name}', initializing new parsing of "
+            for layer in self.layers:
+                if not layer.shapefile_exists:
+                    print(f"ENC: Missing shapefile for feature layer "
+                          f"'{layer.name}', initializing new parsing of "
                           f"downloaded ENC data")
                     new_data = True
                     break
@@ -67,37 +67,37 @@ class Parser:
 
     def process_external_data(self):
         print("ENC: Processing features from region...")
-        for feature in self.features:
-            records = self.region.read_fgdb_files(feature, self.bounding_box)
-            layer = list(feature.select_data(r, True) for r in records)
-            feature.write_data_to_shapefile(layer)
-            print(f"  Feature layer extracted: {feature.name}")
+        for layer in self.layers:
+            records = self.region.read_fgdb_files(layer, self.bounding_box)
+            data = list(layer.select_data(r, True) for r in records)
+            layer.write_data_to_shapefile(data)
+            print(f"  Feature layer extracted: {layer.name}")
         print("External data processing complete\n")
 
-    def extract_coordinates(self, feature):
-        if not isinstance(feature, Feature):
-            feature = self.get_feature_by_name(feature)
-        records = feature.read_shapefile(self.bounding_box)
-        layer = list(feature.select_data(r) for r in records)
-        if len(layer) == 0:
+    def extract_coordinates(self, layer):
+        if not isinstance(layer, Layer):
+            layer = self.get_feature_layer_by_name(layer)
+        records = layer.read_shapefile(self.bounding_box)
+        data = list(layer.select_data(r) for r in records)
+        if len(data) == 0:
             raise ValueError(
-                f"ENC: Feature {feature.name} returned no shapes within"
+                f"ENC: Feature layer {layer.name} returned no shapes within"
                 f"bounding box {self.bounding_box}"
             )
-        return layer
+        return data
 
-    def extract_shapes(self, feature):
-        layer = self.extract_coordinates(feature)
-        if isinstance(layer[0][1], tuple):
-            return [Position(point, depth) for depth, point in layer]
+    def extract_shapes(self, layer):
+        data = self.extract_coordinates(layer)
+        if isinstance(data[0][1], tuple):
+            return [Position(point, depth) for depth, point in data]
         else:
-            return [Area(points, depth) for depth, points in layer]
+            return [Area(points, depth) for depth, points in data]
 
-    def get_feature_by_name(self, name):
-        feature = next((f for f in self.features if f.name == name), None)
-        if not feature:
+    def get_feature_layer_by_name(self, name):
+        layer = next((x for x in self.layers if x.name == name), None)
+        if not layer:
             raise ValueError(
-                f"ENC: Feature '{name}' not found in feature list "
-                f"{list(f.name for f in self.features)}"
+                f"ENC: Feature '{name}' not found in feature layer list "
+                f"{list(x.name for x in self.layers)}"
             )
-        return feature
+        return layer

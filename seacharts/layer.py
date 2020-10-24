@@ -3,7 +3,7 @@ import os
 import fiona
 
 
-class Feature:
+class Layer:
     path_charts = 'data', 'charts'
     supported = {'seabed': ('Polygon', 'dybdeareal', 'minimumsdybde'),
                  'land': ('Polygon', 'landareal', None),
@@ -16,7 +16,7 @@ class Feature:
             self.name = name
         else:
             raise ValueError(
-                f"ENC: Invalid feature name '{name}', "
+                f"ENC: Invalid feature layer name '{name}', "
                 f"possible candidates are {self.supported}"
             )
         self.shape_type = self.supported[name][0]

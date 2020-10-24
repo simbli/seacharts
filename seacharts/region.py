@@ -60,9 +60,9 @@ class Region:
         gdb = file_name.replace('.zip', '.gdb')
         return '/'.join(('zip:/', *self.path_external, file_name, gdb))
 
-    def read_fgdb_files(self, feature, bounding_box):
+    def read_fgdb_files(self, layer, bounding_box):
         for path in self.file_paths:
-            if feature.id in fiona.listlayers(path):
-                with fiona.open(path, 'r', layer=feature.id) as file:
+            if layer.id in fiona.listlayers(path):
+                with fiona.open(path, 'r', layer=layer.id) as file:
                     for record in file.filter(bbox=bounding_box):
                         yield record
