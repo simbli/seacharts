@@ -1,36 +1,14 @@
 from typing import Sequence
 
-from seacharts.shapes import Area, Position
 from .layer import Layer
 from .region import Region
 
 
 class Parser:
     default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
-    supported_projection = 'EUREF89 UTM sone 33, 2d'
-    supported_geometry = ('Polygon', 'Point')
 
-    def __init__(self, origin, window_size, region, features, depths):
-        if isinstance(origin, tuple) and len(origin) == 2:
-            self.origin = origin
-        else:
-            raise TypeError(
-                "ENC: Origin should be a tuple of size two"
-            )
-        if isinstance(window_size, tuple) and len(window_size) == 2:
-            self.window_size = window_size
-        else:
-            raise TypeError(
-                "ENC: Window size should be a tuple of size two"
-            )
-        if depths is None:
-            self.depths = self.default_depths
-        elif not isinstance(features, str) and isinstance(depths, Sequence):
-            self.depths = tuple(int(i) for i in depths)
-        else:
-            raise TypeError(
-                "ENC: Depth bins should be a sequence of numbers"
-            )
+    def __init__(self, bounding_box, region, features, depths):
+        self.bounding_box = bounding_box
         if isinstance(region, str) or isinstance(region, Sequence):
             self.region = Region(region)
         else:
@@ -50,8 +28,14 @@ class Parser:
                 f"ENC: Invalid feature layer format for '{features}', "
                 f"should be a sequence of strings or {Layer} objects"
             )
-        tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
-        self.bounding_box = *self.origin, *tr_corner
+        if depths is None:
+            self.depths = self.default_depths
+        elif not isinstance(features, str) and isinstance(depths, Sequence):
+            self.depths = tuple(int(i) for i in depths)
+        else:
+            raise TypeError(
+                "ENC: Depth bins should be a sequence of numbers"
+            )
 
     def update_charts_data(self, new_data):
         if not new_data:
@@ -85,13 +69,6 @@ class Parser:
                 f"bounding box {self.bounding_box}"
             )
         return data
-
-    def extract_shapes(self, layer):
-        data = self.extract_coordinates(layer)
-        if isinstance(data[0][1], tuple):
-            return [Position(point, depth) for depth, point in data]
-        else:
-            return [Area(points, depth) for depth, points in data]
 
     def get_feature_layer_by_name(self, name):
         layer = next((x for x in self.layers if x.name == name), None)
