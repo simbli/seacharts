@@ -1,8 +1,8 @@
 from typing import Sequence
 
-from seacharts.layer import Layer
-from seacharts.region import Region
 from seacharts.shapes import Area, Position
+from .layer import Layer
+from .region import Region
 
 
 class Parser:

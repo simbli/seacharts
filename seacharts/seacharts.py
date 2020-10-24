@@ -1,6 +1,6 @@
 from typing import Sequence, Union
 
-from .parser import Parser
+from seacharts.files import Parser
 
 
 class ENC:
