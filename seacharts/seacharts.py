@@ -48,13 +48,9 @@ class ENC:
         bounding_box = *self.origin, *tr_corner
         self.parser = Parser(bounding_box, region, depths)
         self.parser.update_charts_data(self._features, new_data)
-        self.layers = {x.__name__: x(self.parser.load) for x in self._layers}
-
-    def __getitem__(self, item):
-        return self.layers[item.capitalize()]
-
-    def __getattr__(self, item):
-        return self.__getitem__(item)
+        self.ocean = Ocean(self.parser.load)
+        self.surface = Surface(self.parser.load)
+        self.details = Details(self.parser.load)
 
     @property
     def supported_features(self):
