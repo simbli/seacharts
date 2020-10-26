@@ -4,6 +4,7 @@ from .shapes import Feature, Polygon, Position
 
 
 class Ship(Feature):
+    shape = 'ShipHull'
     ship_dimensions = (13.6, 74.7)
 
     def __init__(self, center, heading=0.0, scale=1.0):

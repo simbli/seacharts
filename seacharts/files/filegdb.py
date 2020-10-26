@@ -3,7 +3,7 @@ import os
 import fiona
 
 
-class Region:
+class FileGDB:
     prefix = 'Basisdata'
     data_type = 'Dybdedata'
     projection = '25833'
@@ -18,17 +18,17 @@ class Region:
                  'Vestfold og Telemark',
                  'Vestland', 'Viken')
 
-    def __init__(self, area):
-        if isinstance(area, str):
-            area = (area,)
-        for name in area:
+    def __init__(self, region):
+        if isinstance(region, str):
+            region = (region,)
+        for name in region:
             if name not in self.supported:
                 raise ValueError(
                     f"ENC: Invalid region name '{name}', "
                     f"possible candidates are {self.supported}"
                 )
-        self.names = area
-        self.labels = [name.translate(self.translation) for name in area]
+        self.names = region
+        self.labels = [name.translate(self.translation) for name in region]
         self.file_paths = list(self.validate_files())
 
     def validate_files(self):
@@ -60,9 +60,9 @@ class Region:
         gdb = file_name.replace('.zip', '.gdb')
         return '/'.join(('zip:/', *self.path_external, file_name, gdb))
 
-    def read_fgdb_files(self, layer, bounding_box):
+    def read_files(self, layer_name, bounding_box):
         for path in self.file_paths:
-            if layer.id in fiona.listlayers(path):
-                with fiona.open(path, 'r', layer=layer.id) as file:
+            if layer_name in fiona.listlayers(path):
+                with fiona.open(path, 'r', layer=layer_name) as file:
                     for record in file.filter(bbox=bounding_box):
                         yield record

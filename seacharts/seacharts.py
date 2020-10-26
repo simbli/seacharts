@@ -49,9 +49,24 @@ class ENC:
             raise TypeError(
                 "ENC: Window size should be a tuple of size two"
             )
+        if features is None:
+            features = supported_features
+        elif isinstance(features, Sequence) and not isinstance(features, str):
+            for feature in features:
+                if not (isinstance(feature, str)
+                        and feature in supported_features):
+                    raise ValueError(
+                        f"ENC: Invalid feature name '{feature}', "
+                        f"possible candidates are {supported_features}"
+                    )
+        else:
+            raise TypeError(
+                f"ENC: Features should be a sequence of feature name strings"
+            )
+        feature_classes = (_topography[f] for f in features)
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
         bounding_box = *self.origin, *tr_corner
-        self.parser = Parser(bounding_box, region, features, depths)
+        self.parser = Parser(bounding_box, feature_classes, region, depths)
         self.parser.update_charts_data(new_data)
 
     def read_feature_coordinates(self, feature):

@@ -1,32 +1,21 @@
 from typing import Sequence
 
-from .layer import Layer
-from .region import Region
+from .filegdb import FileGDB
+from .shapefile import Shapefile
 
 
 class Parser:
     default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
 
-    def __init__(self, bounding_box, region, features, depths):
+    def __init__(self, bounding_box, features, region, depths):
         self.bounding_box = bounding_box
+        self.shapefiles = tuple(Shapefile(f) for f in features)
         if isinstance(region, str) or isinstance(region, Sequence):
-            self.region = Region(region)
+            self.region = FileGDB(region)
         else:
             raise TypeError(
                 f"ENC: Invalid region format for '{region}', should be "
                 f"string or sequence of strings"
-            )
-        if features is None:
-            self.layers = list(Layer(x) for x in Layer.supported)
-        elif isinstance(features, Sequence):
-            if all(isinstance(x, Layer) for x in features):
-                self.layers = list(features)
-            else:
-                self.layers = list(Layer(x) for x in features)
-        else:
-            raise TypeError(
-                f"ENC: Invalid feature layer format for '{features}', "
-                f"should be a sequence of strings or {Layer} objects"
             )
         if depths is None:
             self.depths = self.default_depths
@@ -39,10 +28,10 @@ class Parser:
 
     def update_charts_data(self, new_data):
         if not new_data:
-            for layer in self.layers:
-                if not layer.shapefile_exists:
+            for shapefile in self.shapefiles:
+                if not shapefile.exists:
                     print(f"ENC: Missing shapefile for feature layer "
-                          f"'{layer.name}', initializing new parsing of "
+                          f"'{shapefile.name}', initializing new parsing of "
                           f"downloaded ENC data")
                     new_data = True
                     break
@@ -51,30 +40,27 @@ class Parser:
 
     def process_external_data(self):
         print("ENC: Processing features from region...")
-        for layer in self.layers:
-            records = self.region.read_fgdb_files(layer, self.bounding_box)
-            data = list(layer.select_data(r, True) for r in records)
-            layer.write_data_to_shapefile(data)
-            print(f"  Feature layer extracted: {layer.name}")
+        for shapefile in self.shapefiles:
+            layer_name = shapefile.feature.layer_label
+            records = self.region.read_files(layer_name, self.bounding_box)
+            data = list(shapefile.select_data(r, True) for r in records)
+            shapefile.write_data(data)
+            print(f"  Feature layer extracted: {shapefile.name}")
         print("External data processing complete\n")
 
-    def extract_coordinates(self, layer):
-        if not isinstance(layer, Layer):
-            layer = self.get_feature_layer_by_name(layer)
-        records = layer.read_shapefile(self.bounding_box)
-        data = list(layer.select_data(r) for r in records)
+    def extract_coordinates(self, feature):
+        shapefile = next((shp for shp in self.shapefiles
+                          if shp.name == feature), None)
+        if not shapefile:
+            raise ValueError(
+                f"ENC: Feature '{feature}' not found in shapefile list "
+                f"{list(x.name for x in self.shapefiles)}"
+            )
+        records = shapefile.read(self.bounding_box)
+        data = list(shapefile.select_data(r) for r in records)
         if len(data) == 0:
             raise ValueError(
-                f"ENC: Feature layer {layer.name} returned no shapes within"
-                f"bounding box {self.bounding_box}"
+                f"ENC: Feature layer {shapefile.name} returned no shapes "
+                f"within bounding box {self.bounding_box}"
             )
         return data
-
-    def get_feature_layer_by_name(self, name):
-        layer = next((x for x in self.layers if x.name == name), None)
-        if not layer:
-            raise ValueError(
-                f"ENC: Feature '{name}' not found in feature layer list "
-                f"{list(x.name for x in self.layers)}"
-            )
-        return layer

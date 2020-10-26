@@ -15,15 +15,11 @@ class Feature(ABC):
 
     @property
     def name(self):
-        return self.__class__.__name__.lower()
+        return self.__class__.__name__
 
     @property
     def category(self):
-        return inspect.getmodule(self).__name__.split('.')[-1]
-
-    @property
-    def shape(self):
-        return self.__class__.__bases__[0].__name__.lower()
+        return inspect.getmodule(self).__name__.split('.')[-1].capitalize()
 
     @abstractmethod
     def coordinates(self):
@@ -31,6 +27,8 @@ class Feature(ABC):
 
 
 class Position(Feature):
+    shape = 'Point'
+
     def __init__(self, point, depth=None):
         if not (isinstance(point, tuple) and len(point) == 2):
             raise TypeError(
@@ -60,6 +58,8 @@ class Position(Feature):
 
 
 class Line(Feature):
+    shape = 'PointTuple'
+
     def __init__(self, start, end, depth=None):
         if not all(isinstance(p, Position) for p in (start, end)):
             raise TypeError(
@@ -78,6 +78,8 @@ class Line(Feature):
 
 
 class Area(Feature):
+    shape = 'Polygon'
+
     def __init__(self, points, depth=None):
         if not all(isinstance(p, tuple) and len(p) == 2 for p in points):
             raise TypeError(
