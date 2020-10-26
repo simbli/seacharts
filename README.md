@@ -57,86 +57,58 @@ top-level folder `data` is located in the same directory as the executing
 script.
 
 Import the module, initialize an instance of `seacharts.ENC` with appropriate 
-settings, and set its `parse_new_map_data` keyword argument to `True` in order 
+settings, and set its `new_data` keyword argument to `True` in order 
 to unpack and parse desired ENC features from the downloaded ZIP file(s) into 
 shapefiles:
 
 ```python
-import seacharts
+from seacharts import ENC
 
 origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = seacharts.ENC(origin, window_size, region, new_data=True)
+enc = ENC(origin, window_size, region, new_data=True)
 
 ```
-
 Note that `region` may be one or several Norwegian county names
 (or the whole country if the `Hele landet` data set is available), 
-corresponding to each downloaded ZIP file. Furthermore, a user-defined set of 
-sea `depths` bins and `features` to be extracted may be passed to `ENC` as 
-additional keyword arguments.
+corresponding to each downloaded ZIP file. Furthermore, a user-defined list of 
+sea `depths` bins may be passed to `ENC` as an additional keyword argument.
 
-### Reading feature shapefiles
-After the data is parsed from the downloaded ZIP file(s) as shown above, the 
-resulting shapefiles can be read by calling the `read_feature_coordinates` 
-method for each feature layer independently. The returned data is compatible 
-with the [Shapely](https://pypi.org/project/Shapely/) package for further 
-geometric manipulation and analysis of shapes:
-
+### Accessing features
+After the data is parsed into shapefiles and read into memory as shown above, 
+the [Shapely](https://pypi.org/project/Shapely/) -based features may be 
+accessed through the following ENC attributes:
 ```python
-import seacharts
+from seacharts import ENC
 
 origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
 window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-charts = seacharts.ENC(origin, window_size, region)
-coordinates = charts.read_feature_coordinates('seabed')
+enc = ENC(origin, window_size, region)
+print(enc.supported_features)
 
-from shapely.geometry import Polygon
+feature1 = enc.ocean.seabed[-1]
+feature2 = enc.surface.land[-1]
 
-depth, points = coordinates[-1]
-polygon = Polygon(points)
-
-print(f"Number of extracted seabed polygons: {len(coordinates)}")
-print(f"Minimum sea depth inside the last polygon: {depth}")
-print(f"Number of points in the last polygon: {len(points)}")
-print(f"Area of the last polygon: {int(polygon.area)}")
+for feature in (feature1, feature2):
+    print("Feature name:                    ", feature.name)
+    print("Feature shape:                   ", feature.shape)
+    print("Feature category:                ", feature.category)
+    print("Area of the feature polygon:     ", int(feature.area))
+    print("Number of feature polygon points:", len(feature.coordinates))
+    print("Minimum sea depth inside feature:", int(feature.depth))
+    print()
 
 ```
-
-Note that the `parse_new_map_data` argument may be omitted or set to `False` if 
-the desired regional feature data has already been unpacked and processed into 
+Note that the `new_data` argument may be omitted or set to `False` if the 
+desired regional feature data has already been unpacked and processed into 
 shapefiles in a previous call. Additionally, the `origin` and `window_size` 
 arguments here may be different from the one used to extract the external 
 ENC data, allowing for loading of more specific (smaller) areas of interest 
-into memory during runtime.  
-
-An optional geometric API based on [Shapely](https://pypi.org/project/Shapely/)
-is provided for convenience through use of the `read_feature_shapes` method and 
-the accompanying `seacharts.features` classes:
-
-```python
-import seacharts
-
-origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
-window_size = (20000, 16000)  # w, h (east, north) distance in meters
-region = 'Møre og Romsdal'    # name for a Norwegian county region
-
-charts = seacharts.ENC(origin, window_size, region, new_data=True)
-layer = charts.read_feature_shapes('seabed')
-feature = layer[-1]
-
-print("Feature name:                    ", feature.name)
-print("Feature shape:                   ", feature.shape)
-print("Feature category:                ", feature.category)
-print("Number of feature polygon points:", len(feature.coordinates))
-print("Minimum sea depth inside feature:", int(feature.depth))
-print("Area of the feature polygon:     ", int(feature.area))
-
-```
+into memory during runtime.
 
 
 ## Contributors

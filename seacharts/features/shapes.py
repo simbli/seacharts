@@ -11,7 +11,8 @@ class Feature(ABC):
         self._geometry = geometry
 
     def __repr__(self):
-        return f"{self.__class__.__name__}{self.coordinates}"
+        return (self.name + "-" + self.shape +
+                str(tuple((int(c[0]), int(c[1])) for c in self.coordinates)))
 
     @property
     def name(self):
@@ -21,8 +22,14 @@ class Feature(ABC):
     def category(self):
         return inspect.getmodule(self).__name__.split('.')[-1].capitalize()
 
+    @property
     @abstractmethod
     def coordinates(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def shape(self):
         raise NotImplementedError
 
 
@@ -58,7 +65,7 @@ class Position(Feature):
 
 
 class Line(Feature):
-    shape = 'PointTuple'
+    shape = 'LineString'
 
     def __init__(self, start, end, depth=None):
         if not all(isinstance(p, Position) for p in (start, end)):

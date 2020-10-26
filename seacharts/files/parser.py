@@ -7,9 +7,9 @@ from .shapefile import Shapefile
 class Parser:
     default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
 
-    def __init__(self, bounding_box, features, region, depths):
+    def __init__(self, bounding_box, region, depths):
         self.bounding_box = bounding_box
-        self.shapefiles = tuple(Shapefile(f) for f in features)
+        self.shapefiles = ()
         if isinstance(region, str) or isinstance(region, Sequence):
             self.region = FileGDB(region)
         else:
@@ -19,14 +19,15 @@ class Parser:
             )
         if depths is None:
             self.depths = self.default_depths
-        elif not isinstance(features, str) and isinstance(depths, Sequence):
+        elif not isinstance(depths, str) and isinstance(depths, Sequence):
             self.depths = tuple(int(i) for i in depths)
         else:
             raise TypeError(
                 "ENC: Depth bins should be a sequence of numbers"
             )
 
-    def update_charts_data(self, new_data):
+    def update_charts_data(self, features, new_data):
+        self.shapefiles = tuple(Shapefile(f) for f in features)
         if not new_data:
             for shapefile in self.shapefiles:
                 if not shapefile.exists:
@@ -48,19 +49,11 @@ class Parser:
             print(f"  Feature layer extracted: {shapefile.name}")
         print("External data processing complete\n")
 
-    def extract_coordinates(self, feature):
-        shapefile = next((shp for shp in self.shapefiles
-                          if shp.name == feature), None)
-        if not shapefile:
-            raise ValueError(
-                f"ENC: Feature '{feature}' not found in shapefile list "
-                f"{list(x.name for x in self.shapefiles)}"
-            )
-        records = shapefile.read(self.bounding_box)
-        data = list(shapefile.select_data(r) for r in records)
+    def load(self, feature):
+        data = tuple(Shapefile(feature).read(self.bounding_box))
         if len(data) == 0:
             raise ValueError(
-                f"ENC: Feature layer {shapefile.name} returned no shapes "
-                f"within bounding box {self.bounding_box}"
+                f"ENC: Feature layer {feature.__name__} returned no "
+                f"shapes within bounding box {self.bounding_box}"
             )
-        return data
+        return [feature(shape, depth) for depth, shape in data]

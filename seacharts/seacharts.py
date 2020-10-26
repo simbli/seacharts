@@ -1,13 +1,7 @@
-import inspect
 from typing import Sequence, Union
 
-import seacharts.features
+from seacharts.features import Ocean, Surface, Details
 from seacharts.files import Parser
-
-_topography = {name.lower(): cls for name, cls in
-               inspect.getmembers(seacharts.features, inspect.isclass)}
-supported_features = tuple(_topography.keys())
-supported_projection = 'EUREF89 UTM sone 33, 2d'
 
 
 class ENC:
@@ -21,10 +15,12 @@ class ENC:
     :param origin: tuple(easting, northing) coordinates
     :param window_size: tuple(width, height) of the window size
     :param region: str or Sequence[str] of Norwegian regions
-    :param features: Sequence of supported feature strings to be extracted
     :param depths: Sequence of integer depth bins for features
     :param new_data: bool indicating if new data should be parsed
     """
+    _layers = (Ocean, Surface, Details)
+    _features = tuple(f for x in _layers for f in x.features)
+
     default_origin = (38100, 6948700)
     default_window_size = (20000, 16000)
     default_region = 'Møre og Romsdal'
@@ -33,7 +29,6 @@ class ENC:
                  origin: tuple = default_origin,
                  window_size: tuple = default_window_size,
                  region: Union[str, Sequence] = default_region,
-                 features: Sequence = None,
                  depths: Sequence = None,
                  new_data: bool = False):
 
@@ -49,40 +44,27 @@ class ENC:
             raise TypeError(
                 "ENC: Window size should be a tuple of size two"
             )
-        if features is None:
-            features = supported_features
-        elif isinstance(features, Sequence) and not isinstance(features, str):
-            for feature in features:
-                if not (isinstance(feature, str)
-                        and feature in supported_features):
-                    raise ValueError(
-                        f"ENC: Invalid feature name '{feature}', "
-                        f"possible candidates are {supported_features}"
-                    )
-        else:
-            raise TypeError(
-                f"ENC: Features should be a sequence of feature name strings"
-            )
-        feature_classes = (_topography[f] for f in features)
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
         bounding_box = *self.origin, *tr_corner
-        self.parser = Parser(bounding_box, feature_classes, region, depths)
-        self.parser.update_charts_data(new_data)
+        self.parser = Parser(bounding_box, region, depths)
+        self.parser.update_charts_data(self._features, new_data)
+        self.layers = {x.__name__: x(self.parser.load) for x in self._layers}
 
-    def read_feature_coordinates(self, feature):
-        """Reads and returns the regional depths and coordinates of a feature
+    def __getitem__(self, item):
+        return self.layers[item.capitalize()]
 
-        :param feature: str equal to a supported feature name
-        :return: [(depth, polygon_points), ...] if features are polygons
-                     or [(depth, point_tuple), ...] if features are points
-        """
-        return self.parser.extract_coordinates(feature)
+    def __getattr__(self, item):
+        return self.__getitem__(item)
 
-    def read_feature_shapes(self, feature):
-        """Reads and returns the regional shapes of a feature
+    @property
+    def supported_features(self):
+        s = "Supported categories and features:\n"
+        for category in self._layers:
+            s += category.__name__.lower() + ": "
+            s += ", ".join(f.__name__.lower() for f in category.features)
+            s += "\n"
+        return s
 
-        :param feature: str equal to a supported feature name
-        :return: list of geometric feature shapes
-        """
-        data = self.parser.extract_coordinates(feature)
-        return [_topography[feature](shape, depth) for depth, shape in data]
+    @property
+    def supported_projection(self):
+        return "EUREF89 UTM sone 33, 2d"

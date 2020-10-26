@@ -18,7 +18,7 @@ class Shapefile:
     def read(self, bounding_box):
         with fiona.open(self.path) as file:
             for record in file.filter(bbox=bounding_box):
-                yield record
+                yield self.select_data(record)
 
     def select_data(self, record, external_label=False):
         label = self.feature.depth_label if external_label else 'depth'
