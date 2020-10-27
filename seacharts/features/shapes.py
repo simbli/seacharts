@@ -8,7 +8,7 @@ from shapely.geometry import LinearRing, LineString, Point, Polygon
 class Feature(ABC):
     def __init__(self, geometry, depth=None):
         self.depth = 0 if depth is None else depth
-        self._geometry = geometry
+        self.geometry = geometry
 
     def __repr__(self):
         return (self.name + "-" + self.shape +
@@ -46,7 +46,7 @@ class Position(Feature):
 
     @property
     def coordinates(self):
-        return self._geometry.coords[0]
+        return self.geometry.coords[0]
 
     @property
     def x(self):
@@ -81,7 +81,7 @@ class Line(Feature):
 
     @property
     def coordinates(self):
-        return tuple(self._geometry.coords)
+        return tuple(self.geometry.coords)
 
 
 class Area(Feature):
@@ -96,8 +96,8 @@ class Area(Feature):
 
     @property
     def coordinates(self):
-        return tuple(self._geometry.exterior.coords)
+        return tuple(self.geometry.exterior.coords)
 
     @property
     def area(self):
-        return self._geometry.area
+        return self.geometry.area

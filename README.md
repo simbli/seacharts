@@ -34,6 +34,7 @@ pipwin install pandas
 pipwin install shapely
 pipwin install gdal
 pipwin install fiona
+pipwin install cartopy
 ```
 
 
@@ -79,7 +80,7 @@ sea `depths` bins may be passed to `ENC` as an additional keyword argument.
 ### Accessing features
 After the data is parsed into shapefiles and read into memory as shown above, 
 the [Shapely](https://pypi.org/project/Shapely/) -based features may be 
-accessed through the following ENC attributes:
+accessed and displayed through the following ENC attributes:
 ```python
 from seacharts import ENC
 
@@ -101,6 +102,10 @@ for feature in (feature1, feature2):
     print("Number of feature polygon points:", len(feature.coordinates))
     print("Minimum sea depth inside feature:", int(feature.depth))
     print()
+
+enc.map.plot(enc.surface.land)
+enc.map.plot(enc.surface.shore)
+enc.map.show()
 
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 

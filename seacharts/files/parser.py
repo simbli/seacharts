@@ -5,25 +5,16 @@ from .shapefile import Shapefile
 
 
 class Parser:
-    default_depths = (0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500)
-
     def __init__(self, bounding_box, region, depths):
         self.bounding_box = bounding_box
         self.shapefiles = ()
+        self.depths = depths
         if isinstance(region, str) or isinstance(region, Sequence):
             self.region = FileGDB(region)
         else:
             raise TypeError(
                 f"ENC: Invalid region format for '{region}', should be "
                 f"string or sequence of strings"
-            )
-        if depths is None:
-            self.depths = self.default_depths
-        elif not isinstance(depths, str) and isinstance(depths, Sequence):
-            self.depths = tuple(int(i) for i in depths)
-        else:
-            raise TypeError(
-                "ENC: Depth bins should be a sequence of numbers"
             )
 
     def update_charts_data(self, features, new_data):
