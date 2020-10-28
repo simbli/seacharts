@@ -75,6 +75,12 @@ class ENC:
     def supported_projection(self):
         return "EUREF89 UTM sone 33, 2d"
 
+    @property
+    def supported_environment(self):
+        s = "Supported environment variables: "
+        s += ', '.join(feature.lower() for feature in self.environment)
+        return s + '\n'
+
     def init_environment_shapes(self, new_data):
         if self.shapefiles_not_found() or new_data:
             self.process_external_data()

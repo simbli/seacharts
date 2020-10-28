@@ -103,8 +103,8 @@ enc.show()
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 
 desired regional feature data has already been unpacked and processed into 
-shapefiles in a previous call. Available features may be identified by the 
-`enc.supported_features` attribute. Additionally, the `origin` and 
+shapefiles in a previous call. Available map features may be identified by the 
+`enc.supported_environment` attribute. Additionally, the `origin` and 
 `window_size` arguments here may be different from the one used to extract 
 the external ENC data, allowing for loading of more specific (smaller) areas 
 of interest into memory during runtime.
