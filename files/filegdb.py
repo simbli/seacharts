@@ -1,9 +1,7 @@
 import os
 
-import fiona
 
-
-class FileGDB:
+class NorwegianCharts:
     prefix = 'Basisdata'
     data_type = 'Dybdedata'
     projection = '25833'
@@ -46,7 +44,7 @@ class FileGDB:
                             f"_{self.suffix}"
                         )
             else:
-                raise FileExistsError(
+                raise FileNotFoundError(
                     f"ENC: Region FGDB file for '{name}' not found at "
                     f"'{os.path.join(*self.path_external)}'"
                 )
@@ -59,10 +57,3 @@ class FileGDB:
     def zipped_form(self, file_name):
         gdb = file_name.replace('.zip', '.gdb')
         return '/'.join(('zip:/', *self.path_external, file_name, gdb))
-
-    def read_files(self, layer_name, bounding_box):
-        for path in self.file_paths:
-            if layer_name in fiona.listlayers(path):
-                with fiona.open(path, 'r', layer=layer_name) as file:
-                    for record in file.filter(bbox=bounding_box):
-                        yield record

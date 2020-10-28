@@ -84,23 +84,21 @@ accessed and displayed through the following ENC attributes:
 ```python
 from seacharts import ENC
 
-origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
-window_size = (20000, 16000)  # w, h (east, north) distance in meters
-region = 'Møre og Romsdal'    # name for a Norwegian county region
+origin = (42600, 6956400)     # easting/northing (UTM zone 33N)
+window_size = (3000, 2000)    # w, h (east, north) distance in meters
 
-enc = ENC(origin, window_size, region)
+enc = ENC(origin, window_size)
 
-for feature in (enc.seabed[-1], enc.land[-1]):
+for feature in (enc.seabed, enc.land):
+    polygon = feature[10]
     print("Feature name:                    ", feature.name)
-    print("Feature shape:                   ", feature.shape)
-    print("Area of the feature polygon:     ", int(feature.area))
-    print("Number of feature polygon points:", len(feature.coordinates))
-    print("Minimum sea depth inside feature:", int(feature.depth))
+    print("Feature shape:                   ", feature.shape.type)
+    print("Area of the feature polygon:     ", int(polygon.area))
+    print("Number of feature polygon points:", len(polygon.exterior.coords))
+    print("Minimum sea depth inside feature:", int(polygon.depth))
     print()
 
-enc.map.plot(enc.land)
-enc.map.plot(enc.shore)
-enc.map.show()
+enc.show()
 
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 

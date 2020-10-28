@@ -15,16 +15,17 @@ _standard_colors = {
 }
 
 _feature_colors = {
-    'Seabed': _blues[4],
-    'Land': _greens[4],
-    'Shore': _greens[3],
-    'Rocks': _reds[5],
-    'Shallows': _reds[3],
+    'seabed': _blues[4],
+    'land': _greens[4],
+    'shore': _greens[3],
+    'rocks': _reds[5],
+    'shallows': _reds[3],
+    'ship': _standard_colors['red']
 }
 
 
 def color(name, depths=None):
-    if name == 'Ocean':
+    if name == 'ocean':
         if depths is None:
             raise ValueError(f"Ocean color map need depth bins")
         else:
@@ -38,13 +39,13 @@ def color(name, depths=None):
 
 
 def colorbar(axes, depths):
-    ocean = color('Ocean', depths)
-    colors = [_feature_colors['Shore']] + list(ocean)
+    ocean = color('ocean', depths)
+    colors = [_feature_colors['shore']] + list(ocean)
     cmap = clr.LinearSegmentedColormap.from_list(
         'Custom terrain', colors, len(colors)
     )
     cmap.set_over(plt.get_cmap('Blues')(np.linspace(0.0, 1.0, 9))[-1])
-    cmap.set_under(_feature_colors['Land'])
+    cmap.set_under(_feature_colors['land'])
     norm = clr.BoundaryNorm([0, 1] + depths[1:], cmap.N)
     kwargs = dict(cmap=cmap, norm=norm, extend='both',
                   format='%1i m', ticks=[0, 1] + depths[1:],

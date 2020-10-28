@@ -1,66 +1,138 @@
+from abc import ABC
+
+from files import Shapefile
 from .shapes import Area, Position
 
 
-class Seabed(Area):
+class Feature(ABC):
+    def __init__(self, shapes=None):
+        self.shapefile = Shapefile(self.label, self.shape.type)
+        self._shapes = shapes
+
+    def __getitem__(self, item):
+        return self._shapes[item]
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    @property
+    def label(self):
+        return self.name.lower()
+
+    @property
+    def shape(self):
+        raise NotImplementedError
+
+    @property
+    def shapely(self):
+        return self._shapes
+
+    @property
+    def depth_label(self):
+        raise NotImplementedError
+
+    @property
+    def layer_label(self):
+        raise NotImplementedError
+
+    def load(self, bbox, external=None):
+        self._shapes = tuple(self.read_shapes(bbox, external))
+
+    def read_shapes(self, bbox, external):
+        paths = external.file_paths if external else [None]
+        layer = self.layer_label if external else None
+        for path in paths:
+            records = self.shapefile.read(bbox, path, layer)
+            for record in records:
+                yield self.record_to_shape(record, external)
+
+    def record_to_shape(self, record, external_label):
+        label = self.depth_label if external_label else 'depth'
+        depth = record['properties'][label] if label else 0
+        coords = record['geometry']['coordinates']
+        if self.shape.type == 'Polygon':
+            coords = coords[0][0] if external_label else coords[0]
+        return self.shape(coords, depth)
+
+    def write_to_shapefile(self):
+        self.shapefile.write(self._shapes)
+
+
+class Seabed(Feature):
+    shape = Area
     layer_label = 'dybdeareal'
     depth_label = 'minimumsdybde'
-    pass
 
 
-class Land(Area):
+class Land(Feature):
+    shape = Area
     layer_label = 'landareal'
     depth_label = None
     pass
 
 
-class Shore(Area):
+class Shore(Feature):
+    shape = Area
     layer_label = 'torrfall'
     depth_label = None
     pass
 
 
-class Rocks(Position):
+class Rocks(Feature):
+    shape = Position
     layer_label = 'skjer'
     depth_label = None
     pass
 
 
-class Shallows(Position):
+class Shallows(Feature):
+    shape = Position
     layer_label = 'grunne'
     depth_label = 'dybde'
     pass
 
 
-class Ship(Position):
+class Ship(Feature):
+    shape = Position
+    layer_label = None
+    depth_label = None
     default_scale = 1.0
     default_heading = 110.0
-    default_position = Position((42600 + 1500, 6956400 + 1000))
+    default_center = (44100, 6957400)
     ship_dimensions = (13.6, 74.7)
 
-    def __init__(self, center, heading=default_heading, scale=default_scale):
-        if isinstance(center, Position):
+    def __init__(self, center=None, heading=None, scale=None):
+        if center is None:
+            self.center = Position(self.default_center)
+        elif isinstance(center, Position):
             self.center = center
         else:
             raise TypeError(
                 f"Ship center should be a {Position} object"
             )
-        if isinstance(heading, int) or isinstance(heading, float):
+        if heading is None:
+            self.heading = self.default_heading
+        elif isinstance(heading, int) or isinstance(heading, float):
             self.heading = heading
         else:
             raise TypeError(
                 f"Ship heading should be a number in degrees"
             )
-        x, y = center.coordinates
-        w, h = (i * scale for i in self.ship_dimensions)
+        if scale is None:
+            self.scale = self.default_scale
+        elif isinstance(scale, int) or isinstance(scale, float):
+            self.scale = scale
+        else:
+            raise TypeError(
+                f"Ship scale should be a number"
+            )
+        x, y = self.center.coords[0]
+        w, h = (i * self.scale for i in self.ship_dimensions)
         x_min, x_max = x - w / 2, x + w / 2
         y_min, y_max = y - h / 2, y + h / 2 - w
         left_aft, right_aft = (x_min, y_min), (x_max, y_min)
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
-        points = (left_aft, left_bow, (x, y + h / 2), right_bow, right_aft)
-        angle, origin = -self.heading, self.center.coordinates
-        self.hull = Area(points).rotate(angle, origin)
-        super().__init__(center.coordinates)
-
-    @property
-    def coordinates(self):
-        return self.center.coordinates
+        points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
+        angle, origin = -self.heading, self.center.coords[0]
+        super().__init__((Area(points).rotate(angle, origin),))

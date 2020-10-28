@@ -1,56 +1,24 @@
-from abc import ABC, abstractmethod
-from math import sqrt
+from abc import ABC
 
 from shapely.affinity import rotate
-from shapely.geometry import LinearRing, LineString, Point, Polygon
+from shapely.geometry import LinearRing, LineString, Point, Polygon, mapping
 
 
-class Feature(ABC):
-    def __init__(self, geometry, depth=None):
-        self.depth = 0 if depth is None else depth
-        self.geometry = geometry
-
-    def __repr__(self):
-        return (self.name + "-" + self.shape +
-                str(tuple((int(c[0]), int(c[1])) for c in self.coordinates)))
+class Shape(ABC):
+    def __init__(self, depth, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.depth = depth
 
     @property
-    def name(self):
-        return self.__class__.__name__
-
-    @property
-    @abstractmethod
-    def coordinates(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def shape(self):
-        raise NotImplementedError
+    def mapping(self):
+        return mapping(self)
 
 
-class Position(Feature):
-    shape = 'Point'
+class Position(Shape, Point):
+    type = 'Point'
 
-    def __init__(self, point, depth=None):
-        if not (isinstance(point, tuple) and len(point) == 2):
-            raise TypeError(
-                f"Position should be a tuple of the form "
-                f"(easting, northing) in meters"
-            )
-        super().__init__(Point(point), depth)
-
-    @property
-    def coordinates(self):
-        return self.geometry.coords[0]
-
-    @property
-    def x(self):
-        return self.coordinates[0]
-
-    @property
-    def y(self):
-        return self.coordinates[1]
+    def __init__(self, point, depth=0):
+        super().__init__(depth, point)
 
     def line_to(self, target):
         return Line(self, target)
@@ -60,8 +28,8 @@ class Position(Feature):
         return LinearRing((p.coordinates for p in positions)).is_ccw
 
 
-class Line(Feature):
-    shape = 'LineString'
+class Line(Shape, LineString):
+    type = 'LineString'
 
     def __init__(self, start, end, depth=None):
         if not all(isinstance(p, Position) for p in (start, end)):
@@ -71,32 +39,32 @@ class Line(Feature):
         self.start = start
         self.end = end
         self.vector = (end.x - start.x, end.y - start.y)
-        self.length = sqrt(sum(i ** 2 for i in self.vector))
-        geometry = LineString((start.coordinates, end.coordinates))
-        super().__init__(geometry, depth)
+        super().__init__((start, end), depth)
+
+
+class Area(Shape, Polygon):
+    type = 'Polygon'
+
+    def __init__(self, coords, depth=0):
+        super().__init__(depth, shell=coords)
 
     @property
-    def coordinates(self):
-        return tuple(self.geometry.coords)
+    def __array_interface__(self):
+        raise NotImplementedError
 
+    def _get_coords(self):
+        raise NotImplementedError
 
-class Area(Feature):
-    shape = 'Polygon'
-
-    def __init__(self, points, depth=None):
-        if not all(isinstance(p, tuple) and len(p) == 2 for p in points):
-            raise TypeError(
-                f"Area should be a sequence of (E, N) coordinate tuples"
-            )
-        super().__init__(Polygon(points), depth)
+    def _set_coords(self, ob):
+        raise NotImplementedError
 
     @property
-    def coordinates(self):
-        return tuple(self.geometry.exterior.coords)
+    def coords(self):
+        raise NotImplementedError
 
     @property
-    def area(self):
-        return self.geometry.area
+    def xy(self):
+        raise NotImplementedError
 
     def rotate(self, angle, origin):
-        return rotate(self.geometry, angle, origin)
+        return rotate(self, angle, origin)

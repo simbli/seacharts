@@ -24,7 +24,7 @@ class Map:
     def format_topography(self):
         axes = self.figure.add_subplot(self.grid[:, :-1], projection=self.crs)
         axes.set_extent(self.bb, crs=self.crs)
-        axes.set_facecolor(color('Seabed'))
+        axes.set_facecolor(color('seabed'))
         return axes
 
     def format_colorbar(self, depths):
@@ -32,15 +32,8 @@ class Map:
         colorbar(axes, depths)
         return axes
 
-    def plot(self, layer):
-        geometries = (feature.geometry for feature in layer)
-        rgba = color(layer[0].name)
-        shape = ShapelyFeature(geometries, self.crs, color=rgba)
-        self.topography.add_feature(shape)
-
-    def plot_ship(self, ship):
-        geometries = [ship.hull]
-        rgba = color('red')
+    def draw(self, feature):
+        geometries, rgba = feature.shapely, color(feature.label)
         shape = ShapelyFeature(geometries, self.crs, color=rgba)
         self.topography.add_feature(shape)
 
