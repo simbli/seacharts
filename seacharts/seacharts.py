@@ -21,8 +21,8 @@ class ENC:
     """
     topography = (Seabed, Land, Shore, Rocks, Shallows)
     default_depths = [0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500]
-    default_window_size = (20000, 16000)
-    default_origin = (38100, 6948700)
+    default_window_size = (3000, 2000)
+    default_origin = (42600, 6956400)
     default_region = 'Møre og Romsdal'
 
     def __init__(self,
@@ -60,6 +60,7 @@ class ENC:
         for feature in self.topography:
             key = feature.__name__.lower()
             self.features[key] = self.parser.load(feature)
+        self.ship = Ship(Ship.default_position)
         self.map = Map(bounding_box, self.depths)
 
     def __getitem__(self, item):

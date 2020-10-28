@@ -11,7 +11,7 @@ from .colors import color, colorbar
 class Map:
     crs = UTM(33)
     grid_size = (1, 12)
-    window_size = (12, 8)
+    window_size = (12, 7)
     path_reports = 'reports'
 
     def __init__(self, bounding_box, depths):
@@ -25,8 +25,6 @@ class Map:
         axes = self.figure.add_subplot(self.grid[:, :-1], projection=self.crs)
         axes.set_extent(self.bb, crs=self.crs)
         axes.set_facecolor(color('Seabed'))
-        axes.gridlines(crs=self.crs, color='white',
-                       alpha=0.3, linewidth=0.7, linestyle='--')
         return axes
 
     def format_colorbar(self, depths):
@@ -37,6 +35,12 @@ class Map:
     def plot(self, layer):
         geometries = (feature.geometry for feature in layer)
         rgba = color(layer[0].name)
+        shape = ShapelyFeature(geometries, self.crs, color=rgba)
+        self.topography.add_feature(shape)
+
+    def plot_ship(self, ship):
+        geometries = [ship.hull]
+        rgba = color('red')
         shape = ShapelyFeature(geometries, self.crs, color=rgba)
         self.topography.add_feature(shape)
 
