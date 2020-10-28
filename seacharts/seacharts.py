@@ -2,7 +2,7 @@ from typing import Sequence, Union
 
 from seacharts.display import Map
 from seacharts.features import *
-from seacharts.files import Parser
+from seacharts.files import FileGDB, Shapefile
 
 
 class ENC:
@@ -44,6 +44,13 @@ class ENC:
             raise TypeError(
                 "ENC: Window size should be a tuple of size two"
             )
+        if isinstance(region, str) or isinstance(region, Sequence):
+            self.region = FileGDB(region)
+        else:
+            raise TypeError(
+                f"ENC: Invalid region format for '{region}', should be "
+                f"string or sequence of strings"
+            )
         if depths is None:
             self.depths = self.default_depths
         elif not isinstance(depths, str) and isinstance(depths, Sequence):
@@ -53,15 +60,15 @@ class ENC:
                 "ENC: Depth bins should be a sequence of numbers"
             )
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
-        bounding_box = *self.origin, *tr_corner
-        self.parser = Parser(bounding_box, region, self.depths)
-        self.parser.update_charts_data(self.topography, new_data)
+        self.bounding_box = *self.origin, *tr_corner
+        self.update_charts_data(new_data)
+        self.shapefiles = ()
         self.features = {}
         for feature in self.topography:
             key = feature.__name__.lower()
-            self.features[key] = self.parser.load(feature)
+            self.features[key] = self.load(feature)
         self.ship = Ship(Ship.default_position)
-        self.map = Map(bounding_box, self.depths)
+        self.map = Map(self.bounding_box, self.depths)
 
     def __getitem__(self, item):
         return self.features[item]
@@ -76,3 +83,35 @@ class ENC:
     @property
     def supported_projection(self):
         return "EUREF89 UTM sone 33, 2d"
+
+    def update_charts_data(self, new_data):
+        self.shapefiles = tuple(Shapefile(f) for f in self.topography)
+        if not new_data:
+            for shapefile in self.shapefiles:
+                if not shapefile.exists:
+                    print(f"ENC: Missing shapefile for feature layer "
+                          f"'{shapefile.name}', initializing new parsing of "
+                          f"downloaded ENC data")
+                    new_data = True
+                    break
+        if new_data:
+            self.process_external_data()
+
+    def process_external_data(self):
+        print("ENC: Processing features from region...")
+        for shapefile in self.shapefiles:
+            layer_name = shapefile.feature.layer_label
+            records = self.region.read_files(layer_name, self.bounding_box)
+            data = list(shapefile.select_data(r, True) for r in records)
+            shapefile.write_data(data)
+            print(f"  Feature layer extracted: {shapefile.name}")
+        print("External data processing complete\n")
+
+    def load(self, feature):
+        data = tuple(Shapefile(feature).read(self.bounding_box))
+        if len(data) == 0:
+            raise ValueError(
+                f"ENC: Feature layer {feature.__name__} returned no "
+                f"shapes within bounding box {self.bounding_box}"
+            )
+        return [feature(shape, depth) for depth, shape in data]
