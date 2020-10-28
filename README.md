@@ -89,31 +89,27 @@ window_size = (20000, 16000)  # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
 enc = ENC(origin, window_size, region)
-print(enc.supported_features)
 
-feature1 = enc.ocean.seabed[-1]
-feature2 = enc.surface.land[-1]
-
-for feature in (feature1, feature2):
+for feature in (enc.seabed[-1], enc.land[-1]):
     print("Feature name:                    ", feature.name)
     print("Feature shape:                   ", feature.shape)
-    print("Feature category:                ", feature.category)
     print("Area of the feature polygon:     ", int(feature.area))
     print("Number of feature polygon points:", len(feature.coordinates))
     print("Minimum sea depth inside feature:", int(feature.depth))
     print()
 
-enc.map.plot(enc.surface.land)
-enc.map.plot(enc.surface.shore)
+enc.map.plot(enc.land)
+enc.map.plot(enc.shore)
 enc.map.show()
 
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 
 desired regional feature data has already been unpacked and processed into 
-shapefiles in a previous call. Additionally, the `origin` and `window_size` 
-arguments here may be different from the one used to extract the external 
-ENC data, allowing for loading of more specific (smaller) areas of interest 
-into memory during runtime.
+shapefiles in a previous call. Available features may be identified by the 
+`enc.supported_features` attribute. Additionally, the `origin` and 
+`window_size` arguments here may be different from the one used to extract 
+the external ENC data, allowing for loading of more specific (smaller) areas 
+of interest into memory during runtime.
 
 
 ## Contributors

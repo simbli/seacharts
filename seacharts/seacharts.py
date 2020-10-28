@@ -1,7 +1,7 @@
 from typing import Sequence, Union
 
 from seacharts.display import Map
-from seacharts.features import Ocean, Surface, Details
+from seacharts.features import *
 from seacharts.files import Parser
 
 
@@ -19,9 +19,7 @@ class ENC:
     :param depths: Sequence of integer depth bins for features
     :param new_data: bool indicating if new data should be parsed
     """
-    _layers = (Ocean, Surface, Details)
-    _features = tuple(f for x in _layers for f in x.features)
-
+    topography = (Seabed, Land, Shore, Rocks, Shallows)
     default_depths = [0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500]
     default_window_size = (20000, 16000)
     default_origin = (38100, 6948700)
@@ -57,20 +55,22 @@ class ENC:
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
         bounding_box = *self.origin, *tr_corner
         self.parser = Parser(bounding_box, region, self.depths)
-        self.parser.update_charts_data(self._features, new_data)
-        self.ocean = Ocean(self.parser.load)
-        self.surface = Surface(self.parser.load)
-        self.details = Details(self.parser.load)
+        self.parser.update_charts_data(self.topography, new_data)
+        self.features = {}
+        for feature in self.topography:
+            key = feature.__name__.lower()
+            self.features[key] = self.parser.load(feature)
         self.map = Map(bounding_box, self.depths)
+
+    def __getitem__(self, item):
+        return self.features[item]
+
+    def __getattr__(self, item):
+        return self.__getitem__(item)
 
     @property
     def supported_features(self):
-        s = "Supported categories and features:\n"
-        for category in self._layers:
-            s += category.__name__.lower() + ": "
-            s += ", ".join(f.__name__.lower() for f in category.features)
-            s += "\n"
-        return s
+        return tuple(f.__name__ for f in self.topography)
 
     @property
     def supported_projection(self):

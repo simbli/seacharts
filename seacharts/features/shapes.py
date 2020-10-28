@@ -1,7 +1,7 @@
-import inspect
 from abc import ABC, abstractmethod
 from math import sqrt
 
+from shapely.affinity import rotate
 from shapely.geometry import LinearRing, LineString, Point, Polygon
 
 
@@ -17,10 +17,6 @@ class Feature(ABC):
     @property
     def name(self):
         return self.__class__.__name__
-
-    @property
-    def category(self):
-        return inspect.getmodule(self).__name__.split('.')[-1].capitalize()
 
     @property
     @abstractmethod
@@ -101,3 +97,6 @@ class Area(Feature):
     @property
     def area(self):
         return self.geometry.area
+
+    def rotate(self, angle, origin):
+        return rotate(self.geometry, angle, origin)

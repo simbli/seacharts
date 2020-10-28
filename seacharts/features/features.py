@@ -1,10 +1,37 @@
-from shapely.affinity import rotate
-
-from .shapes import Feature, Polygon, Position
+from .shapes import Area, Position
 
 
-class Ship(Feature):
-    shape = 'Polygon'
+class Seabed(Area):
+    layer_label = 'dybdeareal'
+    depth_label = 'minimumsdybde'
+    pass
+
+
+class Land(Area):
+    layer_label = 'landareal'
+    depth_label = None
+    pass
+
+
+class Shore(Area):
+    layer_label = 'torrfall'
+    depth_label = None
+    pass
+
+
+class Rocks(Position):
+    layer_label = 'skjer'
+    depth_label = None
+    pass
+
+
+class Shallows(Position):
+    layer_label = 'grunne'
+    depth_label = 'dybde'
+    pass
+
+
+class Ship(Position):
     ship_dimensions = (13.6, 74.7)
 
     def __init__(self, center, heading=0.0, scale=1.0):
@@ -28,8 +55,7 @@ class Ship(Feature):
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
         points = (left_aft, left_bow, (x, y + h / 2), right_aft, right_bow)
         angle, origin = -self.heading, self.center.coordinates
-        geometry = rotate(Polygon(points), angle=angle, origin=origin)
-        super().__init__(geometry)
+        super().__init__(Area(points).rotate(angle, origin))
 
     @property
     def coordinates(self):

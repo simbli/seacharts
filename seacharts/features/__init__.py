@@ -1,1 +1,1 @@
-from .layers import Ocean, Surface, Details
+from .features import Seabed, Land, Shore, Rocks, Shallows, Ship
