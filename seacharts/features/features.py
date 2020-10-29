@@ -1,11 +1,14 @@
+import math
 from abc import ABC
+
+import numpy as np
 
 from files import Shapefile
 from .shapes import Area, Position
 
 
 class Feature(ABC):
-    def __init__(self, shapes=None):
+    def __init__(self, shapes=()):
         self.shapefile = Shapefile(self.label, self.shape.type)
         self._shapes = shapes
 
@@ -21,12 +24,25 @@ class Feature(ABC):
         return self.name.lower()
 
     @property
-    def shape(self):
-        raise NotImplementedError
-
-    @property
     def shapely(self):
         return self._shapes
+
+    @property
+    def coords(self):
+        if not self._shapes:
+            raise AttributeError(f"Feature {self.name} has no shapes")
+        elif len(self._shapes) > 1:
+            raise AttributeError(f"Feature {self.name} has several shapes")
+        else:
+            return self._shapes[0].coords
+
+    @property
+    def xy(self):
+        return np.array(self.coords)
+
+    @property
+    def shape(self):
+        raise NotImplementedError
 
     @property
     def depth_label(self):
@@ -98,7 +114,7 @@ class Ship(Feature):
     layer_label = None
     depth_label = None
     default_scale = 1.0
-    default_heading = 110.0
+    default_heading = 103.0
     default_center = (44100, 6957400)
     ship_dimensions = (13.6, 74.7)
 
@@ -127,6 +143,18 @@ class Ship(Feature):
             raise TypeError(
                 f"Ship scale should be a number"
             )
+        self._shapes = self.create_hull()
+        super().__init__(self._shapes)
+
+    @property
+    def coords(self):
+        return self.center.coords[0]
+
+    @property
+    def hull(self):
+        return self._shapes[0].coords
+
+    def create_hull(self):
         x, y = self.center.coords[0]
         w, h = (i * self.scale for i in self.ship_dimensions)
         x_min, x_max = x - w / 2, x + w / 2
@@ -135,4 +163,12 @@ class Ship(Feature):
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
         points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         angle, origin = -self.heading, self.center.coords[0]
-        super().__init__((Area(points).rotate(angle, origin),))
+        return (Area(points).rotate(angle, origin),)
+
+    def update_position(self, fps, ship_velocity=7, speedup=10):
+        step = ship_velocity * speedup / fps
+        x, y = self.center.coords[0]
+        x += math.sin(self.heading * math.pi / 180) * step
+        y += math.cos(self.heading * math.pi / 180) * step
+        self.center = Position((x, y))
+        self._shapes = self.create_hull()

@@ -1,5 +1,6 @@
 from abc import ABC
 
+import numpy as np
 from shapely.affinity import rotate
 from shapely.geometry import LinearRing, LineString, Point, Polygon, mapping
 
@@ -49,6 +50,14 @@ class Area(Shape, Polygon):
         super().__init__(depth, shell=coords)
 
     @property
+    def coords(self):
+        return self.exterior.coords
+
+    @property
+    def xy(self):
+        return np.array(self.exterior.coords)
+
+    @property
     def __array_interface__(self):
         raise NotImplementedError
 
@@ -56,14 +65,6 @@ class Area(Shape, Polygon):
         raise NotImplementedError
 
     def _set_coords(self, ob):
-        raise NotImplementedError
-
-    @property
-    def coords(self):
-        raise NotImplementedError
-
-    @property
-    def xy(self):
         raise NotImplementedError
 
     def rotate(self, angle, origin):

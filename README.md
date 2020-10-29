@@ -98,7 +98,7 @@ for feature in (enc.seabed, enc.land):
     print("Minimum sea depth inside feature:", int(polygon.depth))
     print()
 
-enc.show()
+enc.simulate_test_ship()
 
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 
@@ -107,7 +107,8 @@ shapefiles in a previous call. Available map features may be identified by the
 `enc.supported_environment` attribute. Additionally, the `origin` and 
 `window_size` arguments here may be different from the one used to extract 
 the external ENC data, allowing for loading of more specific (smaller) areas 
-of interest into memory during runtime.
+of interest into memory during runtime. The result GIF of the test ship
+simulation is saved as `reports/simulation.gif`.
 
 
 ## Contributors

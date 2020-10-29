@@ -61,9 +61,10 @@ class ENC:
             )
         tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
         self.bounding_box = *self.origin, *tr_corner
-        self.display = Map(self.bounding_box, self.depths)
-        self.init_environment_shapes(new_data)
-        self.display.draw(Ship())
+        self.ships = [Ship()]
+        self.load_environment_shapes(new_data)
+        self.display = Map(self.ships, self.environment,
+                           self.bounding_box, self.depths)
 
     def __getitem__(self, item):
         return self.environment[item]
@@ -81,13 +82,11 @@ class ENC:
         s += ', '.join(feature.lower() for feature in self.environment)
         return s + '\n'
 
-    def init_environment_shapes(self, new_data):
+    def load_environment_shapes(self, new_data):
         if self.shapefiles_not_found() or new_data:
             self.process_external_data()
         for feature in self.environment.values():
             feature.load(self.bounding_box)
-            if feature.name != 'Seabed':
-                self.display.draw(feature)
 
     def shapefiles_not_found(self):
         for feature in self.environment.values():
@@ -105,6 +104,17 @@ class ENC:
             feature.write_to_shapefile()
             print(f"  Feature layer extracted: {feature.name}")
         print("External data processing complete\n")
+
+    def simulate_test_ship(self):
+        print("Simulating test ship...")
+        for j in range(100):
+            self.display.pause()
+            for ship in self.ships:
+                ship.update_position(self.display.fps)
+            self.display.update(self.ships)
+            self.display.save_frame(j)
+        self.display.close()
+        self.display.save_simulation()
 
     def show(self):
         self.display.show()
