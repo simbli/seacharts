@@ -1,1 +1,1 @@
-from .map import Map
+from .display import Display

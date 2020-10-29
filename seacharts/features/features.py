@@ -3,7 +3,7 @@ from abc import ABC
 
 import numpy as np
 
-from files import Shapefile
+from seacharts.files import Shapefile
 from .shapes import Area, Position
 
 

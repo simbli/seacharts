@@ -11,7 +11,7 @@ from cartopy.feature import ShapelyFeature
 from .colors import color, colorbar
 
 
-class Map:
+class Display:
     fps = 24
     crs = UTM(33)
     grid_size = (1, 12)

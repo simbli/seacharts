@@ -1,8 +1,8 @@
 from typing import Sequence, Union
 
-from files import NorwegianCharts
-from seacharts.display import Map
+from seacharts.display import Display
 from seacharts.features import Seabed, Land, Shore, Ship
+from seacharts.files import NorwegianCharts
 
 
 class ENC:
@@ -63,8 +63,8 @@ class ENC:
         self.bounding_box = *self.origin, *tr_corner
         self.ships = [Ship()]
         self.load_environment_shapes(new_data)
-        self.display = Map(self.ships, self.environment,
-                           self.bounding_box, self.depths)
+        self.display = Display(self.ships, self.environment,
+                               self.bounding_box, self.depths)
 
     def __getitem__(self, item):
         return self.environment[item]
