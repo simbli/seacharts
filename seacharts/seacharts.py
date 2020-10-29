@@ -1,7 +1,8 @@
+from multiprocessing import Process
 from typing import Sequence, Union
 
 from seacharts.display import Display
-from seacharts.features import Seabed, Land, Shore, Ship
+from seacharts.features import Seabed, Land, Shore
 from seacharts.files import NorwegianCharts
 
 
@@ -14,20 +15,20 @@ class ENC:
     Polygons ignoring all inner holes.
 
     :param origin: tuple(easting, northing) coordinates
-    :param window_size: tuple(width, height) of the window size
+    :param extent: tuple(width, height) of the area extent
     :param region: str or Sequence[str] of Norwegian regions
     :param depths: Sequence of integer depth bins for features
     :param new_data: bool indicating if new data should be parsed
     """
     environment = {f.__name__.lower(): f() for f in (Seabed, Land, Shore)}
     default_depths = [0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500]
-    default_window_size = (3000, 2000)
-    default_origin = (42600, 6956400)
     default_region = 'Møre og Romsdal'
+    default_origin = (42600, 6956400)
+    default_extent = (3000, 2000)
 
     def __init__(self,
                  origin: tuple = default_origin,
-                 window_size: tuple = default_window_size,
+                 extent: tuple = default_extent,
                  region: Union[str, Sequence] = default_region,
                  depths: Sequence = None,
                  new_data: bool = False):
@@ -38,8 +39,8 @@ class ENC:
             raise TypeError(
                 "ENC: Origin should be a tuple of size two"
             )
-        if isinstance(window_size, tuple) and len(window_size) == 2:
-            self.window_size = window_size
+        if isinstance(extent, tuple) and len(extent) == 2:
+            self.extent = extent
         else:
             raise TypeError(
                 "ENC: Window size should be a tuple of size two"
@@ -59,12 +60,9 @@ class ENC:
             raise TypeError(
                 "ENC: Depth bins should be a sequence of numbers"
             )
-        tr_corner = (i + j for i, j in zip(self.origin, self.window_size))
+        tr_corner = (i + j for i, j in zip(self.origin, self.extent))
         self.bounding_box = *self.origin, *tr_corner
-        self.ships = [Ship()]
         self.load_environment_shapes(new_data)
-        self.display = Display(self.ships, self.environment,
-                               self.bounding_box, self.depths)
 
     def __getitem__(self, item):
         return self.environment[item]
@@ -105,16 +103,9 @@ class ENC:
             print(f"  Feature layer extracted: {feature.name}")
         print("External data processing complete\n")
 
-    def simulate_test_ship(self):
-        print("Simulating test ship...")
-        for j in range(100):
-            self.display.pause()
-            for ship in self.ships:
-                ship.update_position(self.display.fps)
-            self.display.update(self.ships)
-            self.display.save_frame(j)
-        self.display.close()
-        self.display.save_simulation()
+    def save_current_user_settings(self):
+        pass
 
-    def show(self):
-        self.display.show()
+    @staticmethod
+    def run_test_ship_simulation():
+        Process(target=Display).start()

@@ -66,10 +66,11 @@ shapefiles:
 from seacharts import ENC
 
 origin = (38100, 6948700)     # easting/northing (UTM zone 33N)
-window_size = (20000, 16000)  # w, h (east, north) distance in meters
+extent = (20000, 16000)       # w, h (east, north) distance in meters
 region = 'Møre og Romsdal'    # name for a Norwegian county region
 
-enc = ENC(origin, window_size, region, new_data=True)
+if __name__ == '__main__':
+    enc = ENC(origin, extent, region, new_data=True)
 
 ```
 Note that `region` may be one or several Norwegian county names
@@ -79,34 +80,35 @@ sea `depths` bins may be passed to `ENC` as an additional keyword argument.
 
 ### Accessing features
 After the data is parsed into shapefiles and read into memory as shown above, 
-the [Shapely](https://pypi.org/project/Shapely/) -based features may be 
-accessed and displayed through the following ENC attributes:
+[Shapely](https://pypi.org/project/Shapely/) features may be accessed and 
+displayed through the following ENC attributes:
 ```python
 from seacharts import ENC
 
 origin = (42600, 6956400)     # easting/northing (UTM zone 33N)
-window_size = (3000, 2000)    # w, h (east, north) distance in meters
+extent = (3000, 2000)         # w, h (east, north) distance in meters
 
-enc = ENC(origin, window_size)
+if __name__ == '__main__':
+    enc = ENC(origin, extent)
 
-for feature in (enc.seabed, enc.land):
-    polygon = feature[10]
-    print("Feature name:                    ", feature.name)
-    print("Feature shape:                   ", feature.shape.type)
-    print("Area of the feature polygon:     ", int(polygon.area))
-    print("Number of feature polygon points:", len(polygon.exterior.coords))
-    print("Minimum sea depth inside feature:", int(polygon.depth))
-    print()
+    for feature in (enc.seabed, enc.land):
+        polygon = feature[10]
+        print("Feature name:                    ", feature.name)
+        print("Feature shape:                   ", feature.shape.type)
+        print("Area of the feature polygon:     ", int(polygon.area))
+        print("Number of feature polygon points:", len(polygon.coords))
+        print("Minimum sea depth inside feature:", int(polygon.depth))
+        print()
 
-enc.simulate_test_ship()
+    enc.run_test_ship_simulation()
 
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 
 desired regional feature data has already been unpacked and processed into 
 shapefiles in a previous call. Available map features may be identified by the 
 `enc.supported_environment` attribute. Additionally, the `origin` and 
-`window_size` arguments here may be different from the one used to extract 
-the external ENC data, allowing for loading of more specific (smaller) areas 
+`extent` arguments here may be different from the one used to extract the 
+external ENC data, allowing for loading of more specific (smaller) areas 
 of interest into memory during runtime. The result GIF of the test ship
 simulation is saved as `reports/simulation.gif`.
 
