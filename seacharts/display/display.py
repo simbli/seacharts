@@ -1,54 +1,44 @@
 import glob
-import os
-import pathlib
 
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from PIL import Image
-from cartopy.crs import UTM
 from cartopy.feature import ShapelyFeature
 
-from seacharts.features import Seabed, Land, Shore, Ship
+import seacharts.settings as config
 from .colors import color, colorbar
 
 
 class Display:
-    fps = 24
-    crs = UTM(33)
-    grid_size = (1, 12)
-    window_size = (12, 7)
-    path_reports = 'reports'
-    path_frames = path_reports, 'frames'
-    environment = {f.__name__.lower(): f() for f in (Seabed, Land, Shore)}
-    default_depths = [0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500]
-    default_region = 'Møre og Romsdal'
-    default_origin = (42600, 6956400)
-    default_extent = (3000, 2000)
-
-    tr_corner = (i + j for i, j in zip(default_origin, default_extent))
-    bounding_box = *default_origin, *tr_corner
-
     def __init__(self):
-        self.figure = plt.figure('Map', figsize=self.window_size)
-        self.grid = self.figure.add_gridspec(*self.grid_size)
-        self.colorbar = self.format_colorbar(self.default_depths)
+        self.scope = config.get_user_scope()
+        self.environment = {f.__name__: f() for f in self.scope.features}
+        self.figure = plt.figure('Map', figsize=config.figure_size)
+        self.grid = self.figure.add_gridspec(*config.grid_size)
+        self.colorbar = self.format_colorbar(self.scope.depths)
         self.topography = self.format_topography()
-        self.ships = [Ship()]
+        self.ships = [config.Ship()]
         self.ship_patches = list(self.create_ship_patches())
         for feature in self.environment.values():
-            feature.load(self.bounding_box)
+            feature.load(self.scope.bounding_box)
         self.draw(self.environment)
         self.background = None
         self.figure.canvas.draw()
         self.figure.canvas.mpl_connect("draw_event", self.on_draw)
+        self.figure.canvas.mpl_connect('close_event', self.close)
         plt.ion()
         self.simulate_test_ship()
 
+    @property
+    def is_active(self):
+        return plt.fignum_exists(self.figure.number)
+
     def format_topography(self):
-        axes = self.figure.add_subplot(self.grid[:, :-1], projection=self.crs)
-        bb = tuple(self.bounding_box[i] for i in (0, 2, 1, 3))
-        axes.set_extent(bb, crs=self.crs)
-        axes.set_facecolor(color('seabed'))
+        axes = self.figure.add_subplot(self.grid[:, :-1],
+                                       projection=config.crs)
+        x_min, y_min, x_max, y_max = self.scope.bounding_box
+        axes.set_extent((x_min, x_max, y_min, y_max), crs=config.crs)
+        axes.set_facecolor(color('Seabed'))
         return axes
 
     def format_colorbar(self, depths):
@@ -66,52 +56,54 @@ class Display:
         for ship, patch in zip(self.ships, self.ship_patches):
             patch.set_xy(ship.hull)
             self.figure.draw_artist(patch)
-        self.figure.canvas.blit()
+            if self.is_active:
+                self.figure.canvas.blit()
 
     def create_ship_patches(self):
         for ship in self.ships:
-            clr = color(ship.label)
-            patch = patches.Polygon(ship.hull, self.crs, fc=clr, ec=clr)
+            clr = color(ship.name)
+            patch = patches.Polygon(ship.hull, config.crs, fc=clr, ec=clr)
             self.topography.add_patch(patch)
             yield patch
 
     def draw(self, environment, lines=False):
         for feature in environment.values():
             if feature.name != 'Seabed':
-                face = color(feature.label)
+                face = color(feature.name)
                 edge = 'k' if lines else face
-                shape = ShapelyFeature(feature.shapely, self.crs,
+                shape = ShapelyFeature(feature.shapely, config.crs,
                                        facecolor=face, edgecolor=edge)
                 self.topography.add_feature(shape)
 
     def simulate_test_ship(self):
         print("Simulating test ship...")
         for j in range(100):
+            if not self.is_active:
+                self.close()
+                return
             self.pause()
             for ship in self.ships:
-                ship.update_position(self.fps)
+                ship.update_position(config.fps)
             self.update()
             self.save_frame(j)
         self.close()
         self.save_simulation()
 
     def save(self, name='map'):
-        pathlib.Path(self.path_reports).mkdir(parents=True, exist_ok=True)
-        self.figure.savefig(os.path.join(self.path_reports, name + '.png'))
+        self.figure.savefig(config.path_frame_files.replace('*', name))
 
     def save_frame(self, i):
         name = ''.join(['0' for _ in range(3 - len(str(i)))]) + str(i)
-        path = os.path.join(*self.path_frames, 'frame_' + name + '.png')
-        pathlib.Path(*self.path_frames).mkdir(parents=True, exist_ok=True)
+        path = config.path_frame_files.replace('*', name)
         self.figure.savefig(path)
 
-    def save_simulation(self):
+    @staticmethod
+    def save_simulation():
         print("Creating simulation GIF...")
-        fp_in = os.path.join(*self.path_frames, 'frame_*.png')
-        fp_out = os.path.join(self.path_reports, 'simulation.gif')
-        first_frame, *frames = [Image.open(f) for f in glob.glob(fp_in)]
-        first_frame.save(fp=fp_out, format='GIF', append_images=frames,
-                         save_all=True, duration=1000 / self.fps, loop=0)
+        fp_in, fp_out = config.path_frame_files, config.path_simulation
+        frame1, *frames = [Image.open(f) for f in glob.glob(fp_in)]
+        frame1.save(fp=fp_out, format='GIF', append_images=frames,
+                    save_all=True, duration=1000 / config.fps, loop=0)
         print("Done.")
 
     def show(self):

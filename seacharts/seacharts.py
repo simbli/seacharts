@@ -1,9 +1,8 @@
 from multiprocessing import Process
-from typing import Sequence, Union
+from typing import Optional
 
+import seacharts.settings as config
 from seacharts.display import Display
-from seacharts.features import Seabed, Land, Shore
-from seacharts.files import NorwegianCharts
 
 
 class ENC:
@@ -17,55 +16,22 @@ class ENC:
     :param origin: tuple(easting, northing) coordinates
     :param extent: tuple(width, height) of the area extent
     :param region: str or Sequence[str] of Norwegian regions
-    :param depths: Sequence of integer depth bins for features
+    :param depths: Sequence[int] of depth bins for features
+    :param features: Sequence[str] of features to load or show
     :param new_data: bool indicating if new data should be parsed
     """
-    environment = {f.__name__.lower(): f() for f in (Seabed, Land, Shore)}
-    default_depths = [0, 3, 6, 10, 20, 50, 100, 200, 300, 400, 500]
-    default_region = 'Møre og Romsdal'
-    default_origin = (42600, 6956400)
-    default_extent = (3000, 2000)
 
     def __init__(self,
-                 origin: tuple = default_origin,
-                 extent: tuple = default_extent,
-                 region: Union[str, Sequence] = default_region,
-                 depths: Sequence = None,
-                 new_data: bool = False):
-
-        if isinstance(origin, tuple) and len(origin) == 2:
-            self.origin = origin
-        else:
-            raise TypeError(
-                "ENC: Origin should be a tuple of size two"
-            )
-        if isinstance(extent, tuple) and len(extent) == 2:
-            self.extent = extent
-        else:
-            raise TypeError(
-                "ENC: Window size should be a tuple of size two"
-            )
-        if isinstance(region, str) or isinstance(region, Sequence):
-            self.region = region
-        else:
-            raise TypeError(
-                f"ENC: Invalid region format for '{region}', should be "
-                f"string or sequence of strings"
-            )
-        if depths is None:
-            self.depths = self.default_depths
-        elif not isinstance(depths, str) and isinstance(depths, Sequence):
-            self.depths = list(int(i) for i in depths)
-        else:
-            raise TypeError(
-                "ENC: Depth bins should be a sequence of numbers"
-            )
-        tr_corner = (i + j for i, j in zip(self.origin, self.extent))
-        self.bounding_box = *self.origin, *tr_corner
+                 *args: Optional,
+                 new_data: Optional[bool] = False,
+                 **kwargs: Optional):
+        config.write_user_input_to_config_file(args, kwargs)
+        self.scope = config.get_user_scope()
+        self.environment = {f.__name__: f() for f in self.scope.features}
         self.load_environment_shapes(new_data)
 
     def __getitem__(self, item):
-        return self.environment[item]
+        return self.environment[item.capitalize()]
 
     def __getattr__(self, item):
         return self.__getitem__(item)
@@ -84,11 +50,11 @@ class ENC:
         if self.shapefiles_not_found() or new_data:
             self.process_external_data()
         for feature in self.environment.values():
-            feature.load(self.bounding_box)
+            feature.load(self.scope.bounding_box)
 
     def shapefiles_not_found(self):
-        for feature in self.environment.values():
-            if not feature.shapefile.exists:
+        for feature in self.environment.keys():
+            if not config.shapefile_exists(feature):
                 print(f"ENC: Missing shapefile for feature layer "
                       f"'{feature.name}', initializing new parsing of "
                       f"downloaded ENC data")
@@ -96,9 +62,9 @@ class ENC:
 
     def process_external_data(self):
         print("ENC: Processing features from region...")
-        fgdb = NorwegianCharts(self.region)
         for feature in self.environment.values():
-            feature.load(self.bounding_box, fgdb)
+            external_path = config.get_gdb_zip_paths(self.scope.region)
+            feature.load(self.scope.bounding_box, external_path)
             feature.write_to_shapefile()
             print(f"  Feature layer extracted: {feature.name}")
         print("External data processing complete\n")

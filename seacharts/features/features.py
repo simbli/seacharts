@@ -1,15 +1,16 @@
 import math
 from abc import ABC
 
+import fiona
 import numpy as np
 
-from seacharts.files import Shapefile
+import seacharts.settings as config
 from .shapes import Area, Position
 
 
 class Feature(ABC):
     def __init__(self, shapes=()):
-        self.shapefile = Shapefile(self.label, self.shape.type)
+        self._file_path = config.shapefile_path(self.name)
         self._shapes = shapes
 
     def __getitem__(self, item):
@@ -18,10 +19,6 @@ class Feature(ABC):
     @property
     def name(self):
         return self.__class__.__name__
-
-    @property
-    def label(self):
-        return self.name.lower()
 
     @property
     def shapely(self):
@@ -56,10 +53,10 @@ class Feature(ABC):
         self._shapes = tuple(self.read_shapes(bbox, external))
 
     def read_shapes(self, bbox, external):
-        paths = external.file_paths if external else [None]
+        paths = external if external else [None]
         layer = self.layer_label if external else None
         for path in paths:
-            records = self.shapefile.read(bbox, path, layer)
+            records = self.read_shapefile(bbox, path, layer)
             for record in records:
                 yield self.record_to_shape(record, external)
 
@@ -71,8 +68,26 @@ class Feature(ABC):
             coords = coords[0][0] if external_label else coords[0]
         return self.shape(coords, depth)
 
+    def read_shapefile(self, bbox, path=None, layer=None):
+        if path is None:
+            path = self._file_path
+        kwargs = {'layer': layer} if layer else {}
+        with fiona.open(path, 'r', **kwargs) as source:
+            for record in source.filter(bbox=bbox):
+                yield record
+
     def write_to_shapefile(self):
-        self.shapefile.write(self._shapes)
+        writer = fiona.open(
+            self._file_path, 'w',
+            schema=self.record_structure('float', self.shape.type),
+            driver='ESRI Shapefile', crs={'init': 'epsg:25833'})
+        with writer as sink:
+            for shape in self._shapes:
+                sink.write(self.record_structure(shape.depth, shape.mapping))
+
+    @staticmethod
+    def record_structure(depth, geometry):
+        return {'properties': {'depth': depth}, 'geometry': geometry}
 
 
 class Seabed(Feature):
