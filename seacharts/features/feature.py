@@ -1,4 +1,3 @@
-import math
 from abc import ABC
 
 import fiona
@@ -129,34 +128,18 @@ class Ship(Feature):
     layer_label = None
     depth_label = None
     default_scale = 1.0
-    default_heading = 103.0
-    default_center = (44100, 6957400)
     ship_dimensions = (13.6, 74.7)
 
-    def __init__(self, center=None, heading=None, scale=None):
-        if center is None:
-            self.center = Position(self.default_center)
-        elif isinstance(center, Position):
-            self.center = center
-        else:
-            raise TypeError(
-                f"Ship center should be a {Position} object"
-            )
-        if heading is None:
-            self.heading = self.default_heading
-        elif isinstance(heading, int) or isinstance(heading, float):
-            self.heading = heading
-        else:
-            raise TypeError(
-                f"Ship heading should be a number in degrees"
-            )
+    def __init__(self, x, y, heading, scale=None):
+        self.center = Position((x, y))
+        self.heading = heading
         if scale is None:
             self.scale = self.default_scale
-        elif isinstance(scale, int) or isinstance(scale, float):
+        elif isinstance(scale, float):
             self.scale = scale
         else:
             raise TypeError(
-                f"Ship scale should be a number"
+                f"Ship scale should be a float"
             )
         self._shapes = self.create_hull()
         super().__init__(self._shapes)
@@ -179,11 +162,3 @@ class Ship(Feature):
         points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         angle, origin = -self.heading, self.center.coords[0]
         return (Area(points).rotate(angle, origin),)
-
-    def update_position(self, fps, ship_velocity=7, speedup=10):
-        step = ship_velocity * speedup / fps
-        x, y = self.center.coords[0]
-        x += math.sin(self.heading * math.pi / 180) * step
-        y += math.cos(self.heading * math.pi / 180) * step
-        self.center = Position((x, y))
-        self._shapes = self.create_hull()

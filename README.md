@@ -100,7 +100,7 @@ if __name__ == '__main__':
         print("Minimum sea depth inside feature:", int(polygon.depth))
         print()
 
-    enc.run_test_ship_simulation()
+    enc.visualize_environment()
 
 ```
 Note that the `new_data` argument may be omitted or set to `False` if the 

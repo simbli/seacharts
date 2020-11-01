@@ -17,12 +17,11 @@ class Display:
         self.grid = self.figure.add_gridspec(*config.grid_size)
         self.colorbar = self.format_colorbar(self.scope.depths)
         self.topography = self.format_topography()
-        self.background = None
+        self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
+        self.ships = []
         self.draw_environment()
         self.init_event_manager()
-        self.ships = [config.Ship()]
-        self.ship_patches = list(self.create_ship_patches())
-        self.simulate_test_ship()
+        self.init_visualization_loop()
 
     @property
     def is_active(self):
@@ -44,7 +43,6 @@ class Display:
     def init_event_manager(self):
         self.figure.canvas.draw()
         self.figure.canvas.mpl_connect('key_press_event', self.handle_key)
-        self.figure.canvas.mpl_connect('draw_event', self.on_draw)
         self.figure.canvas.mpl_connect('close_event', self.close)
         plt.ion()
 
@@ -52,25 +50,25 @@ class Display:
         if event.key == 'escape':
             self.close()
 
-    def on_draw(self, _):
-        self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
-        for patch in self.ship_patches:
-            self.figure.draw_artist(patch)
-
-    def update(self):
-        self.figure.canvas.restore_region(self.background)
-        for ship, patch in zip(self.ships, self.ship_patches):
-            patch.set_xy(ship.hull)
-            self.figure.draw_artist(patch)
+    def update_plot(self):
+        poses = config.read_ship_poses()
+        if poses is not None:
+            self.figure.canvas.restore_region(self.background)
+            for i in range(max(len(poses), len(self.ships))):
+                if i >= len(self.ships):
+                    new_ship = poses[i]
+                    clr = color(new_ship.name)
+                    patch = patches.Polygon(new_ship.hull, config.crs,
+                                            fc=clr, ec=clr)
+                    self.topography.add_patch(patch)
+                    self.ships.append(patch)
+                if i < len(poses):
+                    self.ships[i].set_xy(poses[i].hull)
+                    self.ships[i].set_visible(True)
+                else:
+                    self.ships[i].set_visible(False)
             if self.is_active:
-                self.figure.canvas.blit()
-
-    def create_ship_patches(self):
-        for ship in self.ships:
-            clr = color(ship.name)
-            patch = patches.Polygon(ship.hull, config.crs, fc=clr, ec=clr)
-            self.topography.add_patch(patch)
-            yield patch
+                self.figure.canvas.draw()
 
     def draw_environment(self, lines=False):
         for feature in self.environment:
@@ -82,19 +80,16 @@ class Display:
                                        facecolor=face, edgecolor=edge)
                 self.topography.add_feature(shape)
 
-    def simulate_test_ship(self):
-        print("Simulating test ship...")
-        for j in range(100):
+    def init_visualization_loop(self):
+        count = 0
+        while True:
             if not self.is_active:
                 self.close()
                 return
             self.pause()
-            for ship in self.ships:
-                ship.update_position(config.fps)
-            self.update()
-            self.save_frame(j)
-        self.close()
-        self.save_simulation()
+            self.update_plot()
+            self.save_frame(count)
+            count += 1
 
     def save(self, name='map'):
         self.figure.savefig(config.path_frame_files.replace('*', name))

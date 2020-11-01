@@ -70,5 +70,5 @@ class ENC:
         pass
 
     @staticmethod
-    def run_test_ship_simulation():
+    def visualize_environment():
         Process(target=Display).start()

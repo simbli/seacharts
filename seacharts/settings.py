@@ -1,4 +1,5 @@
 import configparser
+import csv
 import os
 import pathlib
 from dataclasses import dataclass
@@ -175,6 +176,7 @@ def shapefile_path(name):
 # Paths
 
 path_config = os.path.join('data', 'settings', 'config.ini')
+path_ships = os.path.join('data', 'ships.csv')
 _paths = _read_config_section('PATHS')
 
 path_data = os.path.join(*_paths['data'])
@@ -258,6 +260,17 @@ def get_user_scope():
     environment = Environment(**{f.__name__.lower(): f() for f in env})
 
     return Scope(origin, extent, region, depths, bounding_box, environment)
+
+
+def read_ship_poses():
+    try:
+        with open(path_ships) as csv_file:
+            reader = csv.reader(csv_file, delimiter=',')
+            _ = next(reader)
+            rows = tuple(reader)
+        return [Ship(*(float(v) for v in row)) for row in rows]
+    except PermissionError:
+        return None
 
 
 @dataclass
