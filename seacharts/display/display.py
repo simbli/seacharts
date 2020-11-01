@@ -12,21 +12,16 @@ from .colors import color, colorbar
 class Display:
     def __init__(self):
         self.scope = config.get_user_scope()
-        self.environment = {f.__name__: f() for f in self.scope.features}
+        self.environment = self.scope.environment
         self.figure = plt.figure('Map', figsize=config.figure_size)
         self.grid = self.figure.add_gridspec(*config.grid_size)
         self.colorbar = self.format_colorbar(self.scope.depths)
         self.topography = self.format_topography()
+        self.background = None
+        self.draw_environment()
+        self.init_event_manager()
         self.ships = [config.Ship()]
         self.ship_patches = list(self.create_ship_patches())
-        for feature in self.environment.values():
-            feature.load(self.scope.bounding_box)
-        self.draw(self.environment)
-        self.background = None
-        self.figure.canvas.draw()
-        self.figure.canvas.mpl_connect("draw_event", self.on_draw)
-        self.figure.canvas.mpl_connect('close_event', self.close)
-        plt.ion()
         self.simulate_test_ship()
 
     @property
@@ -45,6 +40,17 @@ class Display:
         axes = self.figure.add_subplot(self.grid[:, -1])
         colorbar(axes, depths)
         return axes
+
+    def init_event_manager(self):
+        self.figure.canvas.draw()
+        self.figure.canvas.mpl_connect('key_press_event', self.handle_key)
+        self.figure.canvas.mpl_connect('draw_event', self.on_draw)
+        self.figure.canvas.mpl_connect('close_event', self.close)
+        plt.ion()
+
+    def handle_key(self, event):
+        if event.key == 'escape':
+            self.close()
 
     def on_draw(self, _):
         self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
@@ -66,9 +72,10 @@ class Display:
             self.topography.add_patch(patch)
             yield patch
 
-    def draw(self, environment, lines=False):
-        for feature in environment.values():
+    def draw_environment(self, lines=False):
+        for feature in self.environment:
             if feature.name != 'Seabed':
+                feature.load(self.scope.bounding_box)
                 face = color(feature.name)
                 edge = 'k' if lines else face
                 shape = ShapelyFeature(feature.shapely, config.crs,

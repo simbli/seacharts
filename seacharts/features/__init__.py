@@ -1,1 +1,1 @@
-from .features import Seabed, Land, Shore, Rocks, Shallows, Ship
+from .feature import Seabed, Land, Shore, Rocks, Shallows, Ship

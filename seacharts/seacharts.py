@@ -27,14 +27,11 @@ class ENC:
                  **kwargs: Optional):
         config.write_user_input_to_config_file(args, kwargs)
         self.scope = config.get_user_scope()
-        self.environment = {f.__name__: f() for f in self.scope.features}
+        self.environment = self.scope.environment
         self.load_environment_shapes(new_data)
 
-    def __getitem__(self, item):
-        return self.environment[item.capitalize()]
-
     def __getattr__(self, item):
-        return self.__getitem__(item)
+        return self.environment.__getattr__(item)
 
     @property
     def supported_projection(self):
@@ -43,18 +40,18 @@ class ENC:
     @property
     def supported_environment(self):
         s = "Supported environment variables: "
-        s += ', '.join(feature.lower() for feature in self.environment)
+        s += ', '.join(config.supported_environment)
         return s + '\n'
 
     def load_environment_shapes(self, new_data):
         if self.shapefiles_not_found() or new_data:
             self.process_external_data()
-        for feature in self.environment.values():
+        for feature in self.environment:
             feature.load(self.scope.bounding_box)
 
     def shapefiles_not_found(self):
-        for feature in self.environment.keys():
-            if not config.shapefile_exists(feature):
+        for feature in self.environment:
+            if not config.shapefile_exists(feature.name):
                 print(f"ENC: Missing shapefile for feature layer "
                       f"'{feature.name}', initializing new parsing of "
                       f"downloaded ENC data")
@@ -62,7 +59,7 @@ class ENC:
 
     def process_external_data(self):
         print("ENC: Processing features from region...")
-        for feature in self.environment.values():
+        for feature in self.environment:
             external_path = config.get_gdb_zip_paths(self.scope.region)
             feature.load(self.scope.bounding_box, external_path)
             feature.write_to_shapefile()

@@ -6,13 +6,21 @@ from typing import Sequence, Union
 
 import cartopy.crs
 
-import seacharts.features
+import seacharts.features as sf
 
+_environment_features = (
+    sf.Seabed,
+    sf.Land,
+    sf.Shore,
+    sf.Shallows,
+    sf.Rocks
+)
+_entity_features = (
+    sf.Ship,
+)
+supported_environment = [_f.__name__ for _f in _environment_features]
 supported_crs = ['UTM']
 supported_utm_zones = [33]
-supported_environment = [
-    'Seabed', 'Land', 'Shore', 'Shallows', 'Rocks'
-]
 supported_regions = [
     'Agder', 'Hele landet', 'Møre og Romsdal', 'Nordland', 'Nordsjøen',
     'Norge', 'Oslo', 'Rogaland', 'Svalbard', 'Troms og Finnmark', 'Trøndelag',
@@ -204,43 +212,41 @@ elif int(_crs_zone) not in supported_utm_zones:
     )
 crs = getattr(cartopy.crs, _crs_base)(int(_crs_zone))
 
-Ship = getattr(seacharts.features, 'Ship')
-
 ship_scale = float(_display['ship_scale'][0])
 
 grid_size = tuple(int(_i) for _i in _display['grid_size'])
 
 figure_size = tuple(int(_i) for _i in _display['figure_size'])
 
+Ship = _entity_features[0]
+
 
 # User
 
 def get_user_scope():
-    _user = _read_config_section('USER')
+    user = _read_config_section('USER')
 
-    _f_names = _user['features']
-    for _feature in _f_names:
-        if _feature not in supported_environment:
+    feature_names = user['features']
+    for feature in feature_names:
+        if feature not in supported_environment:
             raise ValueError(
-                f"Feature '{_feature}' not supported, "
+                f"Feature '{feature}' not supported, "
                 f"possible candidates are: {supported_environment}"
             )
-    features = tuple(getattr(seacharts.features, _f) for _f in _f_names)
-
-    depths = tuple(float(_d) for _d in _user['depths'])
-    if any(_d < 0 for _d in depths):
+    depths = tuple(float(d) for d in user['depths'])
+    if any(d < 0 for d in depths):
         raise ValueError(
             f"Depth bins must be non-negative"
         )
 
-    origin = tuple(int(_i) for _i in _user['origin'])
+    origin = tuple(int(i) for i in user['origin'])
 
-    extent = tuple(int(_i) for _i in _user['extent'])
+    extent = tuple(int(i) for i in user['extent'])
 
-    _upper_right_corner = (_i + _j for _i, _j in zip(origin, extent))
-    bounding_box = (*origin, *_upper_right_corner)
+    upper_right_corner = (i + j for i, j in zip(origin, extent))
+    bounding_box = (*origin, *upper_right_corner)
 
-    region = _user['region']
+    region = user['region']
     for sector in region:
         if sector not in supported_regions:
             raise ValueError(
@@ -248,7 +254,28 @@ def get_user_scope():
                 f"possible candidates are: {supported_regions}"
             )
 
-    return Scope(origin, extent, region, depths, features, bounding_box)
+    env = (f for f in _environment_features if f.__name__ in feature_names)
+    environment = Environment(**{f.__name__.lower(): f() for f in env})
+
+    return Scope(origin, extent, region, depths, bounding_box, environment)
+
+
+@dataclass
+class Environment:
+    seabed: sf.Seabed = None
+    land: sf.Land = None
+    shore: sf.Shore = None
+    shallows: sf.Shallows = None
+    rocks: sf.Rocks = None
+
+    def __iter__(self):
+        for key in self.__dict__:
+            attribute = getattr(self, key)
+            if attribute is not None:
+                yield attribute
+
+    def __getattr__(self, item):
+        return getattr(self, item)
 
 
 @dataclass
@@ -257,5 +284,5 @@ class Scope:
     extent: tuple
     region: Union[str, Sequence[str]]
     depths: tuple
-    features: Sequence[str]
     bounding_box: tuple
+    environment: Environment
