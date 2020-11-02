@@ -9,7 +9,7 @@ from seacharts.features.shapes import Area, Position
 class Feature(ShapelyFeature):
     crs = UTM(33)
 
-    def __init__(self, *args, geometries=(), **kwargs):
+    def __init__(self, geometries=(), **kwargs):
         self.color = config.color(self.name)
         self._file_path = config.shapefile_path(self.name)
         super().__init__(geometries, self.crs, color=self.color, **kwargs)
@@ -148,7 +148,7 @@ class Ship(Feature):
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
         points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         angle, origin = -self.heading, self.center.coords[0]
-        return (Area(points).rotate(angle, origin),)
+        return tuple(Area(points).rotate(angle, origin), )
 
     def update_pose(self, new_ship):
         self.center = new_ship.center
