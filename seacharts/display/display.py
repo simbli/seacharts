@@ -1,8 +1,5 @@
-import glob
-
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-from PIL import Image
 from cartopy.feature import ShapelyFeature
 
 import seacharts.settings as config
@@ -95,18 +92,9 @@ class Display:
         self.figure.savefig(config.path_frame_files.replace('*', name))
 
     def save_frame(self, i):
-        name = ''.join(['0' for _ in range(3 - len(str(i)))]) + str(i)
+        name = ''.join(['0' for _ in range(5 - len(str(i)))]) + str(i)
         path = config.path_frame_files.replace('*', name)
         self.figure.savefig(path)
-
-    @staticmethod
-    def save_simulation():
-        print("Creating simulation GIF...")
-        fp_in, fp_out = config.path_frame_files, config.path_simulation
-        frame1, *frames = [Image.open(f) for f in glob.glob(fp_in)]
-        frame1.save(fp=fp_out, format='GIF', append_images=frames,
-                    save_all=True, duration=1000 / config.fps, loop=0)
-        print("Done.")
 
     def show(self):
         self.save()
