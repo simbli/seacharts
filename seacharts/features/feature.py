@@ -1,40 +1,28 @@
 from abc import ABC
 
 import fiona
-import numpy as np
+from cartopy.crs import UTM
+from cartopy.feature import ShapelyFeature
 
 import seacharts.settings as config
 from .shapes import Area, Position
 
 
-class Feature(ABC):
-    def __init__(self, shapes=()):
+class Feature(ABC, ShapelyFeature):
+    crs = UTM(33)
+
+    def __init__(self, *args, geometries=(), **kwargs):
+        self.color = config.color(self.name)
         self._file_path = config.shapefile_path(self.name)
-        self._shapes = shapes
+        super().__init__(geometries, self.crs, *args, facecolor=self.color,
+                         edgecolor=self.color, **kwargs)
 
     def __getitem__(self, item):
-        return self._shapes[item]
+        return self._geoms[item]
 
     @property
     def name(self):
         return self.__class__.__name__
-
-    @property
-    def shapely(self):
-        return self._shapes
-
-    @property
-    def coords(self):
-        if not self._shapes:
-            raise AttributeError(f"Feature {self.name} has no shapes")
-        elif len(self._shapes) > 1:
-            raise AttributeError(f"Feature {self.name} has several shapes")
-        else:
-            return self._shapes[0].coords
-
-    @property
-    def xy(self):
-        return np.array(self.coords)
 
     @property
     def shape(self):
@@ -49,7 +37,7 @@ class Feature(ABC):
         raise NotImplementedError
 
     def load(self, bbox, external=None):
-        self._shapes = tuple(self.read_shapes(bbox, external))
+        self._geoms = tuple(self.read_shapes(bbox, external))
 
     def read_shapes(self, bbox, external):
         paths = external if external else [None]
@@ -81,7 +69,7 @@ class Feature(ABC):
             schema=self.record_structure('float', self.shape.type),
             driver='ESRI Shapefile', crs={'init': 'epsg:25833'})
         with writer as sink:
-            for shape in self._shapes:
+            for shape in self._geoms:
                 sink.write(self.record_structure(shape.depth, shape.mapping))
 
     @staticmethod
@@ -141,8 +129,7 @@ class Ship(Feature):
             raise TypeError(
                 f"Ship scale should be a float"
             )
-        self._shapes = self.create_hull()
-        super().__init__(self._shapes)
+        super().__init__(geometries=self.create_hull())
 
     @property
     def coords(self):
@@ -150,7 +137,7 @@ class Ship(Feature):
 
     @property
     def hull(self):
-        return self._shapes[0].coords
+        return self._geoms
 
     def create_hull(self):
         x, y = self.center.coords[0]
@@ -162,3 +149,7 @@ class Ship(Feature):
         points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         angle, origin = -self.heading, self.center.coords[0]
         return (Area(points).rotate(angle, origin),)
+
+    def update_pose(self, new_ship):
+        self.center = new_ship.center
+        self._geoms = new_ship.hull

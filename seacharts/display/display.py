@@ -1,9 +1,6 @@
-import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-from cartopy.feature import ShapelyFeature
 
 import seacharts.settings as config
-from .colors import color, colorbar
 
 
 class Display:
@@ -16,6 +13,7 @@ class Display:
         self.topography = self.format_topography()
         self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
         self.ships = []
+        self.artists = []
         self.draw_environment()
         self.init_event_manager()
         self.init_visualization_loop()
@@ -25,16 +23,15 @@ class Display:
         return plt.fignum_exists(self.figure.number)
 
     def format_topography(self):
-        axes = self.figure.add_subplot(self.grid[:, :-1],
-                                       projection=config.crs)
+        ax = self.figure.add_subplot(self.grid[:, :-1], projection=config.crs)
         x_min, y_min, x_max, y_max = self.scope.bounding_box
-        axes.set_extent((x_min, x_max, y_min, y_max), crs=config.crs)
-        axes.set_facecolor(color('Seabed'))
-        return axes
+        ax.set_extent((x_min, x_max, y_min, y_max), crs=config.crs)
+        ax.set_facecolor(config.color('Seabed'))
+        return ax
 
     def format_colorbar(self, depths):
         axes = self.figure.add_subplot(self.grid[:, -1])
-        colorbar(axes, depths)
+        config.colorbar(axes, depths)
         return axes
 
     def init_event_manager(self):
@@ -51,31 +48,25 @@ class Display:
         poses = config.read_ship_poses()
         if poses is not None:
             self.figure.canvas.restore_region(self.background)
-            for i in range(max(len(poses), len(self.ships))):
-                if i >= len(self.ships):
-                    new_ship = poses[i]
-                    clr = color(new_ship.name)
-                    patch = patches.Polygon(new_ship.hull, config.crs,
-                                            fc=clr, ec=clr)
-                    self.topography.add_patch(patch)
-                    self.ships.append(patch)
+            for i in range(max(len(poses), len(self.artists))):
                 if i < len(poses):
-                    self.ships[i].set_xy(poses[i].hull)
-                    self.ships[i].set_visible(True)
+                    ship = poses[i]
+                    if i >= len(self.ships):
+                        artist = self.topography.add_feature(ship)
+                        self.artists.append(artist)
+                        self.ships.append(ship)
+                    self.ships[i].update_pose(ship)
+                    self.artists[i].set_visible(True)
                 else:
-                    self.ships[i].set_visible(False)
+                    self.artists[i].set_visible(False)
             if self.is_active:
                 self.figure.canvas.draw()
 
-    def draw_environment(self, lines=False):
+    def draw_environment(self):
         for feature in self.environment:
             if feature.name != 'Seabed':
                 feature.load(self.scope.bounding_box)
-                face = color(feature.name)
-                edge = 'k' if lines else face
-                shape = ShapelyFeature(feature.shapely, config.crs,
-                                       facecolor=face, edgecolor=edge)
-                self.topography.add_feature(shape)
+                self.topography.add_feature(feature)
 
     def init_visualization_loop(self):
         count = 0

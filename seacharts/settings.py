@@ -5,8 +5,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Sequence, Union
 
-import cartopy.crs
-
+import seacharts.display.colors
 import seacharts.features as sf
 
 _environment_features = (
@@ -212,13 +211,17 @@ elif int(_crs_zone) not in supported_utm_zones:
         f"CRS zone '{_crs_zone}' not supported, "
         f"possible candidates are: {supported_utm_zones}"
     )
-crs = getattr(cartopy.crs, _crs_base)(int(_crs_zone))
+crs = _environment_features[0].crs
 
 ship_scale = float(_display['ship_scale'][0])
 
 grid_size = tuple(int(_i) for _i in _display['grid_size'])
 
 figure_size = tuple(int(_i) for _i in _display['figure_size'])
+
+color = seacharts.display.colors.color
+
+colorbar = seacharts.display.colors.colorbar
 
 Ship = _entity_features[0]
 
@@ -268,9 +271,10 @@ def read_ship_poses():
             reader = csv.reader(csv_file, delimiter=',')
             _ = next(reader)
             rows = tuple(reader)
-        return [Ship(*(float(v) for v in row)) for row in rows]
     except PermissionError:
         return None
+    poses = ((float(v) for v in row) for row in rows if row)
+    return [Ship(*pose) for pose in poses]
 
 
 @dataclass
