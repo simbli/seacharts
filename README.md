@@ -47,8 +47,8 @@ Follow the above link to download the `Depth data` (`Sjøkart - Dybdedata`)
 dataset from the [Norwegian Mapping Authority](https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority), 
 by adding it to the Download queue and navigating to the separate 
 [download page](https://kartkatalog.geonorge.no/nedlasting). 
-Choose one or more county areas (e.g. `Møre og Romsdal`), and 
-select the `EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0` 
+Choose one or more county areas (e.g. `Møre og Romsdal`), and select the 
+`EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0` 
 format. Finally, select your appropriate user group and purpose, and click 
 `Download` to obtain the ZIP file(s).
 
@@ -106,13 +106,13 @@ if __name__ == '__main__':
 Note that the `new_data` argument may be omitted or set to `False` if the 
 desired regional feature data has already been unpacked and processed into 
 shapefiles in a previous call. Available map features may be identified by the 
-`enc.supported_environment` attribute. Additionally, the `origin` and 
+`ENC.supported_environment` attribute. Additionally, the `origin` and 
 `extent` arguments here may be different from the one used to extract the 
 external ENC data, allowing for loading of more specific (smaller) areas 
-of interest into memory during runtime. The `enc.visualize_environment` method
+of interest into memory during runtime. The `ENC.visualize_environment` method
 continuously reads the position and heading of ships in a csv file and 
 displays it in a decoupled environment using multiprocessing, and may be saved
-as a GIF using `enc.save_visualization`.
+as a GIF using `ENC.save_visualization`.
 
 
 ## Contributors
