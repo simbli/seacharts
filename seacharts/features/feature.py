@@ -148,7 +148,7 @@ class Ship(Feature):
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
         points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         angle, origin = -self.heading, self.center.coords[0]
-        return tuple(Area(points).rotate(angle, origin), )
+        return (Area(points).rotate(angle, origin),)
 
     def update_pose(self, new_ship):
         self.center = new_ship.center
