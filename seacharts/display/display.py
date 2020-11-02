@@ -61,7 +61,7 @@ class Display:
                 else:
                     self.artists[i].set_visible(False)
             if self.is_active:
-                self.figure.canvas.draw()
+                self.figure.canvas.blit()
 
     def draw_environment(self):
         for feature in self.environment:
