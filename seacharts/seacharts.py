@@ -4,8 +4,8 @@ from typing import Optional
 
 from PIL import Image
 
-import seacharts.settings as config
-from seacharts.display import Display
+from . import settings as config
+from .display import Display
 
 
 class ENC:

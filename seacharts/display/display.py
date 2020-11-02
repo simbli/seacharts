@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-import seacharts.settings as config
+from .. import settings as config
 
 
 class Display:

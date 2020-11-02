@@ -5,8 +5,8 @@ import pathlib
 from dataclasses import dataclass
 from typing import Sequence, Union
 
-import seacharts.display.colors
-import seacharts.features as sf
+from . import features as sf
+from .display import colors
 
 _environment_features = (
     sf.Seabed,
@@ -224,9 +224,9 @@ grid_size = tuple(int(_i) for _i in _display['grid_size'])
 
 figure_size = tuple(int(_i) for _i in _display['figure_size'])
 
-color = seacharts.display.colors.color
+color = colors.color
 
-colorbar = seacharts.display.colors.colorbar
+colorbar = colors.colorbar
 
 Ship = _entity_features[0]
 
