@@ -27,7 +27,9 @@ _feature_colors = {
 def color(name, depths=None):
     if name == 'Ocean':
         if depths is None:
-            raise ValueError(f"Ocean color map need depth bins")
+            raise ValueError(
+                f"Ocean color map need depth bins"
+            )
         else:
             return plt.get_cmap('Blues')(np.linspace(0.3, 0.9, len(depths)))
     elif name in _feature_colors:
@@ -35,7 +37,9 @@ def color(name, depths=None):
     elif name in _standard_colors:
         return _standard_colors[name]
     else:
-        raise IndexError(f"{name} is not a valid color")
+        raise ValueError(
+            f"{name} is not a valid color"
+        )
 
 
 def colorbar(axes, depths):

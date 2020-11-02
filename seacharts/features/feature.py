@@ -1,21 +1,18 @@
-from abc import ABC
-
 import fiona
 from cartopy.crs import UTM
 from cartopy.feature import ShapelyFeature
 
 import seacharts.settings as config
-from .shapes import Area, Position
+from seacharts.features.shapes import Area, Position
 
 
-class Feature(ABC, ShapelyFeature):
+class Feature(ShapelyFeature):
     crs = UTM(33)
 
     def __init__(self, *args, geometries=(), **kwargs):
         self.color = config.color(self.name)
         self._file_path = config.shapefile_path(self.name)
-        super().__init__(geometries, self.crs, *args, facecolor=self.color,
-                         edgecolor=self.color, **kwargs)
+        super().__init__(geometries, self.crs, color=self.color, **kwargs)
 
     def __getitem__(self, item):
         return self._geoms[item]
@@ -47,14 +44,6 @@ class Feature(ABC, ShapelyFeature):
             for record in records:
                 yield self.record_to_shape(record, external)
 
-    def record_to_shape(self, record, external_label):
-        label = self.depth_label if external_label else 'depth'
-        depth = record['properties'][label] if label else 0
-        coords = record['geometry']['coordinates']
-        if self.shape.type == 'Polygon':
-            coords = coords[0][0] if external_label else coords[0]
-        return self.shape(coords, depth)
-
     def read_shapefile(self, bbox, path=None, layer=None):
         if path is None:
             path = self._file_path
@@ -63,14 +52,25 @@ class Feature(ABC, ShapelyFeature):
             for record in source.filter(bbox=bbox):
                 yield record
 
+    def record_to_shape(self, record, external_label):
+        label = self.depth_label if external_label else 'depth'
+        depth = record['properties'][label] if label else 0
+        coords = record['geometry']['coordinates']
+        if self.shape.type == 'Polygon':
+            coords = coords[0][0] if external_label else coords[0]
+        return self.shape(coords, depth)
+
     def write_to_shapefile(self):
         writer = fiona.open(
             self._file_path, 'w',
             schema=self.record_structure('float', self.shape.type),
-            driver='ESRI Shapefile', crs={'init': 'epsg:25833'})
+            driver='ESRI Shapefile', crs={'init': 'epsg:25833'}
+        )
         with writer as sink:
             for shape in self._geoms:
-                sink.write(self.record_structure(shape.depth, shape.mapping))
+                sink.write(
+                    self.record_structure(shape.depth, shape.mapping)
+                )
 
     @staticmethod
     def record_structure(depth, geometry):

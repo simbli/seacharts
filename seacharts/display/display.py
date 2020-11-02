@@ -5,35 +5,44 @@ import seacharts.settings as config
 
 class Display:
     def __init__(self):
-        config.remove_past_gif_frames()
+        self.ships = []
+        self.artists = []
         self.scope = config.get_user_scope()
         self.environment = self.scope.environment
         self.figure = plt.figure('Map', figsize=config.figure_size)
         self.grid = self.figure.add_gridspec(*config.grid_size)
-        self.colorbar = self.format_colorbar(self.scope.depths)
         self.topography = self.format_topography()
-        self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
-        self.ships = []
-        self.artists = []
-        self.draw_environment()
+        self.colorbar = self.format_colorbar()
+        self.background = self.copy_canvas()
+        self.draw_environment_features()
         self.init_event_manager()
-        self.init_visualization_loop()
+        self.visualization_loop()
 
     @property
     def is_active(self):
         return plt.fignum_exists(self.figure.number)
 
     def format_topography(self):
-        ax = self.figure.add_subplot(self.grid[:, :-1], projection=config.crs)
+        grid, crs = self.grid[:, :-1], config.crs
+        axes = self.figure.add_subplot(grid, projection=crs)
         x_min, y_min, x_max, y_max = self.scope.bounding_box
-        ax.set_extent((x_min, x_max, y_min, y_max), crs=config.crs)
-        ax.set_facecolor(config.color('Seabed'))
-        return ax
-
-    def format_colorbar(self, depths):
-        axes = self.figure.add_subplot(self.grid[:, -1])
-        config.colorbar(axes, depths)
+        axes.set_extent((x_min, x_max, y_min, y_max), crs=config.crs)
+        axes.set_facecolor(config.color('Seabed'))
         return axes
+
+    def format_colorbar(self):
+        axes = self.figure.add_subplot(self.grid[:, -1])
+        config.colorbar(axes, self.scope.depths)
+        return axes
+
+    def copy_canvas(self):
+        return self.figure.canvas.copy_from_bbox(self.figure.bbox)
+
+    def draw_environment_features(self):
+        for feature in self.environment:
+            if feature.name != 'Seabed':
+                feature.load(self.scope.bounding_box)
+                self.topography.add_feature(feature)
 
     def init_event_manager(self):
         self.figure.canvas.draw()
@@ -44,6 +53,18 @@ class Display:
     def handle_key(self, event):
         if event.key == 'escape':
             self.close()
+
+    def visualization_loop(self):
+        config.remove_past_gif_frames()
+        count = 0
+        while True:
+            if not self.is_active:
+                self.close()
+                return
+            self.pause()
+            self.update_plot()
+            self.save_frame(count)
+            count += 1
 
     def update_plot(self):
         poses = config.read_ship_poses()
@@ -63,23 +84,6 @@ class Display:
             if self.is_active:
                 self.figure.canvas.blit()
 
-    def draw_environment(self):
-        for feature in self.environment:
-            if feature.name != 'Seabed':
-                feature.load(self.scope.bounding_box)
-                self.topography.add_feature(feature)
-
-    def init_visualization_loop(self):
-        count = 0
-        while True:
-            if not self.is_active:
-                self.close()
-                return
-            self.pause()
-            self.update_plot()
-            self.save_frame(count)
-            count += 1
-
     def save(self, name='map'):
         self.figure.savefig(config.path_frame_files.replace('*', name))
 
@@ -93,8 +97,8 @@ class Display:
         plt.show()
 
     @staticmethod
-    def pause(time=1E-9):
-        plt.pause(time)
+    def pause(interval=1E-9):
+        plt.pause(interval)
 
     @staticmethod
     def close():

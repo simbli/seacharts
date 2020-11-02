@@ -73,7 +73,7 @@ def write_user_input_to_config_file(args=None, kwargs=None):
                 if not (isinstance(value, Sequence)
                         and all(isinstance(v, int) for v in value)):
                     raise TypeError(
-                        "Depth bins should be a sequence of numbers"
+                        f"Depth bins should be a sequence of numbers"
                     )
                 else:
                     value = ', '.join(str(v) for v in value)

@@ -34,16 +34,21 @@ class ENC:
         self.load_environment_shapes(new_data)
 
     def __getattr__(self, item):
-        return self.environment.__getattr__(item)
+        if item in self.environment.__dict__:
+            return getattr(self.environment, item)
+        elif item in self.__dict__:
+            return getattr(self, item)
+        else:
+            raise AttributeError(item)
 
     @property
     def supported_projection(self):
-        return "EUREF89 UTM sone 33, 2d"
+        return f"EUREF89 UTM sone 33, 2d"
 
     @property
     def supported_environment(self):
-        s = "Supported environment variables: "
-        s += ', '.join(config.supported_environment)
+        s = f"Supported environment variables: "
+        s += f', '.join(config.supported_environment)
         return s + '\n'
 
     def load_environment_shapes(self, new_data):
@@ -61,13 +66,13 @@ class ENC:
                 return True
 
     def process_external_data(self):
-        print("ENC: Processing features from region...")
+        print(f"ENC: Processing features from region...")
         for feature in self.environment:
             external_path = config.get_gdb_zip_paths(self.scope.region)
             feature.load(self.scope.bounding_box, external_path)
             feature.write_to_shapefile()
             print(f"  Feature layer extracted: {feature.name}")
-        print("External data processing complete\n")
+        print(f"External data processing complete\n")
 
     @staticmethod
     def visualize_environment():

@@ -1,11 +1,9 @@
-from abc import ABC
-
 import numpy as np
 from shapely.affinity import rotate
 from shapely.geometry import LinearRing, LineString, Point, Polygon, mapping
 
 
-class Shape(ABC):
+class Shape:
     def __init__(self, depth, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.depth = depth
