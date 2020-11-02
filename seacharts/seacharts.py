@@ -74,7 +74,7 @@ class ENC:
         Process(target=Display).start()
 
     @staticmethod
-    def save_simulation():
+    def save_visualization():
         print("Creating simulation GIF...")
         fp_in, fp_out = config.path_frame_files, config.path_simulation
         frame1, *frames = [Image.open(f) for f in glob.glob(fp_in)]

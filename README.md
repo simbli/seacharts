@@ -111,7 +111,8 @@ shapefiles in a previous call. Available map features may be identified by the
 external ENC data, allowing for loading of more specific (smaller) areas 
 of interest into memory during runtime. The `enc.visualize_environment` method
 continuously reads the position and heading of ships in a csv file and 
-displays it in a decoupled environment using multiprocessing.
+displays it in a decoupled environment using multiprocessing, and may be saved
+as a GIF using `enc.save_visualization`.
 
 
 ## Contributors

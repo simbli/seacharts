@@ -103,6 +103,11 @@ def write_user_input_to_config_file(args=None, kwargs=None):
         config.write(configfile)
 
 
+def remove_past_gif_frames():
+    for file_name in os.listdir(path_frames_dir):
+        os.remove(os.path.join(path_frames_dir, file_name))
+
+
 def _read_config_section(category):
     settings = {}
     config = configparser.ConfigParser()

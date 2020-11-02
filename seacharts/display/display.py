@@ -5,6 +5,7 @@ import seacharts.settings as config
 
 class Display:
     def __init__(self):
+        config.remove_past_gif_frames()
         self.scope = config.get_user_scope()
         self.environment = self.scope.environment
         self.figure = plt.figure('Map', figsize=config.figure_size)
