@@ -79,7 +79,7 @@ corresponding to each downloaded ZIP file. Furthermore, a user-defined list of
 sea `depths` bins may be passed to `ENC` as an additional keyword argument.
 
 ### Accessing features
-After the data is parsed into shapefiles and read into memory as shown above, 
+After the data is parsed into shapefiles as shown above, 
 [Shapely](https://pypi.org/project/Shapely/) features may be accessed and 
 displayed through the following ENC attributes:
 ```python
@@ -109,8 +109,9 @@ shapefiles in a previous call. Available map features may be identified by the
 `enc.supported_environment` attribute. Additionally, the `origin` and 
 `extent` arguments here may be different from the one used to extract the 
 external ENC data, allowing for loading of more specific (smaller) areas 
-of interest into memory during runtime. The result GIF of the test ship
-simulation is saved as `reports/simulation.gif`.
+of interest into memory during runtime. The `enc.visualize_environment` method
+continuously reads the position and heading of ships in a csv file and 
+displays it in a decoupled environment using multiprocessing.
 
 
 ## Contributors
