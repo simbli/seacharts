@@ -2,7 +2,7 @@
 Python-based application for reading Electronic Navigational Charts (ENC)
 
 [![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
-[![python version](https://img.shields.io/badge/python-3.7-blue)]()
+[![python version](https://img.shields.io/badge/python-3.9-blue)]()
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
 
@@ -20,22 +20,27 @@ convention for Python code.
 
 ## Prerequisites
 
-First, ensure that [Python 3.7](https://www.python.org/downloads/) 
+First, ensure that [Python 3.9](https://www.python.org/downloads/) 
 (or another compatible version) and the required
 [C++ build tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019) 
 are installed.
 
 Next, install the required Python packages (in a virtual environment):
 ```
-pip install wheel
 pip install pipwin
-pipwin install numpy
-pipwin install pandas
-pipwin install shapely
 pipwin install gdal
+pipwin install numpy
+pipwin install scipy
 pipwin install fiona
+pipwin install shapely
 pipwin install cartopy
+pipwin install matplotlib
+
 ```
+
+Simply copy and paste the entire block above (including the empty line) into 
+the terminal of your virtual environment, and go get a cup of coffee when it 
+does its thing.
 
 
 ## Usage
