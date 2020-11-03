@@ -11,7 +11,8 @@ class Feature(ShapelyFeature):
 
     def __init__(self, geometries=(), **kwargs):
         self.color = config.color(self.name)
-        self._file_path = config.shapefile_path(self.name)
+        shp = self.name.lower()
+        self._file_path = config.path_shapefiles / shp / shp + '.shp'
         super().__init__(geometries, self.crs, color=self.color, **kwargs)
 
     def __getitem__(self, item):
@@ -20,6 +21,10 @@ class Feature(ShapelyFeature):
     @property
     def name(self):
         return self.__class__.__name__
+
+    @property
+    def shapefile_exists(self):
+        return self._file_path.is_file()
 
     @property
     def shape(self):

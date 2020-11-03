@@ -89,7 +89,7 @@ class Display:
 
     def save_frame(self, i):
         name = ''.join(['0' for _ in range(5 - len(str(i)))]) + str(i)
-        path = config.path_frame_files.replace('*', name)
+        path = str(config.path_frame_files).replace('*', name)
         self.figure.savefig(path)
 
     def show(self):

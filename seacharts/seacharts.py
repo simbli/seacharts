@@ -59,7 +59,7 @@ class ENC:
 
     def shapefiles_not_found(self):
         for feature in self.environment:
-            if not config.shapefile_exists(feature.name):
+            if not feature.shapefile_exists:
                 print(f"ENC: Missing shapefile for feature layer "
                       f"'{feature.name}', initializing new parsing of "
                       f"downloaded ENC data")

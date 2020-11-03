@@ -28,84 +28,59 @@ supported_regions = [
 ]
 
 
-def write_user_input_to_config_file(args=None, kwargs=None):
-    if len(args) > 5:
-        raise ValueError(
-            f"Too many positional arguments passed to ENC"
-        )
-    for kwarg in kwargs:
-        if kwarg not in Scope.__annotations__:
-            raise ValueError(
-                f"'{kwarg}' is not a valid keyword argument for ENC"
-            )
-    user_call = {}
-    for i, key in enumerate(Scope.__annotations__):
-        value = args[i] if len(args) > i else kwargs.get(key, None)
-        if value is not None:
-            if key == 'origin' or key == 'extent':
-                if not (isinstance(value, tuple) and len(value) == 2):
-                    raise TypeError(
-                        f"{key.capitalize()} should be a tuple of size two"
-                    )
-                else:
-                    value = str(value).lstrip('(').rstrip(')')
-            elif key == 'region':
-                if isinstance(value, str):
-                    region = [value]
-                elif (isinstance(value, Sequence)
-                      and all(isinstance(v, str) for v in value)):
-                    region = value
-                else:
-                    raise TypeError(
-                        f"Invalid region format for '{value}', "
-                        f"should be string or sequence of strings"
-                    )
-                for sector in region:
-                    if sector not in supported_regions:
-                        raise ValueError(
-                            f"Region '{sector}' not supported, "
-                            f"possible candidates are: "
-                            f"{supported_regions}"
-                        )
-                else:
-                    value = ', '.join(region)
-            elif key == 'depths':
-                if not (isinstance(value, Sequence)
-                        and all(isinstance(v, int) for v in value)):
-                    raise TypeError(
-                        f"Depth bins should be a sequence of numbers"
-                    )
-                else:
-                    value = ', '.join(str(v) for v in value)
-            elif key == 'features':
-                if (isinstance(value, Sequence)
-                        and all(isinstance(v, str) for v in value)):
-                    features = value
-                else:
-                    raise TypeError(
-                        f"Invalid region format for '{value}', "
-                        f"should be sequence of strings"
-                    )
-                for feature in features:
-                    if feature not in supported_environment:
-                        raise ValueError(
-                            f"Feature '{feature}' not supported, "
-                            f"possible candidates are: "
-                            f"{supported_environment}"
-                        )
-                else:
-                    value = ', '.join(features)
-            user_call[key] = value
-    config = configparser.ConfigParser()
-    config.read(path_config, encoding='utf8')
-    config['USER'] = user_call
-    with open(path_config, 'w', encoding='utf8') as configfile:
-        config.write(configfile)
+@dataclass
+class Environment:
+    seabed: sf.Seabed = None
+    land: sf.Land = None
+    shore: sf.Shore = None
+    shallows: sf.Shallows = None
+    rocks: sf.Rocks = None
+
+    def __iter__(self):
+        for key in self.__dict__:
+            attribute = getattr(self, key)
+            if attribute is not None:
+                yield attribute
+
+    def __getattr__(self, item):
+        return getattr(self, item)
 
 
-def remove_past_gif_frames():
-    for file_name in os.listdir(path_frames_dir):
-        os.remove(os.path.join(path_frames_dir, file_name))
+@dataclass
+class Scope:
+    origin: tuple
+    extent: tuple
+    region: Union[str, Sequence[str]]
+    depths: tuple
+    bounding_box: tuple
+    environment: Environment
+
+
+# Paths
+
+path_cwd = pathlib.Path.cwd()
+path_module = pathlib.Path(__file__).parent
+path_package = path_module.parent
+path_data = path_package / 'data'
+path_settings = path_data / 'settings'
+path_shapefiles = path_data / 'shapefiles'
+path_external = path_data / 'external'
+path_config = path_settings / 'config.ini'
+path_ships = path_data / 'ships.csv'
+path_reports = path_cwd / 'reports'
+path_frames_dir = path_reports / 'frames'
+path_simulation = path_reports / 'simulation.gif'
+path_frame_files = path_frames_dir / 'frame_*.png'
+
+
+def _build_directory_structure():
+    path_reports.mkdir(parents=True, exist_ok=True)
+    path_external.mkdir(parents=True, exist_ok=True)
+    path_shapefiles.mkdir(parents=True, exist_ok=True)
+    path_frames_dir.mkdir(parents=True, exist_ok=True)
+    for feature in supported_environment:
+        shapefile_dir = path_shapefiles / feature.lower()
+        shapefile_dir.mkdir(parents=True, exist_ok=True)
 
 
 def _read_config_section(category):
@@ -117,79 +92,6 @@ def _read_config_section(category):
         settings[key] = values
     return settings
 
-
-def _build_directory_structure():
-    pathlib.Path(path_reports).mkdir(parents=True, exist_ok=True)
-    pathlib.Path(path_external).mkdir(parents=True, exist_ok=True)
-    pathlib.Path(path_shapefiles).mkdir(parents=True, exist_ok=True)
-    pathlib.Path(path_frames_dir).mkdir(parents=True, exist_ok=True)
-    for feature in supported_environment:
-        shapefile_dir = os.path.join(path_shapefiles, feature.lower())
-        pathlib.Path(shapefile_dir).mkdir(parents=True, exist_ok=True)
-
-
-def _match_file_gdb_to_template(file_name):
-    template = 'Basisdata_<#>_<name>_<projection>_Dybdedata_FGDB.zip'
-    template_parts = template.split('_')
-    file_parts = file_name.split('_')
-    if any(file_parts[-i] != template_parts[-i] for i in range(3)):
-        raise ValueError(
-            f"'{file_name}' does not match the correct template for "
-            f"Norwegian FileGDB charts: {template}"
-        )
-    projection = file_parts[-3]
-    if int(projection[-2:]) not in supported_utm_zones:
-        raise ValueError(
-            f"Unsupported UTM zone '{projection[-2:]}' for "
-            f"'{file_name}', possible candidates are: "
-            f"{supported_utm_zones}"
-        )
-    gdb = file_name.replace('.zip', '.gdb')
-    forward_slashed = path_external.replace('\\', '/')
-    return '/'.join(('zip:/', forward_slashed, file_name, gdb))
-
-
-def get_gdb_zip_paths(region_names):
-    zip_paths = []
-    translation = str.maketrans('æøå ', 'eoa_')
-    for name in region_names:
-        label = name.translate(translation)
-        for file_name in next(os.walk(path_external))[2]:
-            if label in file_name:
-                file_gdb = _match_file_gdb_to_template(file_name)
-                zip_paths.append(file_gdb)
-                break
-        else:
-            raise FileNotFoundError(
-                f"Region FileGDB for '{name}' not found at "
-                f"'{path_external}'"
-            )
-    return zip_paths
-
-
-def shapefile_exists(name):
-    path = shapefile_path(name)
-    return os.path.isfile(path)
-
-
-def shapefile_path(name):
-    label = name.lower()
-    return os.path.join(path_shapefiles, label, label + '.shp')
-
-
-# Paths
-
-path_config = os.path.join('data', 'settings', 'config.ini')
-path_ships = os.path.join('data', 'ships.csv')
-_paths = _read_config_section('PATHS')
-
-path_data = os.path.join(*_paths['data'])
-path_reports = os.path.join(*_paths['reports'])
-path_external = os.path.join(*_paths['external'])
-path_shapefiles = os.path.join(*_paths['shapefiles'])
-path_frames_dir = os.path.join(*_paths['frames_dir'])
-path_frame_files = os.path.join(*_paths['frame_files'])
-path_simulation = os.path.join(*_paths['simulation'])
 
 _build_directory_structure()
 
@@ -270,6 +172,81 @@ def get_user_scope():
     return Scope(origin, extent, region, depths, bounding_box, environment)
 
 
+def write_user_input_to_config_file(args=None, kwargs=None):
+    if len(args) > 5:
+        raise ValueError(
+            f"Too many positional arguments passed to ENC"
+        )
+    for kwarg in kwargs:
+        if kwarg not in Scope.__annotations__:
+            raise ValueError(
+                f"'{kwarg}' is not a valid keyword argument for ENC"
+            )
+    user_call = {}
+    for i, key in enumerate(Scope.__annotations__):
+        value = args[i] if len(args) > i else kwargs.get(key, None)
+        if value is not None:
+            if key == 'origin' or key == 'extent':
+                if not (isinstance(value, tuple) and len(value) == 2):
+                    raise TypeError(
+                        f"{key.capitalize()} should be a tuple of size two"
+                    )
+                else:
+                    value = str(value).lstrip('(').rstrip(')')
+            elif key == 'region':
+                if isinstance(value, str):
+                    region = [value]
+                elif (isinstance(value, Sequence)
+                      and all(isinstance(v, str) for v in value)):
+                    region = value
+                else:
+                    raise TypeError(
+                        f"Invalid region format for '{value}', "
+                        f"should be string or sequence of strings"
+                    )
+                for sector in region:
+                    if sector not in supported_regions:
+                        raise ValueError(
+                            f"Region '{sector}' not supported, "
+                            f"possible candidates are: "
+                            f"{supported_regions}"
+                        )
+                else:
+                    value = ', '.join(region)
+            elif key == 'depths':
+                if not (isinstance(value, Sequence)
+                        and all(isinstance(v, int) for v in value)):
+                    raise TypeError(
+                        f"Depth bins should be a sequence of numbers"
+                    )
+                else:
+                    value = ', '.join(str(v) for v in value)
+            elif key == 'features':
+                if (isinstance(value, Sequence)
+                        and all(isinstance(v, str) for v in value)):
+                    features = value
+                else:
+                    raise TypeError(
+                        f"Invalid region format for '{value}', "
+                        f"should be sequence of strings"
+                    )
+                for feature in features:
+                    if feature not in supported_environment:
+                        raise ValueError(
+                            f"Feature '{feature}' not supported, "
+                            f"possible candidates are: "
+                            f"{supported_environment}"
+                        )
+                else:
+                    value = ', '.join(features)
+            user_call[key] = value
+    config = configparser.ConfigParser()
+    config.read(path_config, encoding='utf8')
+    config['USER'] = user_call
+    with open(path_config, 'w', encoding='utf8') as configfile:
+        config.write(configfile)
+
+
 def read_ship_poses():
     try:
         with open(path_ships) as csv_file:
@@ -282,29 +259,45 @@ def read_ship_poses():
     return [Ship(*pose) for pose in poses]
 
 
-@dataclass
-class Environment:
-    seabed: sf.Seabed = None
-    land: sf.Land = None
-    shore: sf.Shore = None
-    shallows: sf.Shallows = None
-    rocks: sf.Rocks = None
+def get_gdb_zip_paths(region_names):
+    zip_paths = []
+    translation = str.maketrans('æøå ', 'eoa_')
+    for name in region_names:
+        label = name.translate(translation)
+        for file_name in next(os.walk(path_external))[2]:
+            if label in file_name:
+                file_gdb = _match_file_gdb_to_template(file_name)
+                zip_paths.append(file_gdb)
+                break
+        else:
+            raise FileNotFoundError(
+                f"Region FileGDB for '{name}' not found at "
+                f"'{path_external}'"
+            )
+    return zip_paths
 
-    def __iter__(self):
-        for key in self.__dict__:
-            attribute = getattr(self, key)
-            if attribute is not None:
-                yield attribute
 
-    def __getattr__(self, item):
-        return getattr(self, item)
+def _match_file_gdb_to_template(file_name):
+    template = 'Basisdata_<#>_<name>_<projection>_Dybdedata_FGDB.zip'
+    template_parts = template.split('_')
+    file_parts = file_name.split('_')
+    if any(file_parts[-i] != template_parts[-i] for i in range(3)):
+        raise ValueError(
+            f"'{file_name}' does not match the correct template for "
+            f"Norwegian FileGDB charts: {template}"
+        )
+    projection = file_parts[-3]
+    if int(projection[-2:]) not in supported_utm_zones:
+        raise ValueError(
+            f"Unsupported UTM zone '{projection[-2:]}' for "
+            f"'{file_name}', possible candidates are: "
+            f"{supported_utm_zones}"
+        )
+    gdb = file_name.replace('.zip', '.gdb')
+    forward_slashed = str(path_external).replace('\\', '/')
+    return '/'.join(('zip:/', forward_slashed, file_name, gdb))
 
 
-@dataclass
-class Scope:
-    origin: tuple
-    extent: tuple
-    region: Union[str, Sequence[str]]
-    depths: tuple
-    bounding_box: tuple
-    environment: Environment
+def remove_past_gif_frames():
+    for file_name in path_frames_dir.iterdir():
+        os.remove(path_frames_dir / file_name)
