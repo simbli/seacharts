@@ -255,6 +255,8 @@ def read_ship_poses():
             rows = tuple(reader)
     except PermissionError:
         return None
+    except StopIteration:
+        return None
     poses = ((float(v) for v in row) for row in rows if row)
     return [Ship(*pose) for pose in poses]
 

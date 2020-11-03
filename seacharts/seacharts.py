@@ -29,6 +29,7 @@ class ENC:
                  new_data: Optional[bool] = False,
                  **kwargs: Optional):
         config.write_user_input_to_config_file(args, kwargs)
+        self.ships_path = config.path_ships
         self.scope = config.get_user_scope()
         self.environment = self.scope.environment
         self.load_environment_shapes(new_data)
