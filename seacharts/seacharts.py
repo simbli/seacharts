@@ -1,8 +1,7 @@
 import glob
+from PIL import Image
 from multiprocessing import Process
 from typing import Optional
-
-from PIL import Image
 
 from . import settings as config
 from .display import Display
@@ -83,7 +82,7 @@ class ENC:
     def save_visualization():
         print("Creating simulation GIF...")
         fp_in, fp_out = config.path_frame_files, config.path_simulation
-        frame1, *frames = [Image.open(f) for f in glob.glob(fp_in)]
-        frame1.save(fp=fp_out, format='GIF', append_images=frames,
+        frame1, *frames = [Image.open(f) for f in glob.glob(str(fp_in))]
+        frame1.save(fp=str(fp_out), format='GIF', append_images=frames,
                     save_all=True, duration=1000 / config.fps, loop=0)
         print(f"Done.")

@@ -62,11 +62,10 @@ path_cwd = pathlib.Path.cwd()
 path_module = pathlib.Path(__file__).parent
 path_package = path_module.parent
 path_data = path_package / 'data'
-path_settings = path_data / 'settings'
-path_shapefiles = path_data / 'shapefiles'
-path_external = path_data / 'external'
-path_config = path_settings / 'config.ini'
 path_ships = path_data / 'ships.csv'
+path_config = path_data / 'config.ini'
+path_external = path_data / 'external'
+path_shapefiles = path_data / 'shapefiles'
 path_reports = path_cwd / 'reports'
 path_frames_dir = path_reports / 'frames'
 path_simulation = path_reports / 'simulation.gif'
@@ -257,8 +256,7 @@ def read_ship_poses():
         return None
     except StopIteration:
         return None
-    poses = ((float(v) for v in row) for row in rows if row)
-    return [Ship(*pose) for pose in poses]
+    return tuple((float(v) for v in row) for row in rows if row)
 
 
 def get_gdb_zip_paths(region_names):

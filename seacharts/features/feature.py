@@ -123,8 +123,9 @@ class Ship(Feature):
     default_scale = 1.0
     ship_dimensions = (13.6, 74.7)
 
-    def __init__(self, x, y, heading, scale=None):
-        self.center = Position((x, y))
+    def __init__(self, x, y, heading, origin, scale=None):
+        utm_x, utm_y = x + origin[0], y + origin[1]
+        self.center = Position((utm_x, utm_y))
         self.heading = heading
         if scale is None:
             self.scale = self.default_scale
@@ -153,7 +154,7 @@ class Ship(Feature):
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
         points = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         angle, origin = -self.heading, self.center.coords[0]
-        return (Area(points).rotate(angle, origin),)
+        return Area(points).rotate(angle, origin),
 
     def update_pose(self, new_ship):
         self.center = new_ship.center
