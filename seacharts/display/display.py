@@ -1,3 +1,5 @@
+from tkinter import TclError
+
 import matplotlib.pyplot as plt
 
 from .. import settings as config
@@ -66,9 +68,9 @@ class Display:
             self.save_frame(count)
             count += 1
 
-    def update_plot(self):
+    def update_plot(self, ):
         poses = config.read_ship_poses()
-        if poses is not None:
+        if poses is not None and (len(poses) + len(self.artists)) > 0:
             self.figure.canvas.restore_region(self.background)
             for i in range(max(len(poses), len(self.artists))):
                 if i < len(poses):
@@ -97,8 +99,11 @@ class Display:
         plt.show()
 
     @staticmethod
-    def pause(interval=1E-9):
-        plt.pause(interval)
+    def pause(interval=0.05):
+        try:
+            plt.pause(interval)
+        except TclError:
+            plt.close()
 
     @staticmethod
     def close():
