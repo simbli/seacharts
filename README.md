@@ -114,10 +114,23 @@ shapefiles in a previous call. Available map features may be identified by the
 `ENC.supported_environment` attribute. Additionally, the `origin` and 
 `extent` arguments here may be different from the one used to extract the 
 external ENC data, allowing for loading of more specific (smaller) areas 
-of interest into memory during runtime. The `ENC.visualize_environment` method
-continuously reads the position and heading of ships in a csv file and 
-displays it in a decoupled environment using multiprocessing, and may be saved
-as a GIF using `ENC.save_visualization`.
+of interest into memory during runtime.
+
+### Visualizing the environment
+The `ENC.visualize_environment` method continuously reads the `x_position`, 
+`y_position` and `heading` (in degrees) of ships in a csv file named 
+`ships.csv`, located in the `data` folder. The ship poses are displayed in a 
+decoupled environment using multiprocessing, and may be saved as a GIF using 
+`ENC.save_visualization` after the display is closed. Create the csv file as 
+in the example below, and update it during runtime to visualize any number of 
+ships:
+
+```
+x_position,y_position,heading
+
+1200,1200,45
+1500,1300,305
+```
 
 
 ## Contributors

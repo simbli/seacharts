@@ -252,7 +252,7 @@ def read_ship_poses():
             reader = csv.reader(csv_file, delimiter=',')
             _ = next(reader)
             rows = tuple(reader)
-    except PermissionError:
+    except PermissionError or FileNotFoundError:
         return None
     except StopIteration:
         return None
