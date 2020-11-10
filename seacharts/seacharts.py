@@ -1,7 +1,9 @@
+import csv
 import glob
-from PIL import Image
 from multiprocessing import Process
 from typing import Optional
+
+from PIL import Image
 
 from . import settings as config
 from .display import Display
@@ -28,7 +30,6 @@ class ENC:
                  new_data: Optional[bool] = False,
                  **kwargs: Optional):
         config.write_user_input_to_config_file(args, kwargs)
-        self.ships_path = config.path_ships
         self.scope = config.get_user_scope()
         self.environment = self.scope.environment
         self.load_environment_shapes(new_data)
@@ -86,3 +87,12 @@ class ENC:
         frame1.save(fp=str(fp_out), format='GIF', append_images=frames,
                     save_all=True, duration=1000 / config.fps, loop=0)
         print(f"Done.")
+
+    @staticmethod
+    def write_ships_to_csv(poses):
+        lines = [('x_position', 'y_position', 'heading')]
+        for pose in poses:
+            lines.append(pose)
+        with open(config.path_ships, 'w') as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            writer.writerows(lines)
