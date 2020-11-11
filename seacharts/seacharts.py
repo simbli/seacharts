@@ -10,7 +10,7 @@ from .display import Display
 
 
 class ENC:
-    """Class for parsing Navigational Electronic Chart data sets
+    """Class for parsing Electronic Navigational Chart data sets
 
     This class reads data sets issued by the Norwegian Mapping Authority
     (Kartverket) and extracts features from a user-specified region in
