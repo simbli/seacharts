@@ -3,7 +3,7 @@ import glob
 from multiprocessing import Process
 from typing import Optional
 
-from PIL import Image
+import PIL.Image
 
 from . import settings as config
 from .display import Display
@@ -77,13 +77,22 @@ class ENC:
 
     @staticmethod
     def visualize_environment():
-        Process(target=Display).start()
+        p = Process(target=Display)
+        p.start()
+        return p
 
     @staticmethod
     def save_visualization():
         print("Creating simulation GIF...")
         fp_in, fp_out = config.path_frame_files, config.path_simulation
-        frame1, *frames = [Image.open(f) for f in glob.glob(str(fp_in))]
+        frame_paths = glob.glob(str(fp_in))
+        images = []
+        for path in frame_paths:
+            try:
+                images.append(PIL.Image.open(path))
+            except PIL.UnidentifiedImageError:
+                pass
+        frame1, *frames = images
         frame1.save(fp=str(fp_out), format='GIF', append_images=frames,
                     save_all=True, duration=1000 / config.fps, loop=0)
         print(f"Done.")
