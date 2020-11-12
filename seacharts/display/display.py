@@ -6,7 +6,7 @@ from .. import settings as config
 
 
 class Display:
-    def __init__(self):
+    def __init__(self, independent=True):
         self.ships = []
         self.artists = []
         self.scope = config.get_user_scope()
@@ -16,9 +16,10 @@ class Display:
         self.topography = self.format_topography()
         self.colorbar = self.format_colorbar()
         self.background = self.copy_canvas()
-        self.draw_environment_features()
-        self.init_event_manager()
-        self.visualization_loop()
+        if independent:
+            self.draw_environment_features()
+            self.init_event_manager()
+            self.visualization_loop()
 
     @property
     def is_active(self):

@@ -28,11 +28,14 @@ class ENC:
     def __init__(self,
                  *args: Optional,
                  new_data: Optional[bool] = False,
+                 independent: Optional[bool] = True,
                  **kwargs: Optional):
         config.write_user_input_to_config_file(args, kwargs)
         self.scope = config.get_user_scope()
         self.environment = self.scope.environment
         self.load_environment_shapes(new_data)
+        if not independent:
+            self.display = Display(independent)
 
     def __getattr__(self, item):
         if item in self.environment.__dict__:
