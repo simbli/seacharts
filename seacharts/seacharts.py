@@ -55,13 +55,26 @@ class ENC:
         s += f', '.join(config.supported_environment)
         return s + '\n'
 
+    def init_display(self):
+        return self.visualize_environment()
+
+    def show(self, *args):
+        self.write_ships_to_csv(args)
+
+    def clear(self):
+        self.write_ships_to_csv([])
+
+    def save(self):
+        self.save_visualization()
+        self.clear()
+
     def load_environment_shapes(self, new_data):
-        if self.shapefiles_not_found() or new_data:
-            self.process_external_data()
+        if self._shapefiles_not_found() or new_data:
+            self._process_external_data()
         for feature in self.environment:
             feature.load(self.scope.bounding_box)
 
-    def shapefiles_not_found(self):
+    def _shapefiles_not_found(self):
         for feature in self.environment:
             if not feature.shapefile_exists:
                 print(f"ENC: Missing shapefile for feature layer "
@@ -69,7 +82,7 @@ class ENC:
                       f"downloaded ENC data")
                 return True
 
-    def process_external_data(self):
+    def _process_external_data(self):
         print(f"ENC: Processing features from region...")
         for feature in self.environment:
             external_path = config.get_gdb_zip_paths(self.scope.region)
