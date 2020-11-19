@@ -1,6 +1,7 @@
 import numpy as np
 from shapely.affinity import rotate
 from shapely.geometry import LinearRing, LineString, Point, Polygon, mapping
+from shapely.ops import cascaded_union
 
 
 class Shape:
@@ -38,7 +39,7 @@ class Line(Shape, LineString):
         self.start = start
         self.end = end
         self.vector = (end.x - start.x, end.y - start.y)
-        super().__init__((start, end), depth)
+        super().__init__(depth, (start.coords[0], end.coords[0]))
 
 
 class Area(Shape, Polygon):
@@ -67,3 +68,7 @@ class Area(Shape, Polygon):
 
     def rotate(self, angle, origin):
         return rotate(self, angle, origin)
+
+    @staticmethod
+    def cascaded(polygons):
+        return cascaded_union(polygons)

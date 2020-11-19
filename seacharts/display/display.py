@@ -43,8 +43,11 @@ class Display:
 
     def draw_environment_features(self):
         for feature in self.environment:
-            if feature.name != 'Seabed':
-                feature.load(self.scope.bounding_box)
+            feature.load(self.scope.bounding_box)
+            if feature.name == 'Seabed':
+                for f in feature.split_ocean_depths(self.scope.depths):
+                    self.topography.add_feature(f)
+            else:
                 self.topography.add_feature(feature)
 
     def init_event_manager(self):
@@ -98,6 +101,10 @@ class Display:
     def show(self):
         self.save()
         plt.show()
+
+    @staticmethod
+    def wait():
+        plt.waitforbuttonpress()
 
     @staticmethod
     def pause(interval=0.05):

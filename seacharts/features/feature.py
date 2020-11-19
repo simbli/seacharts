@@ -10,7 +10,13 @@ class Feature(ShapelyFeature):
     crs = UTM(33)
 
     def __init__(self, geometries=(), **kwargs):
-        self.color = config.color(self.name)
+        color = kwargs.pop('color', None)
+        if isinstance(color, tuple):
+            self.color = config.color(*color)
+        elif isinstance(color, str):
+            self.color = config.color(color)
+        else:
+            self.color = config.color(self.name)
         shp = self.name.lower()
         self._file_path = config.path_shapefiles / shp / (shp + '.shp')
         super().__init__(geometries, self.crs, color=self.color, **kwargs)
@@ -87,6 +93,16 @@ class Seabed(Feature):
     layer_label = 'dybdeareal'
     depth_label = 'minimumsdybde'
 
+    def split_ocean_depths(self, depths):
+        depths = depths[::-1]
+        for i, depth in enumerate(depths):
+            layer = [p for p in self if p.depth <= depth]
+            if len(layer) > 0:
+                union = Area.cascaded(layer)
+                if union.__class__.__name__ == self.shape.type:
+                    union = [union]
+                yield Seabed(union, color=(len(depths) - i - 1, depths))
+
 
 class Land(Feature):
     shape = Area
@@ -116,6 +132,12 @@ class Shallows(Feature):
     pass
 
 
+class Patch(Feature):
+    shape = Area
+    layer_label = None
+    depth_label = None
+
+
 class Ship(Feature):
     shape = Position
     layer_label = None
@@ -124,7 +146,7 @@ class Ship(Feature):
     ship_dimensions = (16, 80)
     heading_in_radians = True
 
-    def __init__(self, x, y, heading, origin, scale=None):
+    def __init__(self, x, y, heading, origin, scale=None, **kwargs):
         utm_x, utm_y = x + origin[0], y + origin[1]
         self.center = Position((utm_x, utm_y))
         self.heading = heading
@@ -136,7 +158,7 @@ class Ship(Feature):
             raise TypeError(
                 f"Ship scale should be a float"
             )
-        super().__init__(geometries=self.create_hull())
+        super().__init__(geometries=self.create_hull(), **kwargs)
 
     @property
     def coords(self):

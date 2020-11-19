@@ -8,10 +8,13 @@ _blues = plt.get_cmap('Blues')(np.linspace(0.3, 0.9, 9))
 _greens = plt.get_cmap('Greens')(np.linspace(0.0, 1.0, 9))
 
 _standard_colors = {
-    'white': 'ffffffaa',
+    'horizon': '#ffffff22',
+    'white': '#ffffffdd',
     'red': '#ff4747aa',
     'yellow': '#fff047aa',
     'cyan': '#47ffffaa',
+    'orange': '#f59e42aa',
+    'purple': '#d078ffaa',
 }
 
 _feature_colors = {
@@ -20,11 +23,14 @@ _feature_colors = {
     'Shore': _greens[3],
     'Rocks': _reds[5],
     'Shallows': _reds[3],
-    'Ship': _standard_colors['red']
+    'Ship': _standard_colors['red'],
+    'Patch': _standard_colors['red'],
 }
 
 
 def color(name, depths=None):
+    if isinstance(name, int):
+        return plt.get_cmap('Blues')(np.linspace(0.3, 0.9, len(depths)))[name]
     if name == 'Ocean':
         if depths is None:
             raise ValueError(
