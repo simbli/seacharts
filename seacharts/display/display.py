@@ -16,9 +16,9 @@ class Display:
         self.topography = self.format_topography()
         self.colorbar = self.format_colorbar()
         self.background = self.copy_canvas()
+        self.draw_environment_features()
+        self.init_event_manager()
         if independent:
-            self.draw_environment_features()
-            self.init_event_manager()
             self.visualization_loop()
 
     @property
@@ -65,11 +65,10 @@ class Display:
                 self.close()
                 return
             self.pause()
-            self.update_plot()
-            self.save_frame(count)
+            self.update_plot(count)
             count += 1
 
-    def update_plot(self, ):
+    def update_plot(self, k):
         poses = config.read_ship_poses()
         if poses is not None and (len(poses) + len(self.artists)) > 0:
             self.figure.canvas.restore_region(self.background)
@@ -86,6 +85,7 @@ class Display:
                     self.artists[i].set_visible(False)
             if self.is_active:
                 self.figure.canvas.blit()
+                self.save_frame(k)
 
     def save(self, name='map'):
         self.figure.savefig(config.path_frame_files.replace('*', name))

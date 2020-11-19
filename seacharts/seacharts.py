@@ -58,8 +58,9 @@ class ENC:
     def init_display(self):
         return self.visualize_environment()
 
-    def show(self, *args):
+    def show(self, k, *args):
         self.write_ships_to_csv(args)
+        self.display.update_plot(k)
 
     def clear(self):
         self.write_ships_to_csv([])
@@ -109,8 +110,10 @@ class ENC:
             except PIL.UnidentifiedImageError:
                 pass
         frame1, *frames = images
+        frames = frames + [frames[-1]] * config.fps
         frame1.save(fp=str(fp_out), format='GIF', append_images=frames,
                     save_all=True, duration=1000 / config.fps, loop=0)
+        config.remove_past_gif_frames()
         print(f"Done.")
 
     @staticmethod
