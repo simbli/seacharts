@@ -9,12 +9,25 @@ _greens = plt.get_cmap('Greens')(np.linspace(0.0, 1.0, 9))
 
 _standard_colors = {
     'horizon': '#ffffff22',
-    'white': '#ffffffdd',
+    'white': '#ffffffaa',
     'red': '#ff4747aa',
     'yellow': '#fff047aa',
     'cyan': '#47ffffaa',
     'orange': '#f59e42aa',
     'purple': '#d078ffaa',
+}
+
+legend_colors = {
+    'red': ('#ff0000', '#ff000055'),
+    'orange': ('#ff9900', '#ff990055'),
+    'yellow': ('#ffcc00', '#ffcc0055'),
+    'green': ('#00ff00', '#00ff0055'),
+    'cyan': ('#00ffff', '#00ffff55'),
+    'purple': ('#9900ff', '#9900ff55'),
+    'pink': ('#ff00ff', '#ff00ff55'),
+    'grey_d': ('#666666', '#66666655'),
+    'grey_l': ('#b7b7b7', '#b7b7b755'),
+    'white': ('#d9d9d9', '#ffffff55'),
 }
 
 _feature_colors = {
@@ -23,7 +36,7 @@ _feature_colors = {
     'Shore': _greens[3],
     'Rocks': _reds[5],
     'Shallows': _reds[3],
-    'Ship': _standard_colors['red'],
+    'Ship': _standard_colors['white'],
     'Patch': _standard_colors['red'],
 }
 

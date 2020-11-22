@@ -12,31 +12,55 @@ class Display:
         self.scope = config.get_user_scope()
         self.environment = self.scope.environment
         self.figure = plt.figure('Map', figsize=config.figure_size)
-        self.grid = self.figure.add_gridspec(*config.grid_size)
+        self.figure.subplots_adjust(left=0, right=1.04, bottom=0.02, top=0.98)
         self.topography = self.format_topography()
-        self.colorbar = self.format_colorbar()
         self.background = self.copy_canvas()
         self.draw_environment_features()
         self.init_event_manager()
+        self.add_colorbar()
         if independent:
             self.visualization_loop()
+        else:
+            self.add_legends()
 
     @property
     def is_active(self):
         return plt.fignum_exists(self.figure.number)
 
     def format_topography(self):
-        grid, crs = self.grid[:, :-1], config.crs
-        axes = self.figure.add_subplot(grid, projection=crs)
+        axes = self.figure.add_subplot(projection=config.crs)
         x_min, y_min, x_max, y_max = self.scope.bounding_box
         axes.set_extent((x_min, x_max, y_min, y_max), crs=config.crs)
         axes.set_facecolor(config.color('Seabed'))
         return axes
 
-    def format_colorbar(self):
-        axes = self.figure.add_subplot(self.grid[:, -1])
+    def add_colorbar(self):
+        box = self.topography.get_position()
+        axes = self.figure.add_axes([box.x1 + 0.03, box.y0, 0.05, box.height])
         config.colorbar(axes, self.scope.depths)
-        return axes
+
+    def add_legends(self):
+        width, height = 6, 30
+        box = self.topography.get_position()
+        axes = self.figure.add_axes([box.x0 - 0.17, box.y0, 0.17, box.height])
+        colors = config.legend_colors.values()
+        labels = config.legend_labels
+        axes.set_aspect('equal')
+        axes.set_ylim(0, height)
+        axes.set_xlim(0, width)
+        axes.axis('off')
+        padding = height / len(colors)
+        start = height - (height - (len(colors) - 1) * padding) / 2
+        for i, (color, label) in enumerate(zip(colors, labels)):
+            ec, fc = color
+            h = start - i * padding
+            axes.add_artist(plt.Circle(
+                (width * 0.9, h), 0.4, edgecolor=ec, facecolor=fc, linewidth=1
+            ))
+            axes.text(
+                width * 0.7, h, label,
+                verticalalignment='center', horizontalalignment='right'
+            )
 
     def copy_canvas(self):
         return self.figure.canvas.copy_from_bbox(self.figure.bbox)
@@ -91,7 +115,8 @@ class Display:
                 self.save_frame(k)
 
     def save(self, name='map'):
-        self.figure.savefig(config.path_frame_files.replace('*', name))
+        self.figure.savefig(config.path_frame_files.replace('*', name),
+                            bbox_inches='tight')
 
     def save_frame(self, i):
         name = ''.join(['0' for _ in range(5 - len(str(i)))]) + str(i)

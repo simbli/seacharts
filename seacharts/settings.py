@@ -129,6 +129,21 @@ color = colors.color
 
 colorbar = colors.colorbar
 
+legend_colors = colors.legend_colors
+
+legend_labels = (
+    'convex danger areas',
+    'blackout simulations',
+    'horizon predictions',
+    'next target position',
+    'next velocity vector',
+    'risk gradient vectors',
+    'min obstacle distance',
+    'route alternative 1',
+    'route alternative 2',
+    'current ship pose',
+)
+
 Ship = _entity_features[0]
 
 
