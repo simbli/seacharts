@@ -101,7 +101,14 @@ class Display:
             self.figure.canvas.restore_region(self.background)
             for i in range(max(len(poses), len(self.artists))):
                 if i < len(poses):
-                    ship = config.Ship(*poses[i], self.scope.origin)
+                    pose = tuple(poses[i])
+                    if len(pose) > 3:
+                        color_index = int(pose[3])
+                        ec, fc = config.ship_colors[color_index]
+                        kwargs = dict(ec=ec, fc=fc)
+                    else:
+                        kwargs = {}
+                    ship = config.Ship(*pose[:3], self.scope.origin, **kwargs)
                     if i >= len(self.ships):
                         artist = self.topography.add_feature(ship)
                         self.artists.append(artist)

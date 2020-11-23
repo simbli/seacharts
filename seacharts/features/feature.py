@@ -10,16 +10,32 @@ class Feature(ShapelyFeature):
     crs = UTM(33)
 
     def __init__(self, geometries=(), **kwargs):
+        ec = kwargs.pop('ec', None)
+        fc = kwargs.pop('fc', None)
         color = kwargs.pop('color', None)
-        if isinstance(color, tuple):
-            self.color = config.color(*color)
-        elif isinstance(color, str):
-            self.color = config.color(color)
+        if color is not None:
+            if ec or fc:
+                raise ValueError(
+                    f"Cannot set both 'color' and face color or edge color "
+                    f"for feature {self.name}"
+                )
+            if isinstance(color, tuple):
+                kwargs['color'] = config.color(*color)
+            elif isinstance(color, str):
+                kwargs['color'] = config.color(color)
+        elif ec is not None or fc is not None:
+            if ec and not fc:
+                kwargs['color'] = ec
+            elif fc and not ec:
+                kwargs['color'] = fc
+            else:
+                kwargs['ec'] = ec
+                kwargs['fc'] = fc
         else:
-            self.color = config.color(self.name)
+            kwargs['color'] = config.color(self.name)
         shp = self.name.lower()
         self._file_path = config.path_shapefiles / shp / (shp + '.shp')
-        super().__init__(geometries, self.crs, color=self.color, **kwargs)
+        super().__init__(geometries, self.crs, **kwargs)
 
     def __getitem__(self, item):
         return self._geoms[item]

@@ -27,7 +27,7 @@ legend_colors = {
     'pink': ('#ff00ff', '#ff00ff55'),
     'grey_d': ('#666666', '#66666655'),
     'grey_l': ('#b7b7b7', '#b7b7b755'),
-    'white': ('#d9d9d9', '#ffffff55'),
+    'white': ('#d9d9d9', '#ffffff77'),
 }
 
 _feature_colors = {
@@ -36,15 +36,22 @@ _feature_colors = {
     'Shore': _greens[3],
     'Rocks': _reds[5],
     'Shallows': _reds[3],
-    'Ship': _standard_colors['white'],
+    'Ship': _standard_colors['red'],
     'Patch': _standard_colors['red'],
+}
+
+ship_colors = {
+    0: legend_colors['cyan'],
+    1: legend_colors['white'],
+    2: legend_colors['yellow'],
+    3: legend_colors['orange'],
 }
 
 
 def color(name, depths=None):
     if isinstance(name, int):
         return plt.get_cmap('Blues')(np.linspace(0.3, 0.9, len(depths)))[name]
-    if name == 'Ocean':
+    elif name == 'Ocean':
         if depths is None:
             raise ValueError(
                 f"Ocean color map need depth bins"
