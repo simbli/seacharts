@@ -105,7 +105,7 @@ class Display:
                     if len(pose) > 3:
                         color_index = int(pose[3])
                         ec, fc = config.ship_colors[color_index]
-                        kwargs = dict(ec=ec, fc=fc)
+                        kwargs = dict(ec=ec, fc=fc, zorder=1000 - color_index)
                     else:
                         kwargs = {}
                     ship = config.Ship(*pose[:3], self.scope.origin, **kwargs)
