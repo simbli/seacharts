@@ -110,7 +110,7 @@ class ENC:
             except PIL.UnidentifiedImageError:
                 pass
         frame1, *frames = images
-        frames = frames + [frames[-1]] * config.fps
+        frames = [frame1] * config.fps + frames + [frames[-1]] * config.fps
         frame1.save(fp=str(fp_out), format='GIF', append_images=frames,
                     save_all=True, duration=1000 / config.fps, loop=0)
         config.remove_past_gif_frames()
