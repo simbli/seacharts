@@ -58,9 +58,8 @@ class ENC:
     def init_display(self):
         return self.visualize_environment()
 
-    def show(self, k, *args):
+    def show_ships(self, *args):
         self.write_ships_to_csv(args)
-        self.display.update_plot(k)
 
     def add_overlay(self, shapes, color=None):
         self.display.add_new_feature(shapes, color)
