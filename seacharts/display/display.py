@@ -3,6 +3,7 @@ from tkinter import TclError
 import matplotlib.pyplot as plt
 
 from .. import settings as config
+from ..environment import Patch
 
 
 class Display:
@@ -61,6 +62,9 @@ class Display:
                 width * 0.7, h, label,
                 verticalalignment='center', horizontalalignment='right'
             )
+
+    def add_new_feature(self, shapes, color=None):
+        return self.topography.add_feature(Patch(shapes, color=color))
 
     def copy_canvas(self):
         return self.figure.canvas.copy_from_bbox(self.figure.bbox)

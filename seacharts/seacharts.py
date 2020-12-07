@@ -62,6 +62,9 @@ class ENC:
         self.write_ships_to_csv(args)
         self.display.update_plot(k)
 
+    def add_overlay(self, shapes, color=None):
+        self.display.add_new_feature(shapes, color)
+
     def clear(self):
         self.write_ships_to_csv([])
 
