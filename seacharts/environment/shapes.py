@@ -1,6 +1,6 @@
 import numpy as np
+import shapely.geometry as geom
 from shapely.affinity import rotate
-from shapely.geometry import LinearRing, LineString, Point, Polygon, mapping
 from shapely.ops import cascaded_union
 
 
@@ -11,10 +11,10 @@ class Shape:
 
     @property
     def mapping(self):
-        return mapping(self)
+        return geom.mapping(self)
 
 
-class Position(Shape, Point):
+class Position(Shape, geom.Point):
     type = 'Point'
 
     def __init__(self, point, depth=0):
@@ -25,10 +25,10 @@ class Position(Shape, Point):
 
     def is_left_of(self, line):
         positions = line.start, line.end, self
-        return LinearRing((p.coordinates for p in positions)).is_ccw
+        return geom.LinearRing((p.coordinates for p in positions)).is_ccw
 
 
-class Line(Shape, LineString):
+class Line(Shape, geom.LineString):
     type = 'LineString'
 
     def __init__(self, start, end, depth=None):
@@ -42,7 +42,7 @@ class Line(Shape, LineString):
         super().__init__(depth, (start.coords[0], end.coords[0]))
 
 
-class Area(Shape, Polygon):
+class Area(Shape, geom.Polygon):
     type = 'Polygon'
 
     def __init__(self, coords, depth=0):
@@ -69,6 +69,13 @@ class Area(Shape, Polygon):
     def rotate(self, angle, origin):
         return rotate(self, angle, origin)
 
+    def convex_union(self, polygons, margin=0):
+        union = [self.cascaded(p.buffer(margin).convex_hull) for p in polygons]
+        return [p.convex_hull for p in self.cascaded(union)]
+
     @staticmethod
     def cascaded(polygons):
-        return cascaded_union(polygons)
+        union = cascaded_union(polygons)
+        if isinstance(union, geom.MultiPolygon):
+            union = list(union)
+        return union
