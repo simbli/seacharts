@@ -2,8 +2,8 @@ import fiona
 from cartopy.crs import UTM
 from cartopy.feature import ShapelyFeature
 
+from .shapes import Area, Position
 from .. import settings as config
-from ..features.shapes import Area, Position
 
 
 class Feature(ShapelyFeature):

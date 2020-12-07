@@ -5,18 +5,18 @@ import pathlib
 from dataclasses import dataclass
 from typing import Sequence, Union
 
-from . import features as sf
+from . import environment as env
 from .display import colors
 
 _environment_features = (
-    sf.Seabed,
-    sf.Land,
-    sf.Shore,
-    sf.Shallows,
-    sf.Rocks
+    env.Seabed,
+    env.Land,
+    env.Shore,
+    env.Shallows,
+    env.Rocks
 )
 _entity_features = (
-    sf.Ship,
+    env.Ship,
 )
 supported_environment = [_f.__name__ for _f in _environment_features]
 supported_crs = ['UTM']
@@ -29,31 +29,13 @@ supported_regions = [
 
 
 @dataclass
-class Environment:
-    seabed: sf.Seabed = None
-    land: sf.Land = None
-    shore: sf.Shore = None
-    shallows: sf.Shallows = None
-    rocks: sf.Rocks = None
-
-    def __iter__(self):
-        for key in self.__dict__:
-            attribute = getattr(self, key)
-            if attribute is not None:
-                yield attribute
-
-    def __getattr__(self, item):
-        return getattr(self, item)
-
-
-@dataclass
 class Scope:
     origin: tuple
     extent: tuple
     region: Union[str, Sequence[str]]
     depths: tuple
     bounding_box: tuple
-    environment: Environment
+    environment: env.Environment
 
 
 # Paths
@@ -182,8 +164,8 @@ def get_user_scope():
                 f"possible candidates are: {supported_regions}"
             )
 
-    env = (f for f in _environment_features if f.__name__ in feature_names)
-    environment = Environment(**{f.__name__.lower(): f() for f in env})
+    fs = (f for f in _environment_features if f.__name__ in feature_names)
+    environment = env.Environment(**{f.__name__.lower(): f() for f in fs})
 
     return Scope(origin, extent, region, depths, bounding_box, environment)
 
