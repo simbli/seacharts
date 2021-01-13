@@ -10,11 +10,12 @@ _greens = plt.get_cmap('Greens')(np.linspace(0.0, 1.0, 9))
 _standard_colors = {
     'horizon': '#ffffff22',
     'white': '#ffffffaa',
-    'red': '#ff4747aa',
+    'red': '#ff474799',
     'yellow': '#fff047aa',
     'cyan': '#47ffffaa',
     'orange': '#f59e42aa',
     'purple': '#d078ffaa',
+    'green': '#00ff0055'
 }
 
 legend_colors = {
