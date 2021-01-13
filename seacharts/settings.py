@@ -119,7 +119,7 @@ legend_labels = (
     'convex danger areas',
     'blackout simulations',
     'horizon predictions',
-    'next target position',
+    '1 min target position',
     'current ship pose',
     'risk gradient vectors',
     'min obstacle distance',
