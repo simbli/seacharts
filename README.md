@@ -42,7 +42,7 @@ pipwin install matplotlib
 ```
 
 Simply copy and paste the entire block above (including the empty line) into 
-the terminal of your virtual environment, and go get a cup of coffee when it 
+the terminal of your virtual environment, and go get a cup of coffee while it 
 does its thing.
 
 
@@ -161,12 +161,12 @@ Initializing an `ENC` instance with the `multiprocessing` parameter set to
 `True` spawns a `Process` thread from the Python standard library 
 [multiprocessing module](
 https://docs.python.org/3/library/multiprocessing.html), creating an 
-independent environment display running an infinite visualization loop based on 
-the current user (or default) settings stored in the `data/config.ini` file.
+independent environment display running an infinite visualization loop, based 
+on the current user (or default) settings stored in the `data/config.ini` file.
 The visualization loop continuously reads the `data/vessels.csv` file, and 
 updates the plot with any present vessels. Repeated updating of the vessels 
 file by any arbitrary alternative method is thus reflected in the plot in near
-real-time. Thus, this feature may be utilized for parallel or concurrent 
+real-time. As such, this feature may be utilized for parallel or concurrent 
 visualization of vessels in an environment, e.g. based on vessel trajectories 
 produced by a separate and independent simulation or optimization algorithm.
 
