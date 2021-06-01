@@ -1,38 +1,31 @@
-from dataclasses import dataclass
-from numbers import Number
-from typing import Container, Generator
+from __future__ import annotations
 
-from .feature import Seabed, Land, Shore, Shallows, Rocks
+from typing import List, Tuple
+
+import seacharts.spatial as spl
+from .extent import Extent
+from .scope import Scope
 
 
-@dataclass
-class Environment(Container):
-    seabed: Seabed = None
-    land: Land = None
-    shore: Shore = None
-    shallows: Shallows = None
-    rocks: Rocks = None
+class Environment:
+    supported_crs = "EUREF89 UTM zone 33"
+    supported_layers = ", ".join(spl.supported_layers)
 
-    def __iter__(self) -> Generator:
-        for key in self.__dict__:
-            attribute = getattr(self, key)
-            if attribute is not None:
-                yield attribute
-
-    def __contains__(self, item) -> bool:
-        return getattr(self, item) is not None
-
-    @property
-    def _all_features(self) -> list:
-        return [getattr(self, key) for key in self.__dict__ if key in self]
-
-    def obstacles(self, min_depth: Number, buffer: Number = 0) -> tuple:
-        shapes = []
-        for feature in self._all_features:
-            for shape in feature:
-                if shape.depth <= min_depth:
-                    shapes.append(shape)
-        if not shapes:
-            return ()
-        else:
-            return tuple(shapes[0].convex_union(shapes, buffer))
+    def __init__(self,
+                 size: Tuple[int, int] = None,
+                 origin: Tuple[int, int] = None,
+                 center: Tuple[int, int] = None,
+                 buffer: int = None,
+                 tolerance: int = None,
+                 layers: List[str] = None,
+                 depths: List[int] = None,
+                 files: List[str] = None,
+                 new_data: bool = None,
+                 verbose: bool = None,
+                 ):
+        extent = Extent(size, origin, center)
+        self.scope = Scope(
+            extent, buffer, tolerance, layers, depths, files, new_data, verbose
+        )
+        self.hydrography = spl.Hydrography(self.scope)
+        self.topography = spl.Topography(self.scope)
