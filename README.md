@@ -28,11 +28,27 @@ First, ensure that [Python 3.9](https://www.python.org/downloads/)
 https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019) 
 are installed.
 
-Next, install the required Python packages (in a virtual environment):
+Next, the required Python packages must be installed (ideally in a fresh 
+virtual environment). In order to ensure that the correct version of Numpy+mkl 
+linked to the [Intel® Math Kernel Library](
+https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html#gs.31vx8p)
+is installed, download the wheel according to your Python version and 
+Windows platform from [here](
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel 
+file e.g. in the same directory the terminal is run from, and install it. 
+The below snippet corresponds to Python 3.9 on Windows 64-bit:
+```
+pip install --upgrade pip
+pip install wheel
+pip install numpy-1.20.3+mkl-cp39-cp39-win_amd64.whl
+
+```
+
+The remaining required packages may be installed by the following:
+
 ```
 pip install pipwin
 pipwin install gdal
-pipwin install numpy
 pipwin install scipy
 pipwin install fiona
 pipwin install shapely
