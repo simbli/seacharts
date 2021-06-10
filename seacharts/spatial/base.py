@@ -68,7 +68,9 @@ class Shape(Drawable, ABC):
         self.geometry = bounding_box.intersection(self.geometry)
 
     def dilate(self, distance):
-        self.geometry = self.geometry.buffer(distance)
+        self.geometry = self.geometry.buffer(
+            distance, cap_style=2, join_style=3
+        )
 
     def erode(self, distance):
         self.dilate(-distance)
@@ -141,19 +143,6 @@ class Layer(Shape, ABC):
     def unify(self, records):
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = self._collect(geometries)
-
-    def simplify(self, resolution, preserve_topology=True):
-        super().simplify(resolution, preserve_topology)
-
-    def clip(self, bbox):
-        super().clip(bbox)
-
-    def dilate(self, distance):
-        super().dilate(distance)
-
-    def erode(self, distance):
-        super().dilate(distance)
-        self.dilate(-distance)
 
 
 @dataclass

@@ -21,6 +21,9 @@ class _Hypsometry(ABC):
     def layers(self) -> List[Layer]:
         raise NotImplementedError
 
+    def add_buffer(self, layer, distance):
+        raise NotImplementedError
+
     @property
     def loaded_layers(self) -> List[Layer]:
         return [layer for layer in self.layers if not layer.geometry.is_empty]
@@ -39,22 +42,22 @@ class _Hypsometry(ABC):
                 records = layer.load_fgdb(scope.parser)
                 info = f"{len(records)} {layer.name} geometries"
 
-                if scope.parser.verbose:
-                    print(f"\rMerging {info}...", end='')
-                layer.unify(records)
-
                 if not records:
                     if scope.parser.verbose:
                         print(f"\rFound {info}.\n")
                     return
 
                 if scope.parser.verbose:
-                    print(f"\rDilating {info}...", end='')
-                layer.dilate(scope.buffer)
+                    print(f"\rMerging {info}...", end='')
+                layer.unify(records)
 
                 if scope.parser.verbose:
                     print(f"\rSimplifying {info}...", end='')
                 layer.simplify(scope.tolerance)
+
+                if scope.parser.verbose:
+                    print(f"\rBuffering {info}...", end='')
+                self.add_buffer(layer, scope.buffer)
 
                 if scope.parser.verbose:
                     print(f"\rClipping {info}...", end='')
@@ -86,6 +89,9 @@ class Hydrography(_Hypsometry):
         self.bathymetry = {d: Seabed(d) for d in scope.depths}
         self.load(scope)
 
+    def add_buffer(self, layer, distance):
+        layer.erode(distance)
+
 
 @dataclass
 class Topography(_Hypsometry):
@@ -100,3 +106,6 @@ class Topography(_Hypsometry):
         self.land = Land()
         self.shore = Shore()
         self.load(scope)
+
+    def add_buffer(self, layer, distance):
+        layer.dilate(distance)
