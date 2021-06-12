@@ -55,6 +55,8 @@ class EventsManager:
     def _key_press(self, event):
         if event.key == 'escape':
             self._display.terminate()
+        elif event.key == 'd':
+            self._display.toggle_dark_mode()
         elif event.key == 't':
             self._display.features.show_top_hidden_layer()
         elif event.key == 'g':
@@ -69,8 +71,8 @@ class EventsManager:
         elif event.key == 'v':
             self._display.features.toggle_vessels_visibility()
         elif event.key == 'l':
-            self._display.features.toggle_land_visibility()
-            self._display.features.toggle_shore_visibility()
+            self._display.features.toggle_topography_visibility()
+            self._display.draw_plot()
         elif event.key in ['n', 'm']:
             if self._display.environment.depth is not None:
                 self._toggle_depth_filter_values(event.key)
@@ -80,7 +82,7 @@ class EventsManager:
         elif event.key in self._directions:
             if self._display.environment.ownship:
                 self._direction_keys[event.key] = True
-                self._move_own_ship()
+                self._move_ownship()
         elif event.key in self._resizing:
             self._resize_hazards_horizon(event.key)
 
@@ -97,7 +99,7 @@ class EventsManager:
         self._display.features.update_hazards()
         self._display.update_plot()
 
-    def _move_own_ship(self):
+    def _move_ownship(self):
         x, y, psi, *params = self._display.environment.ownship.parameters
         if self._direction_keys['up']:
             x = x + np.sin(np.deg2rad(psi)) * self._cartesian_step
@@ -134,6 +136,7 @@ class EventsManager:
             d = self._display.environment.scope.depths[next_d]
             self._display.environment.depth = d
             self._display.environment.filter_hazardous_areas(d)
+            self._display.features.update_hazards()
             self._display.update_plot()
 
     def _click_press(self, event):

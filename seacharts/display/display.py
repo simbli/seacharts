@@ -25,7 +25,8 @@ class Display:
             self.environment = env.Environment()
         self.figure = plt.figure('SeaCharts', figsize=self.figure_size)
         self.axes = self.figure.add_subplot(projection=self.crs)
-        self.background = None
+        self._background = None
+        self._dark_mode = False
         self._format_hypsometry()
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
@@ -66,12 +67,12 @@ class Display:
         self.update_plot()
 
     def update_plot(self):
-        self.figure.canvas.restore_region(self.background)
+        self.figure.canvas.restore_region(self._background)
         self.draw_animated_artists()
 
     def draw_plot(self):
         self.figure.canvas.draw()
-        self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
+        self._background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
         self.draw_animated_artists()
 
     def draw_animated_artists(self):
@@ -79,6 +80,12 @@ class Display:
             self.axes.draw_artist(artist)
         self.figure.canvas.blit()
         self.figure.canvas.flush_events()
+
+    def toggle_dark_mode(self):
+        self.features.toggle_topography_visibility(self._dark_mode)
+        self.figure.set_facecolor('#ffffff' if self._dark_mode else '#142c38')
+        self._dark_mode = not self._dark_mode
+        self.draw_plot()
 
     def save_figure(self, name=None):
         if name is None:

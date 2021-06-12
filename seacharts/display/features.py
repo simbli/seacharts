@@ -107,13 +107,11 @@ class FeaturesManager:
             artist.set_visible(not artist.get_visible())
         self._display.update_plot()
 
-    def toggle_land_visibility(self):
-        self._land.set_visible(not self._land.get_visible())
-        self._display.draw_plot()
-
-    def toggle_shore_visibility(self):
-        self._shore.set_visible(not self._shore.get_visible())
-        self._display.draw_plot()
+    def toggle_topography_visibility(self, new_state: bool = None):
+        if new_state is None:
+            new_state = not self._land.get_visible()
+        self._land.set_visible(new_state)
+        self._shore.set_visible(new_state)
 
     def show_top_hidden_layer(self):
         artists = self._z_sorted_seabeds(descending=False)
