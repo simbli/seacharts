@@ -25,9 +25,11 @@ class Display:
             self.environment = env.Environment()
         self.figure = plt.figure('SeaCharts', figsize=self.figure_size)
         self.axes = self.figure.add_subplot(projection=self.crs)
+        self.background = None
+        self._format_hypsometry()
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
-        self._format_hypsometry()
+        self.draw_plot()
         if environment is None:
             self.start_visualization_loop()
 
@@ -41,8 +43,9 @@ class Display:
         )
 
     def start_visualization_loop(self):
-        start_time = time.time()
         print()
+        self.show(0.1)
+        start_time = time.time()
         while True:
             delta = datetime.timedelta(seconds=time.time() - start_time)
             now = str(delta).split(".")[0]
@@ -53,27 +56,29 @@ class Display:
                 self.terminate()
                 print()
                 return
-            self.show(0.8)
-            self.features.update()
+            self.features.update_vessels()
+            self.update_plot()
+            time.sleep(0.1)
 
-    def update_vessels(self, poses: List[Tuple]):
+    def refresh_vessels(self, poses: List[Tuple]):
         self.features.vessels_to_file(poses)
-        self.features.update()
+        self.features.update_vessels()
+        self.update_plot()
 
     def update_plot(self):
-        if self.is_active:
-            self.figure.canvas.draw()
-        else:
-            self.terminate()
+        self.figure.canvas.restore_region(self.background)
+        self.draw_animated_artists()
 
-    def show(self, duration=None):
-        try:
-            if duration:
-                self.pause(duration)
-            else:
-                plt.show()
-        except TclError:
-            plt.close()
+    def draw_plot(self):
+        self.figure.canvas.draw()
+        self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
+        self.draw_animated_artists()
+
+    def draw_animated_artists(self):
+        for artist in self.features.animated:
+            self.axes.draw_artist(artist)
+        self.figure.canvas.blit()
+        self.figure.canvas.flush_events()
 
     def save_figure(self, name=None):
         if name is None:
@@ -86,8 +91,11 @@ class Display:
         return plt.fignum_exists(self.figure.number)
 
     @staticmethod
-    def pause(interval=0.05):
-        plt.pause(interval)
+    def show(duration=0.0):
+        try:
+            plt.pause(duration)
+        except TclError:
+            plt.close()
 
     @staticmethod
     def terminate():
@@ -95,6 +103,4 @@ class Display:
 
     @staticmethod
     def init_multiprocessing():
-        display = Process(target=Display)
-        display.start()
-        return display
+        Process(target=Display).start()

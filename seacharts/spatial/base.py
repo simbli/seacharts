@@ -60,8 +60,8 @@ class MultiDepth:
 class Shape(Drawable, ABC):
     geometry: geo.base.BaseGeometry = None
 
-    def simplify(self, resolution, preserve_topology=True):
-        self.geometry = self.geometry.simplify(resolution, preserve_topology)
+    def simplify(self, tolerance, preserve_topology=True):
+        self.geometry = self.geometry.simplify(tolerance, preserve_topology)
 
     def clip(self, bbox):
         bounding_box = geo.box(*bbox)
@@ -96,7 +96,7 @@ class Shape(Drawable, ABC):
 
     @staticmethod
     def _record_to_geometry(record):
-        return geo.asShape(record['geometry'])
+        return geo.shape(record['geometry'])
 
     @staticmethod
     def _geometry_to_multi(geometry):

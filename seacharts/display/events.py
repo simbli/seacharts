@@ -44,7 +44,7 @@ class EventsManager:
         self._display.axes.set_ylim(
             [y_data - new_height * (1 - dy), y_data + new_height * dy]
         )
-        self._display.update_plot()
+        self._display.draw_plot()
 
     def _key_press(self, event):
         if event.key == 'escape':
@@ -58,13 +58,13 @@ class EventsManager:
         elif event.key == 'b':
             self._display.features.hide_bottom_visible_layer()
         elif event.key == 'u':
-            self._display.features.update()
+            self._display.features.update_vessels()
+            self._display.update_plot()
         elif event.key == 'v':
             self._display.features.toggle_vessels_visibility()
-        elif event.key == 'k':
-            self._display.features.toggle_shore_visibility()
         elif event.key == 'l':
             self._display.features.toggle_land_visibility()
+            self._display.features.toggle_shore_visibility()
 
     def _click_press(self, event):
         if event.inaxes != self._display.axes:
@@ -75,7 +75,7 @@ class EventsManager:
 
     def _click_release(self, _):
         self._mouse_press = None
-        self._display.update_plot()
+        self._display.draw_plot()
 
     def _mouse_motion(self, event):
         if self._mouse_press is None:
@@ -86,18 +86,18 @@ class EventsManager:
         self._y_view_limit -= (event.ydata - self._mouse_press['y'])
         self._display.axes.set_xlim(self._x_view_limit)
         self._display.axes.set_ylim(self._y_view_limit)
-        self._display.update_plot()
+        self._display.draw_plot()
 
     @staticmethod
     def _remove_default_keybindings():
         dic = plt.rcParams
-        plt.rcParams['keymap.pan'].remove('p')
-        plt.rcParams['keymap.zoom'].remove('o')
-        plt.rcParams['keymap.grid'].remove('g')
-        plt.rcParams['keymap.save'].remove('s')
-        plt.rcParams['keymap.back'].remove('left')
-        plt.rcParams['keymap.xscale'].remove('k')
-        plt.rcParams['keymap.yscale'].remove('l')
-        plt.rcParams['keymap.forward'].remove('v')
-        plt.rcParams['keymap.forward'].remove('right')
-        plt.rcParams['keymap.all_axes'].remove('a')
+        dic['keymap.pan'].remove('p')
+        dic['keymap.zoom'].remove('o')
+        dic['keymap.grid'].remove('g')
+        dic['keymap.save'].remove('s')
+        dic['keymap.back'].remove('left')
+        dic['keymap.xscale'].remove('k')
+        dic['keymap.yscale'].remove('l')
+        dic['keymap.forward'].remove('v')
+        dic['keymap.forward'].remove('right')
+        dic['keymap.all_axes'].remove('a')

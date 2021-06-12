@@ -63,13 +63,13 @@ class ENC:
 
     def add_vessels(self, *args: Tuple[int, int, int, int, str]) -> None:
         """Add colored vessel features to the displayed environment plot."""
-        self._display.update_vessels(list(args))
+        self._display.refresh_vessels(list(args))
 
     def clear_vessels(self) -> None:
         """Remove all vessel features from the environment plot."""
-        self._display.update_vessels([])
+        self._display.refresh_vessels([])
 
-    def show_display(self, duration: int = None) -> None:
+    def show_display(self, duration: float = 0.0) -> None:
         """Show a Matplotlib display window of a maritime environment."""
         self._display.show(duration)
 
