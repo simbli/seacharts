@@ -62,22 +62,79 @@ class ENC:
         return self._environment.supported_layers
 
     def add_vessels(self, *args: Tuple[int, int, int, int, str]) -> None:
-        """Add colored vessel features to the displayed environment plot."""
+        """
+        Add colored vessel features to the displayed environment plot.
+        :param args: tuples with id, easting, northing, heading, color
+        :return: None
+        """
         self._display.refresh_vessels(list(args))
 
     def clear_vessels(self) -> None:
-        """Remove all vessel features from the environment plot."""
+        """
+        Remove all vessel features from the environment plot.
+        :return: None
+        """
         self._display.refresh_vessels([])
 
-    def show_display(self, duration: float = 0.0) -> None:
-        """Show a Matplotlib display window of a maritime environment."""
+    def add_ownship(self,
+                    easting: int,
+                    northing: int,
+                    heading: float,
+                    hull_scale: float = 1.0,
+                    lon_scale: float = 10.0,
+                    lat_scale: float = 10.0,
+                    ):
+        """
+        Add the body of a controllable vessel to the environment.
+        :param easting: int denoting the ownship X coordinate
+        :param northing: int denoting the ownship Y coordinate
+        :param heading: float denoting the ownship heading in degrees
+        :param hull_scale: optional float scaling the ownship body size
+        :param lon_scale: optional float scaling the longitudinal horizon
+        :param lat_scale: optional float scaling the lateral horizon
+        :return: None
+        """
+        self._environment.create_ownship(
+            easting, northing, heading, hull_scale, lon_scale, lat_scale
+        )
+        self._display.update_plot()
+
+    def remove_ownship(self):
+        """
+        Remove the controllable vessel from the environment.
+        :return: None
+        """
+        self._environment.ownship = None
+
+    def add_hazards(self, depth: int, buffer: int = 0) -> None:
+        """
+        Add hazardous areas the environment, filtered by given depth.
+        :param depth: int denoting the filter depth
+        :param buffer: optional int denoting the buffer distance
+        :return: None
+        """
+        self._environment.filter_hazardous_areas(depth, buffer)
+
+    def show_display(self, duration: int = 0.0) -> None:
+        """
+        Show a Matplotlib display window of a maritime environment.
+        :param duration: optional int for window pause duration
+        :return: None
+        """
         self._display.show(duration)
 
     def close_display(self) -> None:
-        """Close the environment display window and clear all vessels."""
+        """
+        Close the environment display window and clear all vessels.
+        :return: None
+        """
         self._display.terminate()
         self.clear_vessels()
 
     def save_image(self, name=None):
-        """Save the environment plot as a .png image."""
+        """
+        Save the environment plot as a .png image.
+        :param name: optional str of file name
+        :return: None
+        """
         self._display.save_figure(name)

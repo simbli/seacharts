@@ -11,11 +11,20 @@ from .colors import color_picker
 class FeaturesManager:
     def __init__(self, display: dis.Display):
         self._display = display
+        self._show_hazards = True
+        self._ownship = None
+        self._horizon = None
         self._vessels = {}
+        self._hazards = {}
         self._seabeds = {}
         self._land = None
         self._shore = None
         self._init_layers()
+
+    @property
+    def animated(self):
+        return [a for a in [self._horizon, *self._hazards.values(),
+                            *self._vessels.values(), self._ownship] if a]
 
     def _init_layers(self):
         layers = self._display.environment.hydrography.loaded_layers
@@ -32,10 +41,6 @@ class FeaturesManager:
         color = color_picker(land.color)
         self._land = self.new_artist(land.geometry, color, land.z_order)
 
-    @property
-    def animated(self):
-        return [artist for artist in self._vessels.values()]
-
     def new_artist(self, geometry, color, z_order=None):
         kwargs = dict(crs=self._display.crs)
         if z_order is not None:
@@ -51,6 +56,31 @@ class FeaturesManager:
         if z_order is None:
             artist.set_animated(True)
         return artist
+
+    def update_ownship(self):
+        ownship = self._display.environment.ownship
+        bc = color_picker('cyan')
+        hc = color_picker('full_horizon')
+        if self._ownship:
+            self._ownship.remove()
+        if self._horizon:
+            self._horizon.remove()
+        self._ownship = self.new_artist(ownship.geometry, bc)
+        self._horizon = self.new_artist(ownship.horizon, hc)
+
+    def update_hazards(self):
+        if self._show_hazards:
+            safe_area = self._display.environment.safe_area
+            sectors = self._display.environment.ownship.horizon_sectors
+            for color, geometry in sectors.items():
+                artist = self._hazards.pop(color, None)
+                if artist:
+                    artist.remove()
+                hazards = geometry.difference(safe_area.geometry)
+                if not hazards.is_empty:
+                    self._hazards[color] = self.new_artist(
+                        hazards, color_picker(color)
+                    )
 
     def update_vessels(self):
         entries = list(data.files.read_ship_poses())

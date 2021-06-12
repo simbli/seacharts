@@ -90,8 +90,11 @@ class Display:
     def is_active(self):
         return plt.fignum_exists(self.figure.number)
 
-    @staticmethod
-    def show(duration=0.0):
+    def show(self, duration=0.0):
+        if self.environment.ownship:
+            self.features.update_ownship()
+            if self.environment.safe_area:
+                self.features.update_hazards()
         try:
             plt.pause(duration)
         except TclError:
