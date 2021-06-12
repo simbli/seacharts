@@ -11,7 +11,8 @@ from .colors import color_picker
 class FeaturesManager:
     def __init__(self, display: dis.Display):
         self._display = display
-        self._show_hazards = True
+        self.show_ownship = False
+        self.show_hazards = False
         self._ownship = None
         self._horizon = None
         self._vessels = {}
@@ -58,18 +59,21 @@ class FeaturesManager:
         return artist
 
     def update_ownship(self):
-        ownship = self._display.environment.ownship
-        bc = color_picker('cyan')
-        hc = color_picker('full_horizon')
-        if self._ownship:
-            self._ownship.remove()
-        if self._horizon:
-            self._horizon.remove()
-        self._ownship = self.new_artist(ownship.geometry, bc)
-        self._horizon = self.new_artist(ownship.horizon, hc)
+        if self.show_ownship:
+            ownship = self._display.environment.ownship
+            bc = color_picker('cyan')
+            hc = color_picker('full_horizon')
+            if self._ownship:
+                self._ownship.remove()
+            if self._horizon:
+                self._horizon.remove()
+            self._ownship = self.new_artist(ownship.geometry, bc)
+            self._horizon = self.new_artist(ownship.horizon, hc)
+            if not self.show_hazards:
+                self._horizon.set_visible(False)
 
     def update_hazards(self):
-        if self._show_hazards:
+        if self.show_hazards:
             safe_area = self._display.environment.safe_area
             sectors = self._display.environment.ownship.horizon_sectors
             for color, geometry in sectors.items():
@@ -105,13 +109,29 @@ class FeaturesManager:
     def toggle_vessels_visibility(self):
         for artist in self._vessels.values():
             artist.set_visible(not artist.get_visible())
-        self._display.update_plot()
 
     def toggle_topography_visibility(self, new_state: bool = None):
         if new_state is None:
             new_state = not self._land.get_visible()
         self._land.set_visible(new_state)
         self._shore.set_visible(new_state)
+
+    def toggle_ownship_visibility(self):
+        self.show_ownship = not self.show_ownship
+        if self.show_ownship:
+            self.update_ownship()
+        self._ownship.set_visible(self.show_ownship)
+        self.toggle_hazards_visibility()
+        self._display.update_plot()
+
+    def toggle_hazards_visibility(self):
+        self.show_hazards = not self.show_hazards
+        self._horizon.set_visible(self.show_hazards)
+        for artist in self._hazards.values():
+            artist.set_visible(self.show_hazards)
+        if self.show_hazards:
+            self.update_hazards()
+        self._display.update_plot()
 
     def show_top_hidden_layer(self):
         artists = self._z_sorted_seabeds(descending=False)

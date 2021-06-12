@@ -70,21 +70,31 @@ class EventsManager:
             self._display.update_plot()
         elif event.key == 'v':
             self._display.features.toggle_vessels_visibility()
+            self._display.update_plot()
         elif event.key == 'l':
             self._display.features.toggle_topography_visibility()
             self._display.draw_plot()
         elif event.key in ['n', 'm']:
-            if self._display.environment.depth is not None:
+            if (self._display.environment.ownship
+                    and self._display.features.show_ownship
+                    and self._display.environment.depth is not None):
                 self._toggle_depth_filter_values(event.key)
         elif event.key == 'o':
-            if not self._display.environment.ownship:
-                self._add_ownship_to_plot_center()
-        elif event.key in self._directions:
             if self._display.environment.ownship:
+                self._display.features.toggle_ownship_visibility()
+            else:
+                self._add_ownship_to_plot_center()
+        elif event.key == 'z':
+            self._display.features.toggle_hazards_visibility()
+        elif event.key in self._directions:
+            if (self._display.environment.ownship
+                    and self._display.features.show_ownship):
                 self._direction_keys[event.key] = True
                 self._move_ownship()
         elif event.key in self._resizing:
-            self._resize_hazards_horizon(event.key)
+            if (self._display.environment.ownship
+                    and self._display.features.show_ownship):
+                self._resize_hazards_horizon(event.key)
 
     def _key_release(self, event):
         if event.key in self._directions:
@@ -95,9 +105,7 @@ class EventsManager:
         x, y = center[0] - 1414, center[1] - 1414
         self._display.environment.create_ownship(x, y, 45, 1, 10, 10)
         self._display.environment.filter_hazardous_areas(10)
-        self._display.features.update_ownship()
-        self._display.features.update_hazards()
-        self._display.update_plot()
+        self._display.features.toggle_ownship_visibility()
 
     def _move_ownship(self):
         x, y, psi, *params = self._display.environment.ownship.parameters
