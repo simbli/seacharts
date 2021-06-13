@@ -3,11 +3,11 @@ import configparser
 from . import paths as path
 
 
-def read_user_settings():
+def read_settings(category='USER'):
     settings = {}
     config = configparser.ConfigParser()
     config.read(path.config, encoding='utf8')
-    for key, value in config['USER'].items():
+    for key, value in config[category].items():
         settings[key] = [v.strip(' ') for v in value.split(',')]
     return settings
 

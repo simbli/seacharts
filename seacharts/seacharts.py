@@ -61,6 +61,14 @@ class ENC:
         """Return the supported feature layers."""
         return self._environment.supported_layers
 
+    def dark_mode(self, arg: bool = True):
+        """
+        Enable or disable dark mode view of environment figure.
+        :param arg: boolean switching dark mode on or off
+        :return: None
+        """
+        self._display.toggle_dark_mode(arg)
+
     def add_vessels(self, *args: Tuple[int, int, int, int, str]) -> None:
         """
         Add colored vessel features to the displayed environment plot.

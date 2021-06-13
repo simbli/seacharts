@@ -19,7 +19,7 @@ class Extent:
             raise ValueError(
                 f"Multiple location arguments given."
             )
-        defaults = config.read_user_settings()
+        defaults = config.read_settings()
 
         if self.origin is None:
             key = 'center'

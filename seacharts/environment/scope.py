@@ -21,7 +21,7 @@ class Scope:
     parser: data.parser.ShapefileParser = field(init=False)
 
     def __post_init__(self):
-        defaults = data.config.read_user_settings()
+        defaults = data.config.read_settings()
 
         key = 'buffer'
         if self.buffer is None:

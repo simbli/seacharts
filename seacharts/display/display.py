@@ -9,6 +9,7 @@ from typing import Tuple, List
 import matplotlib.pyplot as plt
 from cartopy.crs import UTM
 
+import seacharts.data.config as config
 import seacharts.environment as env
 from .events import EventsManager
 from .features import FeaturesManager
@@ -87,11 +88,11 @@ class Display:
         self._dark_mode = not self._dark_mode
         self.draw_plot()
 
-    def save_figure(self, name=None):
+    def save_figure(self, name=None, scale=1.0):
         if name is None:
             name = self.figure.canvas.manager.get_window_title()
-        self.figure.savefig(f"reports/{name}.png", dpi=self.figure.dpi,
-                            bbox_inches='tight', pad_inches=0.5)
+        self.figure.savefig(f"reports/{name}.png", dpi=self.figure.dpi * scale,
+                            bbox_inches='tight', pad_inches=0.0)
 
     @property
     def is_active(self):
