@@ -108,7 +108,7 @@ class Shape(Drawable, ABC):
             raise NotImplementedError
 
     @staticmethod
-    def _collect(geometries):
+    def collect(geometries):
         return ops.unary_union(geometries)
 
 
@@ -142,7 +142,7 @@ class Layer(Shape, ABC):
 
     def unify(self, records):
         geometries = [self._record_to_geometry(r) for r in records]
-        self.geometry = self._collect(geometries)
+        self.geometry = self.collect(geometries)
 
 
 @dataclass

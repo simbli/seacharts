@@ -25,7 +25,8 @@ class FeaturesManager:
     @property
     def animated(self):
         return [a for a in [self._horizon, *self._hazards.values(),
-                            *self._vessels.values(), self._ownship] if a]
+                            *[v['artist'] for v in self._vessels.values()],
+                            self._ownship] if a]
 
     def _init_layers(self):
         layers = self._display.environment.hydrography.loaded_layers
@@ -80,7 +81,12 @@ class FeaturesManager:
                 artist = self._hazards.pop(color, None)
                 if artist:
                     artist.remove()
-                hazards = geometry.difference(safe_area.geometry)
+                vessel_horizons = spl.Shape.collect(
+                    [v['ship'].horizon for v in self._vessels.values()]
+                )
+                obstacles = geometry.difference(safe_area.geometry)
+                bodies = geometry.intersection(vessel_horizons)
+                hazards = obstacles.union(bodies)
                 if not hazards.is_empty:
                     self._hazards[color] = self.new_artist(
                         hazards, color_picker(color)
@@ -89,25 +95,26 @@ class FeaturesManager:
     def update_vessels(self):
         entries = list(data.files.read_ship_poses())
         if entries is not None and len(entries) > 0:
-            new_artists = {}
+            new_vessels = {}
             for ship_details in entries:
                 ship_id = ship_details[0]
                 pose = ship_details[1:4]
                 color = color_picker(ship_details[4])
-                ship = spl.Ship(*pose, in_degrees=True)
+                ship = spl.Ship(*pose, lon_scale=2.0, lat_scale=1.0)
                 artist = self.new_artist(ship.geometry, color)
                 if self._vessels.get(ship_id, None):
-                    self._vessels.pop(ship_id).remove()
-                new_artists[ship_id] = artist
-            self.replace_vessels(new_artists)
+                    self._vessels.pop(ship_id)['artist'].remove()
+                new_vessels[ship_id] = dict(ship=ship, artist=artist)
+            self.replace_vessels(new_vessels)
 
     def replace_vessels(self, new_artists):
-        for artist in self._vessels.values():
-            artist.remove()
+        for vessel in self._vessels.values():
+            vessel['artist'].remove()
         self._vessels = new_artists
 
     def toggle_vessels_visibility(self):
-        for artist in self._vessels.values():
+        for vessel in self._vessels.values():
+            artist = vessel['artist']
             artist.set_visible(not artist.get_visible())
 
     def toggle_topography_visibility(self, new_state: bool = None):
