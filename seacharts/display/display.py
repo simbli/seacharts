@@ -17,32 +17,42 @@ from .features import FeaturesManager
 
 class Display:
     crs = UTM(33)
-    figure_size = 18, 12
+    settings = config.read_settings('DISPLAY')
 
     def __init__(self, environment: env.Environment = None):
-        if environment is not None:
-            self.environment = environment
-        else:
+        if environment is None:
             self.environment = env.Environment()
-        self.figure = plt.figure('SeaCharts', figsize=self.figure_size)
-        self.axes = self.figure.add_subplot(projection=self.crs)
-        self._background = None
+        else:
+            self.environment = environment
         self._dark_mode = False
-        self._format_hypsometry()
+        self._background = None
+        self.figure = self._init_figure()
+        self.axes = self._init_axes()
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self.draw_plot()
+        if int(self.settings['dark_mode'][0]):
+            self.toggle_dark_mode()
         if environment is None:
             self.start_visualization_loop()
 
-    def _format_hypsometry(self):
+    def _init_figure(self):
+        dpi = int(self.settings['dpi'][0])
+        resolution = int(self.settings['resolution'][0])
+        width, height = self.environment.scope.extent.size
+        window_height, ratio = resolution / dpi, width / height
+        figure_size = ratio * window_height, window_height
+        figure = plt.figure('SeaCharts', figsize=figure_size, dpi=dpi)
+        figure.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        return figure
+
+    def _init_axes(self):
+        axes = self.figure.add_subplot(projection=self.crs)
         x_min, y_min, x_max, y_max = self.environment.scope.extent.bbox
-        self.axes.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
-        self.axes.background_patch.set_visible(False)
-        self.axes.outline_patch.set_visible(False)
-        self.figure.subplots_adjust(
-            left=0.05, right=0.95, bottom=0.05, top=0.95
-        )
+        axes.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
+        axes.background_patch.set_visible(False)
+        axes.outline_patch.set_visible(False)
+        return axes
 
     def start_visualization_loop(self):
         print()
@@ -82,10 +92,11 @@ class Display:
         self.figure.canvas.blit()
         self.figure.canvas.flush_events()
 
-    def toggle_dark_mode(self):
-        self.features.toggle_topography_visibility(self._dark_mode)
-        self.figure.set_facecolor('#ffffff' if self._dark_mode else '#142c38')
-        self._dark_mode = not self._dark_mode
+    def toggle_dark_mode(self, state=None):
+        state = state if state is not None else not self._dark_mode
+        self.figure.set_facecolor('#142c38' if state else '#ffffff')
+        self.features.toggle_topography_visibility(not state)
+        self._dark_mode = state
         self.draw_plot()
 
     def save_figure(self, name=None, scale=1.0):
