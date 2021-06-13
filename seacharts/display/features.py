@@ -13,10 +13,13 @@ class FeaturesManager:
         self._display = display
         self.show_ownship = False
         self.show_hazards = False
+        self.show_vessels = True
+        self.show_arrows = True
         self._ownship = None
         self._horizon = None
         self._vessels = {}
         self._hazards = {}
+        self._arrows = {}
         self._seabeds = {}
         self._land = None
         self._shore = None
@@ -26,6 +29,7 @@ class FeaturesManager:
     def animated(self):
         return [a for a in [self._horizon, *self._hazards.values(),
                             *[v['artist'] for v in self._vessels.values()],
+                            *self._arrows.values(),
                             self._ownship] if a]
 
     def _init_layers(self):
@@ -84,44 +88,78 @@ class FeaturesManager:
                 vessel_horizons = spl.Shape.collect(
                     [v['ship'].horizon for v in self._vessels.values()]
                 )
-                obstacles = geometry.difference(safe_area.geometry)
-                bodies = geometry.intersection(vessel_horizons)
-                hazards = obstacles.union(bodies)
+                hazards = geometry.difference(safe_area.geometry)
+                if self.show_vessels:
+                    bodies = geometry.intersection(vessel_horizons)
+                    hazards = hazards.union(bodies)
+                artist = self._arrows.pop(color, None)
+                if artist:
+                    artist.remove()
                 if not hazards.is_empty:
                     self._hazards[color] = self.new_artist(
                         hazards, color_picker(color)
                     )
+                    if self.show_arrows:
+                        arrow = self.calculate_arrow(hazards)
+                        self._arrows[color] = self.new_artist(
+                            arrow, color_picker('orange')
+                        )
+
+    def calculate_arrow(self, hazards):
+        if not spl.Shape.is_multi(hazards):
+            hazards = spl.Shape.as_multi(hazards)
+        ownship = self._display.environment.ownship
+        lines = []
+        for polygon in list(hazards):
+            near = ownship.closest_points(polygon.exterior)
+            lines.append(spl.Shape.line_between(near, ownship.center))
+        shortest = sorted(lines, key=lambda x: x.length)[0]
+        interpolated = shortest.interpolate(
+            min(ownship.dimensions[1] * 0.8, shortest.length * 0.3))
+        head, base = shortest.coords[0], interpolated.coords[0]
+        (x1, y1), (x2, y2) = head, base
+        dx, dy = (x2 - x1) / 3, (y2 - y1) / 3
+        left, right = (x2 - dy, y2 + dx), (x2 + dy, y2 - dx)
+        return spl.Shape.arrow_head([(x1, y1), right, left])
 
     def update_vessels(self):
-        entries = list(data.files.read_ship_poses())
-        if entries is not None and len(entries) > 0:
-            new_vessels = {}
-            for ship_details in entries:
-                ship_id = ship_details[0]
-                pose = ship_details[1:4]
-                color = color_picker(ship_details[4])
-                ship = spl.Ship(*pose, lon_scale=2.0, lat_scale=1.0)
-                artist = self.new_artist(ship.geometry, color)
-                if self._vessels.get(ship_id, None):
-                    self._vessels.pop(ship_id)['artist'].remove()
-                new_vessels[ship_id] = dict(ship=ship, artist=artist)
-            self.replace_vessels(new_vessels)
+        if self.show_vessels:
+            entries = list(data.files.read_ship_poses())
+            if entries is not None and len(entries) > 0:
+                new_vessels = {}
+                for ship_details in entries:
+                    ship_id = ship_details[0]
+                    pose = ship_details[1:4]
+                    color = color_picker(ship_details[4])
+                    ship = spl.Ship(*pose, lon_scale=2.0, lat_scale=1.0)
+                    artist = self.new_artist(ship.geometry, color)
+                    if self._vessels.get(ship_id, None):
+                        self._vessels.pop(ship_id)['artist'].remove()
+                    new_vessels[ship_id] = dict(ship=ship, artist=artist)
+                self.replace_vessels(new_vessels)
 
     def replace_vessels(self, new_artists):
         for vessel in self._vessels.values():
             vessel['artist'].remove()
         self._vessels = new_artists
 
-    def toggle_vessels_visibility(self):
+    def toggle_vessels_visibility(self, new_state: bool = None):
+        if new_state is None:
+            new_state = not self.show_vessels
+        self.show_vessels = new_state
         for vessel in self._vessels.values():
             artist = vessel['artist']
             artist.set_visible(not artist.get_visible())
+        self.update_vessels()
+        self.update_hazards()
+        self._display.update_plot()
 
     def toggle_topography_visibility(self, new_state: bool = None):
         if new_state is None:
             new_state = not self._land.get_visible()
         self._land.set_visible(new_state)
         self._shore.set_visible(new_state)
+        self._display.draw_plot()
 
     def toggle_ownship_visibility(self):
         self.show_ownship = not self.show_ownship
@@ -136,8 +174,15 @@ class FeaturesManager:
         self._horizon.set_visible(self.show_hazards)
         for artist in self._hazards.values():
             artist.set_visible(self.show_hazards)
-        if self.show_hazards:
-            self.update_hazards()
+        self.toggle_arrows_visibility(self.show_hazards)
+
+    def toggle_arrows_visibility(self, new_state: bool = None):
+        if new_state is None:
+            new_state = not self.show_arrows
+            self.show_arrows = new_state
+        for artist in self._arrows.values():
+            artist.set_visible(new_state)
+        self.update_hazards()
         self._display.update_plot()
 
     def show_top_hidden_layer(self):

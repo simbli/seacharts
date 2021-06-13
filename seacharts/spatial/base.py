@@ -78,6 +78,9 @@ class Shape(Drawable, ABC):
     def merge(self, other: Shape):
         self.geometry = self.geometry.union(other.geometry)
 
+    def closest_points(self, geometry):
+        return ops.nearest_points(self.geometry, geometry)[1]
+
     @property
     def mapping(self) -> dict:
         return geo.mapping(self.geometry)
@@ -90,26 +93,37 @@ class Shape(Drawable, ABC):
     def invalid(self):
         return not self.geometry.is_valid
 
-    @property
-    def is_multi(self):
-        return isinstance(self.geometry, geo.MultiPolygon)
+    @staticmethod
+    def is_multi(geometry):
+        return (isinstance(geometry, geo.MultiPolygon)
+                or isinstance(geometry, geo.GeometryCollection))
 
     @staticmethod
     def _record_to_geometry(record):
         return geo.shape(record['geometry'])
 
     @staticmethod
-    def _geometry_to_multi(geometry):
+    def as_multi(geometry):
         if isinstance(geometry, geo.Point):
             return geo.MultiPoint([geometry])
         elif isinstance(geometry, geo.Polygon):
             return geo.MultiPolygon([geometry])
+        elif isinstance(geometry, geo.LineString):
+            return geo.MultiLineString([geometry])
         else:
-            raise NotImplementedError
+            raise NotImplementedError(type(geometry))
 
     @staticmethod
     def collect(geometries):
         return ops.unary_union(geometries)
+
+    @staticmethod
+    def line_between(point1, point2):
+        return geo.LineString([point1, point2])
+
+    @staticmethod
+    def arrow_head(points):
+        return geo.Polygon(points)
 
 
 @dataclass
@@ -134,7 +148,7 @@ class Layer(Shape, ABC):
         if len(records) > 0:
             self.geometry = self._record_to_geometry(records[0])
             if isinstance(self.geometry, geo.Polygon):
-                self.geometry = self._geometry_to_multi(self.geometry)
+                self.geometry = self.as_multi(self.geometry)
 
     def load_fgdb(self, parser):
         depth = self.depth if hasattr(self, 'depth') else 0

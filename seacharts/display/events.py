@@ -70,10 +70,8 @@ class EventsManager:
             self._display.update_plot()
         elif event.key == 'v':
             self._display.features.toggle_vessels_visibility()
-            self._display.update_plot()
         elif event.key == 'l':
             self._display.features.toggle_topography_visibility()
-            self._display.draw_plot()
         elif event.key in ['n', 'm']:
             if (self._display.environment.ownship
                     and self._display.features.show_ownship
@@ -86,6 +84,8 @@ class EventsManager:
                 self._add_ownship_to_plot_center()
         elif event.key == 'z':
             self._display.features.toggle_hazards_visibility()
+        elif event.key == 'a':
+            self._display.features.toggle_arrows_visibility()
         elif event.key == 'S':
             self._display.save_figure('high_resolution', 10.0)
         elif event.key in self._directions:
