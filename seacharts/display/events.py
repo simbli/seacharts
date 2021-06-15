@@ -18,6 +18,8 @@ class EventsManager:
         self._canvas = display.figure.canvas
         self._view_limits = dict(x=None, y=None)
         self._direction_keys = {d: False for d in self._directions}
+        self._control_pressed = False
+        self._shift_pressed = False
         self._mouse_press = None
         self._connect_canvas_events()
         self._remove_default_keybindings()
@@ -55,6 +57,10 @@ class EventsManager:
     def _key_press(self, event):
         if event.key == 'escape':
             self._display.terminate()
+        elif event.key == 'shift':
+            self._shift_pressed = True
+        elif event.key == 'control':
+            self._control_pressed = True
         elif event.key == 'd':
             self._display.toggle_dark_mode()
         elif event.key == 't':
@@ -101,6 +107,10 @@ class EventsManager:
     def _key_release(self, event):
         if event.key in self._directions:
             self._direction_keys[event.key] = False
+        elif event.key == 'shift':
+            self._shift_pressed = False
+        elif event.key == 'control':
+            self._control_pressed = False
 
     def _add_ownship_to_plot_center(self):
         center = self._display.environment.scope.extent.center
@@ -152,9 +162,19 @@ class EventsManager:
     def _click_press(self, event):
         if event.inaxes != self._display.axes:
             return
-        self._view_limits['x'] = self._display.axes.get_xlim()
-        self._view_limits['y'] = self._display.axes.get_ylim()
-        self._mouse_press = dict(x=event.xdata, y=event.ydata)
+        if self._shift_pressed or self._control_pressed:
+            if event.button in [plt.MouseButton.LEFT, plt.MouseButton.RIGHT]:
+                pick = event.xdata, event.ydata
+                coords = pick if event.button == plt.MouseButton.LEFT else None
+                path = 0 if self._shift_pressed else 1
+                self._mouse_press = dict(x=pick[0], y=pick[1])
+                self._display.features.update_waypoints(path, pick, coords)
+                self._display.update_plot()
+        else:
+            if event.button == plt.MouseButton.LEFT:
+                self._view_limits['x'] = self._display.axes.get_xlim()
+                self._view_limits['y'] = self._display.axes.get_ylim()
+                self._mouse_press = dict(x=event.xdata, y=event.ydata)
 
     def _click_release(self, _):
         self._mouse_press = None
@@ -165,11 +185,19 @@ class EventsManager:
             return
         if event.inaxes != self._display.axes:
             return
-        self._view_limits['x'] -= (event.xdata - self._mouse_press['x'])
-        self._view_limits['y'] -= (event.ydata - self._mouse_press['y'])
-        self._display.axes.set_xlim(self._view_limits['x'])
-        self._display.axes.set_ylim(self._view_limits['y'])
-        self._display.draw_plot()
+        if self._shift_pressed or self._control_pressed:
+            new_pos = event.xdata, event.ydata
+            old_pos = self._mouse_press['x'], self._mouse_press['y']
+            path = 0 if self._shift_pressed else 1
+            self._display.features.update_waypoints(path, old_pos, new_pos)
+            self._mouse_press = dict(x=new_pos[0], y=new_pos[1])
+            self._display.update_plot()
+        else:
+            self._view_limits['x'] -= (event.xdata - self._mouse_press['x'])
+            self._view_limits['y'] -= (event.ydata - self._mouse_press['y'])
+            self._display.axes.set_xlim(self._view_limits['x'])
+            self._display.axes.set_ylim(self._view_limits['y'])
+            self._display.draw_plot()
 
     @staticmethod
     def _remove_default_keybindings():

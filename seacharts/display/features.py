@@ -15,6 +15,7 @@ class FeaturesManager:
         self.show_hazards = False
         self.show_vessels = True
         self.show_arrows = True
+        self._paths = [spl.Path('yellow', 1), spl.Path('pink', 2)]
         self._ownship = None
         self._horizon = None
         self._vessels = {}
@@ -27,9 +28,11 @@ class FeaturesManager:
 
     @property
     def animated(self):
-        return [a for a in [self._horizon, *self._hazards.values(),
-                            *[v['artist'] for v in self._vessels.values()],
+        return [a for a in [self._horizon,
+                            *self._hazards.values(),
                             *self._arrows.values(),
+                            self._paths[0].artist, self._paths[1].artist,
+                            *[v['artist'] for v in self._vessels.values()],
                             self._ownship] if a]
 
     def _init_layers(self):
@@ -62,6 +65,25 @@ class FeaturesManager:
         if z_order is None:
             artist.set_animated(True)
         return artist
+
+    def update_waypoints(self, number, pick, coords=None):
+        path = self._paths[number]
+        index = path.locate_waypoint(*pick)
+        if coords is not None:
+            path.add_waypoint(*coords, index)
+        else:
+            if index is None:
+                index = path.locate_edge(*pick)
+                if index is None:
+                    return
+                else:
+                    path.add_waypoint(*pick, index, edge=True)
+            else:
+                path.remove_waypoint(index)
+        if path.artist:
+            path.artist.remove()
+        color = color_picker(path.color)
+        path.artist = self.new_artist(path.multi_shape, color)
 
     def update_ownship(self):
         if self.show_ownship:

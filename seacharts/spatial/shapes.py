@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar
 
 from shapely import affinity, geometry as geo
 
@@ -157,3 +157,107 @@ class Ship(Body):
             starboard_side=self.starboard_side_horizon,
             starboard_bow=self.starboard_bow_horizon,
         )
+
+
+@dataclass
+class Waypoint(Area, base.Radial, base.Coordinates):
+    resolution: InitVar[int] = 0
+
+    def __post_init__(self, resolution):
+        self.center = geo.Point(self.x, self.y)
+        self.geometry = self.center.buffer(self.radius, resolution=resolution)
+
+    def contains(self, x, y):
+        return self.geometry.contains(geo.Point(x, y))
+
+
+class Path:
+    def __init__(self, color, resolution=0):
+        self.color = color
+        self.resolution = resolution
+        self.waypoints = []
+        self.edges = []
+        self.artist = None
+
+    @property
+    def multi_shape(self):
+        return base.Shape.collect(
+            [x.geometry for x in self.waypoints] + self.edges
+        )
+
+    def add_waypoint(self, x, y, index=None, edge=False):
+        radius = 30
+        if index is None:
+            prev_wp = self.waypoints[-1] if self.waypoints else None
+            waypoint = Waypoint(x, y, radius, resolution=self.resolution)
+            if prev_wp:
+                prev_wp.next = waypoint
+                edge = self.edge_between(prev_wp, waypoint)
+                self.edges.append(edge)
+            self.waypoints.append(waypoint)
+        else:
+            if not edge:
+                if index > 0:
+                    prev_wp = self.waypoints[index - 1]
+                else:
+                    prev_wp = None
+                if index < len(self.waypoints) - 1:
+                    next_wp = self.waypoints[index + 1]
+                else:
+                    next_wp = None
+                waypoint = Waypoint(x, y, radius, resolution=self.resolution)
+                self.waypoints.pop(index)
+                self.waypoints.insert(index, waypoint)
+                if prev_wp:
+                    edge1 = self.edge_between(prev_wp, waypoint)
+                    self.edges.pop(index - 1)
+                    self.edges.insert(index - 1, edge1)
+                if next_wp:
+                    edge2 = self.edge_between(waypoint, next_wp)
+                    self.edges.pop(index)
+                    self.edges.insert(index, edge2)
+            else:
+                prev_wp = self.waypoints[index]
+                if index < len(self.waypoints) - 1:
+                    next_wp = self.waypoints[index + 1]
+                else:
+                    next_wp = None
+                waypoint = Waypoint(x, y, radius, resolution=self.resolution)
+                self.waypoints.insert(index + 1, waypoint)
+                new_edge = self.edge_between(prev_wp, waypoint)
+                self.edges.insert(index, new_edge)
+                if next_wp:
+                    self.edges[index + 1] = self.edge_between(waypoint,
+                                                              next_wp)
+
+    def remove_waypoint(self, index):
+        self.waypoints.pop(index)
+        if index == 0:
+            if self.edges:
+                self.edges.pop(0)
+        elif index < len(self.waypoints):
+            self.edges.pop(index)
+            previous_wp = self.waypoints[index - 1]
+            next_wp = self.waypoints[index]
+            self.edges[index - 1] = self.edge_between(previous_wp, next_wp)
+        else:
+            self.edges.pop(-1)
+
+    def locate_waypoint(self, x, y):
+        for i, waypoint in enumerate(self.waypoints):
+            if waypoint.contains(x, y):
+                return i
+        else:
+            return None
+
+    def locate_edge(self, x, y):
+        for i, edge in enumerate(self.edges):
+            if edge.contains(base.geo.Point(x, y)):
+                return i
+        else:
+            return None
+
+    @staticmethod
+    def edge_between(wp1, wp2):
+        line = wp1.line_between(wp1.center, wp2.center)
+        return line.buffer(7, cap_style=2, join_style=3)
