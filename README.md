@@ -5,7 +5,14 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![python version](https://img.shields.io/badge/python-3.9-blue)]()
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
-![](images/example.png?raw=true "Example usage visualization")
+![](images/example1.png?raw=true 
+"Example visualization with default settings")
+
+![](images/example2.png?raw=true 
+"Example visualization with dark mode and ownship hazards")
+
+![](images/example3.png?raw=true 
+"Example visualization with zoom and paths")
 
 ## Features
 
@@ -135,14 +142,35 @@ memory during runtime.
 
 ### Visualizing the environment
 The `ENC.show_display` method is used to show a Matplotlib figure plot of the 
-loaded seacharts features. Layers visibility may be toggled on and off using
-the `v`, `t`, `g`, `h`, `b`, `k` and `l` keys. Furthermore, vessels may be 
-added and shown by passing appropriately formatted vessel poses to the 
-`ENC.add_vessels` method, or manually storing the vessel details in 
-`data/vessels.csv`. The below snippet produces the example usage visualization 
-image shown at the top of this page, assuming a `More_og_Romsdal.gdb` directory 
-is correctly extracted and placed as discussed in the shapefile processing 
-section:
+loaded seacharts features. Zoom and pan the environment view using the mouse 
+scroll button, and holding and dragging the plot with left click, respectively. 
+
+Dark mode may be toggled using the `d` key, and individual layers visibility 
+may be toggled on and off using the `t`, `g`,`h`, `b`, and `l` keys. A 
+controllable ownship with a sector horizon of hazards and arrows pointing to 
+the closest point on a polygon within it may be added and toggled through the 
+`o`, `z` and `a` keys, respectively. Steer the ship with the arrows keys. 
+
+The filter depths of the displayed hazardous obstacles may be toggled using the
+`n` and `m` keys, and the size of the horizon may be altered using `,`, `.`,
+`[`, and `]` (on a US keyboard layout). Furthermore, vessels may be added and 
+shown by passing appropriately formatted vessel poses to the `ENC.add_vessels` 
+method, or manually storing the vessel details in `data/vessels.csv` and 
+pushing the `u` key to update the display. Toggle their visibility through the 
+`v` key.
+
+Shift left-click on the environment to add yellow path waypoints, move them 
+around by pressing Shift and holding down the mouse button, and Shift right-
+click to remove them. One may also Shift right-click on a path edge to create 
+an intermediate waypoint between two existing waypoints. Alternatively, a 
+second path of pink color may be added and manipulated by replacing Shift with 
+the Control key.
+ 
+A high-resolution image of the currently shown display may be saved by 
+`shift+s` or `S`. The below snippet produces the example usage visualization 
+images shown at the top of this page, assuming default settings and that a 
+`More_og_Romsdal.gdb` directory is correctly extracted and placed as discussed 
+in the shapefile processing section:
 
 ```python
 if __name__ == '__main__':
@@ -153,10 +181,9 @@ if __name__ == '__main__':
     ships = [  
         (1, 46100, 6957000, 132, 'orange'),
         (2, 45000, 6956000, 57, 'yellow'),
-        (3, 44100, 6957500, 178, 'purple'),
+        (3, 44100, 6957500, 178, 'red'),
         (4, 42000, 6955200, 86, 'green'),
         (5, 44000, 6955500, 68, 'pink'),
-        (6, 46600, 6956400, -68, 'red'),
     ]
 
     enc = seacharts.ENC()
@@ -169,7 +196,8 @@ if __name__ == '__main__':
 
 The `id` values of the vessel details should be unique identifiers, used as
 references to the feature artists added to the Matplotlib plot. The color 
-values are strings of any named Matplotlib [CSS4 color](
+values may be strings of one of the custom ship colors of this package, or any 
+named Matplotlib [CSS4 color](
 https://matplotlib.org/stable/gallery/color/named_colors.html).
 
 ### Visualization using multiprocessing
