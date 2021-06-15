@@ -13,7 +13,7 @@ class ShapefileParser:
         for file_name in self.file_names:
             file_path = path.external / file_name
             records = self._parse_layers(file_path, external_labels, depth)
-            return self._parse_records(records, label)
+            yield from self._parse_records(records, label)
 
     def read_shapefile(self, label):
         file_path = self._shapefile_path(label)
