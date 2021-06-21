@@ -21,12 +21,7 @@ def build_directory_structure(features):
 
 
 def write_rows_to_csv(rows, file_name='vessels'):
-    if file_name == 'hazards':
-        file_path = path.hazards
-    elif file_name == 'vessels':
-        file_path = path.vessels
-    else:
-        raise NotImplementedError
+    file_path = path.data / (file_name + '.csv')
     with open(file_path, 'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
         writer.writerows(rows)
@@ -34,7 +29,7 @@ def write_rows_to_csv(rows, file_name='vessels'):
 
 def read_ship_poses():
     try:
-        with open(path.vessels) as csv_file:
+        with open(path.data / 'vessels.csv') as csv_file:
             reader = csv.reader(csv_file, delimiter=',')
             _ = next(reader)
             rows = tuple(reader)

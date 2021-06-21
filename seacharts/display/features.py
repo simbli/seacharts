@@ -84,6 +84,8 @@ class FeaturesManager:
             path.artist.remove()
         color = color_picker(path.color)
         path.artist = self.new_artist(path.multi_shape, color)
+        points = [(wp.x, wp.y) for wp in path.waypoints]
+        data.files.write_rows_to_csv(points, 'path' + str(number))
 
     def update_ownship(self):
         if self.show_ownship:

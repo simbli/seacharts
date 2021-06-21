@@ -5,8 +5,6 @@ cwd = pathlib.Path.cwd()
 data = cwd / 'data'
 config = data / 'config.ini'
 external = data / 'external'
-hazards = data / 'hazards.csv'
-vessels = data / 'vessels.csv'
 shapefiles = data / 'shapefiles'
 
 reports = cwd / 'reports'
