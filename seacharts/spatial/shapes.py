@@ -172,9 +172,8 @@ class Waypoint(Area, base.Radial, base.Coordinates):
 
 
 class Path:
-    def __init__(self, color, resolution=0):
+    def __init__(self, color):
         self.color = color
-        self.resolution = resolution
         self.waypoints = []
         self.edges = []
         self.artist = None
@@ -189,7 +188,7 @@ class Path:
         radius = 30
         if index is None:
             prev_wp = self.waypoints[-1] if self.waypoints else None
-            waypoint = Waypoint(x, y, radius, resolution=self.resolution)
+            waypoint = Waypoint(x, y, radius, resolution=2)
             if prev_wp:
                 prev_wp.next = waypoint
                 edge = self.edge_between(prev_wp, waypoint)
@@ -205,7 +204,7 @@ class Path:
                     next_wp = self.waypoints[index + 1]
                 else:
                     next_wp = None
-                waypoint = Waypoint(x, y, radius, resolution=self.resolution)
+                waypoint = Waypoint(x, y, radius, resolution=2)
                 self.waypoints.pop(index)
                 self.waypoints.insert(index, waypoint)
                 if prev_wp:
@@ -222,7 +221,7 @@ class Path:
                     next_wp = self.waypoints[index + 1]
                 else:
                     next_wp = None
-                waypoint = Waypoint(x, y, radius, resolution=self.resolution)
+                waypoint = Waypoint(x, y, radius, resolution=2)
                 self.waypoints.insert(index + 1, waypoint)
                 new_edge = self.edge_between(prev_wp, waypoint)
                 self.edges.insert(index, new_edge)

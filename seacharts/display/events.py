@@ -166,7 +166,7 @@ class EventsManager:
             if event.button in [plt.MouseButton.LEFT, plt.MouseButton.RIGHT]:
                 pick = event.xdata, event.ydata
                 coords = pick if event.button == plt.MouseButton.LEFT else None
-                path = 0 if self._shift_pressed else 1
+                path = 1 if self._shift_pressed else 2
                 self._mouse_press = dict(x=pick[0], y=pick[1])
                 self._display.features.update_waypoints(path, pick, coords)
                 self._display.update_plot()
@@ -188,7 +188,7 @@ class EventsManager:
         if self._shift_pressed or self._control_pressed:
             new_pos = event.xdata, event.ydata
             old_pos = self._mouse_press['x'], self._mouse_press['y']
-            path = 0 if self._shift_pressed else 1
+            path = 1 if self._shift_pressed else 2
             self._display.features.update_waypoints(path, old_pos, new_pos)
             self._mouse_press = dict(x=new_pos[0], y=new_pos[1])
             self._display.update_plot()

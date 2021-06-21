@@ -15,7 +15,7 @@ class FeaturesManager:
         self.show_hazards = False
         self.show_vessels = True
         self.show_arrows = True
-        self._paths = [spl.Path('yellow', 1), spl.Path('pink', 2)]
+        self._paths = [spl.Path('yellow'), spl.Path('pink')]
         self._ownship = None
         self._horizon = None
         self._vessels = {}
@@ -67,7 +67,7 @@ class FeaturesManager:
         return artist
 
     def update_waypoints(self, number, pick, coords=None):
-        path = self._paths[number]
+        path = self._paths[number - 1]
         index = path.locate_waypoint(*pick)
         if coords is not None:
             path.add_waypoint(*coords, index)
