@@ -37,6 +37,8 @@ class Display:
             self.start_visualization_loop()
 
     def _init_figure(self):
+        if int(self.settings['full_screen'][0]):
+            plt.rcParams['toolbar'] = 'None'
         dpi = int(self.settings['dpi'][0])
         resolution = int(self.settings['resolution'][0])
         width, height = self.environment.scope.extent.size
@@ -44,6 +46,8 @@ class Display:
         figure_size = ratio * window_height, window_height
         figure = plt.figure('SeaCharts', figsize=figure_size, dpi=dpi)
         figure.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        if int(self.settings['full_screen'][0]):
+            plt.get_current_fig_manager().full_screen_toggle()
         return figure
 
     def _init_axes(self):
