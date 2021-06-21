@@ -101,6 +101,7 @@ class FeaturesManager:
 
     def update_hazards(self):
         if self.show_hazards:
+            arrow_points = []
             safe_area = self._display.environment.safe_area
             sectors = self._display.environment.ownship.horizon_sectors
             for color, geometry in sectors.items():
@@ -123,9 +124,11 @@ class FeaturesManager:
                     )
                     if self.show_arrows:
                         arrow = self.calculate_arrow(hazards)
+                        arrow_points.append(list(arrow.exterior.coords[0]))
                         self._arrows[color] = self.new_artist(
                             arrow, color_picker('orange')
                         )
+            data.files.write_rows_to_csv(arrow_points, 'hazards')
 
     def calculate_arrow(self, hazards):
         if not spl.Shape.is_multi(hazards):
