@@ -103,39 +103,46 @@ class FeaturesManager:
 
     def update_hazards(self):
         if self.show_hazards:
-            arrow_points = []
+            ownship = self._display.environment.ownship
             safe_area = self._display.environment.safe_area
             sectors = self._display.environment.ownship.horizon_sectors
-            for color, geometry in sectors.items():
-                artist = self._hazards.pop(color, None)
-                if artist:
-                    artist.remove()
+            static_points = [() for _ in range(len(sectors))]
+            dynamic_points = [() for _ in range(len(sectors))]
+            for i, (color, geometry) in enumerate(sectors.items()):
+                for features in [self._hazards, self._arrows]:
+                    artist = features.pop(color, None)
+                    if artist:
+                        artist.remove()
                 vessel_horizons = spl.Shape.collect(
                     [v['ship'].horizon for v in self._vessels.values()]
                 )
-                hazards = geometry.difference(safe_area.geometry)
-                if self.show_vessels:
-                    bodies = geometry.intersection(vessel_horizons)
-                    hazards = hazards.union(bodies)
-                artist = self._arrows.pop(color, None)
-                if artist:
-                    artist.remove()
-                if not hazards.is_empty:
+                static = geometry.difference(safe_area.geometry)
+                dynamic = geometry.intersection(vessel_horizons)
+                if not (static.is_empty and dynamic.is_empty):
                     self._hazards[color] = self.new_artist(
-                        hazards, color_picker(color)
+                        static.union(dynamic), color_picker(color)
                     )
                     if self.show_arrows:
-                        arrow = self.calculate_arrow(hazards)
-                        arrow_points.append(list(arrow.exterior.coords[0]))
+                        arrow, length1 = None, -1
+                        if not static.is_empty:
+                            arrow1, length1 = self.closest(ownship, static)
+                            static_points[i] = arrow1.exterior.coords[0]
+                            arrow = arrow1
+                        if not dynamic.is_empty:
+                            arrow2, length2 = self.closest(ownship, dynamic)
+                            dynamic_points[i] = arrow2.exterior.coords[0]
+                            if arrow is None or length2 < length1:
+                                arrow = arrow2
                         self._arrows[color] = self.new_artist(
                             arrow, color_picker('orange')
                         )
-            data.files.write_rows_to_csv(arrow_points, 'hazards')
+            data.files.write_rows_to_csv(static_points, 'static', 'hazards')
+            data.files.write_rows_to_csv(dynamic_points, 'dynamic', 'hazards')
 
-    def calculate_arrow(self, hazards):
+    @staticmethod
+    def closest(ownship, hazards):
         if not spl.Shape.is_multi(hazards):
             hazards = spl.Shape.as_multi(hazards)
-        ownship = self._display.environment.ownship
         lines = []
         for polygon in list(hazards):
             near = ownship.closest_points(polygon.exterior)
@@ -147,7 +154,7 @@ class FeaturesManager:
         (x1, y1), (x2, y2) = head, base
         dx, dy = (x2 - x1) / 3, (y2 - y1) / 3
         left, right = (x2 - dy, y2 + dx), (x2 + dy, y2 - dx)
-        return spl.Shape.arrow_head([(x1, y1), right, left])
+        return spl.Shape.arrow_head([(x1, y1), right, left]), shortest.length
 
     def update_vessels(self):
         if self.show_vessels:

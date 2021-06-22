@@ -20,8 +20,11 @@ def build_directory_structure(features):
         shapefile_dir.mkdir(parents=True, exist_ok=True)
 
 
-def write_rows_to_csv(rows, file_name='vessels'):
-    file_path = path.data / (file_name + '.csv')
+def write_rows_to_csv(rows, file_name='vessels', folder=None):
+    if folder:
+        file_path = path.data / folder / (file_name + '.csv')
+    else:
+        file_path = path.data / (file_name + '.csv')
     with open(file_path, 'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
         writer.writerows(rows)
