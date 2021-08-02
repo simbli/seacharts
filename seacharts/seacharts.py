@@ -123,7 +123,29 @@ class ENC:
         """
         self._environment.filter_hazardous_areas(depth, buffer)
 
-    def show_display(self, duration: int = 0.0) -> None:
+    def add_circle_overlay(self,
+                           center: tuple,
+                           radius: float,
+                           color: str,
+                           fill: bool = True,
+                           thickness: float = None,
+                           edge_style: str = None,
+                           ):
+        """
+        Add a circle or disk overlay to the environment plot.
+        :param center: tuple of circle center coordinates
+        :param radius: float of circle radius
+        :param color: str of circle color
+        :param fill: bool which toggles the interior disk color
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str denoting the Matplotlib linestyle
+        :return: None
+        """
+        self._display.features.add_circle(
+            center, radius, color, fill, thickness, edge_style
+        )
+
+    def show_display(self, duration: float = 0.0) -> None:
         """
         Show a Matplotlib display window of a maritime environment.
         :param duration: optional int for window pause duration

@@ -50,8 +50,8 @@ class FeaturesManager:
         color = color_picker(land.color)
         self._land = self.new_artist(land.geometry, color, land.z_order)
 
-    def new_artist(self, geometry, color, z_order=None):
-        kwargs = dict(crs=self._display.crs)
+    def new_artist(self, geometry, color, z_order=None, **kwargs):
+        kwargs['crs'] = self._display.crs
         if z_order is not None:
             kwargs['zorder'] = z_order
         if isinstance(color, tuple):
@@ -65,6 +65,19 @@ class FeaturesManager:
         if z_order is None:
             artist.set_animated(True)
         return artist
+
+    def add_circle(self, center, radius, color_name, fill, linewidth,
+                   linestyle):
+        geometry = spl.Circle(*center, radius).geometry
+        color = color_picker(color_name)
+        if fill is False:
+            color = color[0], 'none'
+        kwargs = {}
+        if linewidth is not None:
+            kwargs['linewidth'] = linewidth
+        if linestyle is not None:
+            kwargs['linestyle'] = linestyle
+        self.new_artist(geometry, color, 0, **kwargs)
 
     def update_waypoints(self, number, pick, coords=None):
         path = self._paths[number - 1]

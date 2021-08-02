@@ -13,6 +13,13 @@ class Area(base.Shape):
 
 
 @dataclass
+class Circle(Area, base.Radial, base.Coordinates):
+    def __post_init__(self):
+        self.center = geo.Point(self.x, self.y)
+        self.geometry = geo.Polygon(self.center.buffer(self.radius))
+
+
+@dataclass
 class Body(Area, base.Oriented, base.Coordinates):
     def __post_init__(self):
         self.center = geo.Point(self.x, self.y)
