@@ -145,6 +145,28 @@ class ENC:
             center, radius, color, fill, thickness, edge_style
         )
 
+    def add_line_overlay(self,
+                         start: Tuple[float, float],
+                         end: Tuple[float, float],
+                         color: str,
+                         width: float = None,
+                         thickness: float = None,
+                         edge_style: Union[str, tuple] = None,
+                         ):
+        """
+
+        :param start: tuple of start point coordinate pair
+        :param end: tuple of end point coordinate pair
+        :param color: str of line color
+        :param width: float denoting the line buffer width
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :return: None
+        """
+        self._display.features.add_line(
+            start, end, color, width, thickness, edge_style
+        )
+
     def add_rectangle_overlay(self,
                               center: Tuple[float, float],
                               size: Tuple[float, float],

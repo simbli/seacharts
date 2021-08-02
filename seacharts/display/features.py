@@ -71,6 +71,12 @@ class FeaturesManager:
         geometry = spl.Circle(*center, radius).geometry
         self.add_overlay(geometry, color_name, fill, linewidth, linestyle)
 
+    def add_line(self, start, end, color_name, buffer, linewidth, linestyle):
+        if buffer is None:
+            buffer = 5
+        geometry = spl.Line(start=start, end=end).geometry.buffer(buffer)
+        self.add_overlay(geometry, color_name, True, linewidth, linestyle)
+
     def add_rectangle(self, center, size, color_name, rotation, fill,
                       linewidth, linestyle):
         geometry = spl.Rectangle(

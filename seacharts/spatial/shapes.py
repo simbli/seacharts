@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, InitVar
+from typing import Tuple
 
 from shapely import affinity, geometry as geo
 
@@ -10,6 +11,19 @@ from . import base
 @dataclass
 class Area(base.Shape):
     geometry: geo.Polygon = geo.Polygon()
+
+
+@dataclass
+class Line(base.Shape):
+    start: Tuple[float, float] = None
+    end: Tuple[float, float] = None
+
+    def __post_init__(self):
+        if self.start is None or self.end is None:
+            raise ValueError(
+                f"{self.__class__.__name__} must have a start and an end point"
+            )
+        self.geometry = geo.LineString((self.start, self.end))
 
 
 @dataclass
