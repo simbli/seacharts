@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import seacharts.display as dis
 import seacharts.environment as env
@@ -124,12 +124,12 @@ class ENC:
         self._environment.filter_hazardous_areas(depth, buffer)
 
     def add_circle_overlay(self,
-                           center: tuple,
+                           center: Tuple[float, float],
                            radius: float,
                            color: str,
                            fill: bool = True,
                            thickness: float = None,
-                           edge_style: str = None,
+                           edge_style: Union[str, tuple] = None,
                            ):
         """
         Add a circle or disk overlay to the environment plot.
@@ -138,11 +138,35 @@ class ENC:
         :param color: str of circle color
         :param fill: bool which toggles the interior disk color
         :param thickness: float denoting the Matplotlib linewidth
-        :param edge_style: str denoting the Matplotlib linestyle
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
         :return: None
         """
         self._display.features.add_circle(
             center, radius, color, fill, thickness, edge_style
+        )
+
+    def add_rectangle_overlay(self,
+                              center: Tuple[float, float],
+                              size: Tuple[float, float],
+                              color: str,
+                              rotation: float = 0.0,
+                              fill: bool = True,
+                              thickness: float = None,
+                              edge_style: Union[str, tuple] = None,
+                              ):
+        """
+        Add a rectangle or box overlay to the environment plot.
+        :param center: tuple of rectangle center coordinates
+        :param size: tuple of rectangle (width, height)
+        :param color: str of rectangle color
+        :param rotation: float denoting the rectangle rotation in degrees
+        :param fill: bool which toggles the interior rectangle color
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :return: None
+        """
+        self._display.features.add_rectangle(
+            center, size, color, rotation, fill, thickness, edge_style
         )
 
     def show_display(self, duration: float = 0.0) -> None:

@@ -15,6 +15,10 @@ class Area(base.Shape):
 @dataclass
 class Circle(Area, base.Radial, base.Coordinates):
     def __post_init__(self):
+        if not self.radius > 0:
+            raise ValueError(
+                f"{self.__class__.__name__} should have a positive area"
+            )
         self.center = geo.Point(self.x, self.y)
         self.geometry = geo.Polygon(self.center.buffer(self.radius))
 
@@ -33,6 +37,24 @@ class Body(Area, base.Oriented, base.Coordinates):
             polygon, -self.heading, use_radians=not self.in_degrees,
             origin=(self.center.x, self.center.y)
         )
+
+
+@dataclass
+class Rectangle(Body):
+    width: float = 0.0
+    height: float = 0.0
+
+    def _body_polygon(self) -> geo.Polygon:
+        if not self.width > 0 or not self.height > 0:
+            raise ValueError(
+                f"{self.__class__.__name__} should have a positive area"
+            )
+        return geo.Polygon((
+            (self.x - self.width, self.y - self.height),
+            (self.x + self.width, self.y - self.height),
+            (self.x + self.width, self.y + self.height),
+            (self.x - self.width, self.y + self.height),
+        ))
 
 
 @dataclass

@@ -69,6 +69,15 @@ class FeaturesManager:
     def add_circle(self, center, radius, color_name, fill, linewidth,
                    linestyle):
         geometry = spl.Circle(*center, radius).geometry
+        self.add_overlay(geometry, color_name, fill, linewidth, linestyle)
+
+    def add_rectangle(self, center, size, color_name, rotation, fill,
+                      linewidth, linestyle):
+        geometry = spl.Rectangle(
+            *center, heading=rotation, width=size[0], height=size[1]).geometry
+        self.add_overlay(geometry, color_name, fill, linewidth, linestyle)
+
+    def add_overlay(self, geometry, color_name, fill, linewidth, linestyle):
         color = color_picker(color_name)
         if fill is False:
             color = color[0], 'none'
