@@ -115,7 +115,13 @@ class Shape(Drawable, ABC):
 
     @staticmethod
     def collect(geometries):
-        return ops.unary_union(geometries)
+        if any(not g.is_valid for g in geometries):
+            geometries = [g.buffer(0) if not g.is_valid else g
+                          for g in geometries]
+        geometry = ops.unary_union(geometries)
+        if not geometry.is_valid:
+            geometry = geometry.buffer(0)
+        return geometry
 
     @staticmethod
     def line_between(point1, point2):
