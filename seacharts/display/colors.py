@@ -16,6 +16,7 @@ def _greens(bins=9):
 
 _ship_colors = dict(
     red=('#ff0000', '#ff000055'),
+    blue=('#0000ff', '#0000ff55'),
     orange=('#ff9900', '#ff990055'),
     yellow=('#ffcc00', '#ffcc0055'),
     green=('#00ff00', '#00ff0055'),
