@@ -83,8 +83,14 @@ class FeaturesManager:
     def add_line(self, start, end, color_name, buffer, linewidth, linestyle):
         if buffer is None:
             buffer = 5
-        geometry = spl.Line(start=start, end=end).geometry.buffer(buffer)
-        self.add_overlay(geometry, color_name, True, linewidth, linestyle)
+        if buffer == 0:
+            self._display.axes.plot([start[0], end[0]], [start[1], end[1]],
+                                    color=color_picker(color_name)[0],
+                                    linewidth=linewidth, linestyle=linestyle,
+                                    transform=self._display.crs)
+        else:
+            geometry = spl.Line(start=start, end=end).geometry.buffer(buffer)
+            self.add_overlay(geometry, color_name, True, linewidth, linestyle)
 
     def add_rectangle(self, center, size, color_name, rotation, fill,
                       linewidth, linestyle):
