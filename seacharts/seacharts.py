@@ -191,6 +191,28 @@ class ENC:
             start, end, color, width, thickness, edge_style
         )
 
+    def add_polygon_overlay(self,
+                            exterior: List[Tuple[float, float]],
+                            color: str,
+                            interiors: List[List[Tuple[float, float]]] = None,
+                            fill: bool = True,
+                            thickness: float = None,
+                            edge_style: Union[str, tuple] = None,
+                            ):
+        """
+        Add an arbitrary polygon shape overlay to the environment plot.
+        :param exterior: list of the exterior polygon coordinates (shell)
+        :param interiors: list of lists of interior polygon coordinates (holes)
+        :param color: str of rectangle color
+        :param fill: bool which toggles the interior shape color
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :return: None
+        """
+        self._display.features.add_polygon(
+            exterior, color, interiors, fill, thickness, edge_style
+        )
+
     def add_rectangle_overlay(self,
                               center: Tuple[float, float],
                               size: Tuple[float, float],

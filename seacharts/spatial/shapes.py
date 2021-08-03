@@ -12,6 +12,10 @@ from . import base
 class Area(base.Shape):
     geometry: geo.Polygon = geo.Polygon()
 
+    @staticmethod
+    def new_polygon(exterior, interiors=None):
+        return geo.Polygon(exterior, interiors)
+
 
 @dataclass
 class Line(base.Shape):
