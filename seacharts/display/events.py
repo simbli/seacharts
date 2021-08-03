@@ -92,6 +92,8 @@ class EventsManager:
             self._display.features.toggle_hazards_visibility()
         elif event.key == 'a':
             self._display.features.toggle_arrows_visibility()
+        elif event.key == 'c':
+            self._display.toggle_colorbar()
         elif event.key == 'S':
             self._display.save_figure('high_resolution', 10.0)
         elif event.key in self._directions:

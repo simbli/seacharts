@@ -66,13 +66,13 @@ def color_picker(name, bins=None):
 
 def colorbar(axes, depths):
     depths = list(depths)
-    ocean = color_picker('Ocean', len(depths))
-    colors = [_layer_colors['Shore']] + list(ocean)
+    ocean = list(_blues(len(depths)))
+    colors = [_layer_colors['shore']] + ocean[:-1]
     c_map = clr.LinearSegmentedColormap.from_list(
         'Custom terrain', colors, len(colors)
     )
-    c_map.set_over(_blues()[-1])
-    c_map.set_under(_layer_colors['Land'])
+    c_map.set_over(ocean[-1])
+    c_map.set_under(_layer_colors['land'])
     norm = clr.BoundaryNorm([0, 1] + depths[1:], c_map.N)
     kwargs = dict(cmap=c_map, norm=norm, extend='both',
                   format='%1i m', ticks=[0, 1] + depths[1:],

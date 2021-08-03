@@ -8,9 +8,11 @@ from typing import Tuple, List
 
 import matplotlib.pyplot as plt
 from cartopy.crs import UTM
+from matplotlib.gridspec import GridSpec
 
 import seacharts.data.config as config
 import seacharts.environment as env
+from .colors import colorbar
 from .events import EventsManager
 from .features import FeaturesManager
 
@@ -24,10 +26,11 @@ class Display:
             self.environment = env.Environment()
         else:
             self.environment = environment
+        self._colorbar = False
         self._dark_mode = False
         self._background = None
-        self.figure = self._init_figure()
-        self.axes = self._init_axes()
+        self.figure, self.sizes, self.spacing, widths = self._init_figure()
+        self.axes, self.grid_spec = self._init_axes(widths)
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self.draw_plot()
@@ -43,20 +46,38 @@ class Display:
         resolution = int(self.settings['resolution'][0])
         width, height = self.environment.scope.extent.size
         window_height, ratio = resolution / dpi, width / height
-        figure_size = ratio * window_height, window_height
-        figure = plt.figure('SeaCharts', figsize=figure_size, dpi=dpi)
-        figure.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        figure_width1, figure_height1 = ratio * window_height, window_height
+        axes1_width, axes2_width, width_space = figure_width1, 1.0, 0.3
+        axes_widths = axes1_width, axes2_width
+        figure_height2 = figure_height1
+        figure_width2 = axes1_width + width_space + 2 * axes2_width
+        figure_sizes = [(figure_width1, figure_height1),
+                        (figure_width2, figure_height2)]
+        sub1 = dict(
+            right=(axes1_width + width_space + axes2_width) / figure_width1,
+            wspace=2 * width_space / (axes1_width + axes2_width),
+        )
+        sub2 = dict(
+            right=(axes1_width + width_space + axes2_width) / figure_width2,
+            wspace=2 * width_space / axes1_width,
+        )
+        subplot_spacing = sub1, sub2
+        figure = plt.figure('SeaCharts', figsize=figure_sizes[0], dpi=dpi)
         if int(self.settings['full_screen'][0]):
             plt.get_current_fig_manager().full_screen_toggle()
-        return figure
+        return figure, figure_sizes, subplot_spacing, axes_widths
 
-    def _init_axes(self):
-        axes = self.figure.add_subplot(projection=self.crs)
+    def _init_axes(self, axes_widths):
+        gs = GridSpec(1, 2, width_ratios=axes_widths, **self.spacing[0],
+                      left=0.0, top=1.0, bottom=0.0, hspace=0.0)
+        axes1 = self.figure.add_subplot(gs[0, 0], projection=self.crs)
         x_min, y_min, x_max, y_max = self.environment.scope.extent.bbox
-        axes.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
-        axes.background_patch.set_visible(False)
-        axes.outline_patch.set_visible(False)
-        return axes
+        axes1.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
+        axes1.background_patch.set_visible(False)
+        axes1.outline_patch.set_visible(False)
+        axes2 = self.figure.add_subplot(gs[0, 1])
+        colorbar(axes2, self.environment.scope.depths)
+        return axes1, gs
 
     def start_visualization_loop(self):
         print()
@@ -101,6 +122,12 @@ class Display:
         self.figure.set_facecolor('#142c38' if state else '#ffffff')
         self.features.toggle_topography_visibility(not state)
         self._dark_mode = state
+        self.draw_plot()
+
+    def toggle_colorbar(self):
+        self._colorbar = not self._colorbar
+        self.grid_spec.update(**self.spacing[int(self._colorbar)])
+        self.figure.set_size_inches(self.sizes[int(self._colorbar)])
         self.draw_plot()
 
     def save_figure(self, name=None, scale=1.0):
