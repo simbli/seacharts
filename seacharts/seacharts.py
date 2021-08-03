@@ -123,6 +123,30 @@ class ENC:
         """
         self._environment.filter_hazardous_areas(depth, buffer)
 
+    def add_arrow_overlay(self,
+                          start: Tuple[float, float],
+                          end: Tuple[float, float],
+                          color: str,
+                          width: float = None,
+                          head_size: float = None,
+                          thickness: float = None,
+                          edge_style: Union[str, tuple] = None,
+                          ):
+        """
+        Add a straight arrow overlay to the environment plot.
+        :param start: tuple of start point coordinate pair
+        :param end: tuple of end point coordinate pair
+        :param color: str of line color
+        :param width: float denoting the line buffer width
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param head_size: float of head size (length) in meters
+        :return: None
+        """
+        self._display.features.add_arrow(
+            start, end, color, width, head_size, thickness, edge_style
+        )
+
     def add_circle_overlay(self,
                            center: Tuple[float, float],
                            radius: float,
@@ -154,7 +178,7 @@ class ENC:
                          edge_style: Union[str, tuple] = None,
                          ):
         """
-
+        Add a straight line overlay to the environment plot.
         :param start: tuple of start point coordinate pair
         :param end: tuple of end point coordinate pair
         :param color: str of line color

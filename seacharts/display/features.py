@@ -66,6 +66,15 @@ class FeaturesManager:
             artist.set_animated(True)
         return artist
 
+    def add_arrow(self, start, end, color_name, buffer, head_size, linewidth,
+                  linestyle):
+        if buffer is None:
+            buffer = 5
+        if head_size is None:
+            head_size = 50
+        body = spl.Arrow(start=start, end=end, width=buffer).body(head_size)
+        self.add_overlay(body, color_name, True, linewidth, linestyle)
+
     def add_circle(self, center, radius, color_name, fill, linewidth,
                    linestyle):
         geometry = spl.Circle(*center, radius).geometry
