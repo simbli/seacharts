@@ -43,6 +43,7 @@ _layer_colors = dict(
     seabed=_blues()[4],
     land=_greens()[4],
     shore=_greens()[3],
+    highlight=('#ffffff44', '#ffffff44'),
 )
 
 
