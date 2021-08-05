@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, InitVar
-from typing import Tuple
+from typing import Tuple, List
 
 from shapely import affinity, geometry as geo
 
@@ -19,8 +19,22 @@ class Area(base.Shape):
 
 @dataclass
 class Line(base.Shape):
+    points: List[Tuple[float, float]] = None
+
+    def __post_init__(self):
+        if self.points is None or len(self.points) < 2:
+            raise ValueError(
+                f"{self.__class__.__name__} must contain at least "
+                f"2 pairs of coordinates"
+            )
+        self.geometry = geo.LineString(self.points)
+
+
+@dataclass
+class Arrow(base.Shape):
     start: Tuple[float, float] = None
     end: Tuple[float, float] = None
+    width: float = None
 
     def __post_init__(self):
         if self.start is None or self.end is None:
@@ -32,11 +46,6 @@ class Line(base.Shape):
     @property
     def vector(self) -> Tuple[float, float]:
         return self.end[0] - self.start[0], self.end[1] - self.start[1]
-
-
-@dataclass
-class Arrow(Line):
-    width: float = None
 
     def body(self, head_size):
         if not head_size >= 0:

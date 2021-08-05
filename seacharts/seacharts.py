@@ -170,8 +170,7 @@ class ENC:
         )
 
     def add_line_overlay(self,
-                         start: Tuple[float, float],
-                         end: Tuple[float, float],
+                         points: List[Tuple[float, float]],
                          color: str,
                          width: float = None,
                          thickness: float = None,
@@ -179,8 +178,7 @@ class ENC:
                          ):
         """
         Add a straight line overlay to the environment plot.
-        :param start: tuple of start point coordinate pair
-        :param end: tuple of end point coordinate pair
+        :param points: list of tuples of coordinate pairs
         :param color: str of line color
         :param width: float denoting the line buffer width
         :param thickness: float denoting the Matplotlib linewidth
@@ -188,7 +186,7 @@ class ENC:
         :return: None
         """
         self._display.features.add_line(
-            start, end, color, width, thickness, edge_style
+            points, color, width, thickness, edge_style
         )
 
     def add_polygon_overlay(self,

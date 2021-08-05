@@ -80,16 +80,17 @@ class FeaturesManager:
         geometry = spl.Circle(*center, radius).geometry
         self.add_overlay(geometry, color_name, fill, linewidth, linestyle)
 
-    def add_line(self, start, end, color_name, buffer, linewidth, linestyle):
+    def add_line(self, points, color_name, buffer, linewidth, linestyle):
         if buffer is None:
             buffer = 5
         if buffer == 0:
-            self._display.axes.plot([start[0], end[0]], [start[1], end[1]],
+            x_coordinates, y_coordinates = zip(*points)
+            self._display.axes.plot(x_coordinates, y_coordinates,
                                     color=color_picker(color_name)[0],
                                     linewidth=linewidth, linestyle=linestyle,
                                     transform=self._display.crs)
         else:
-            geometry = spl.Line(start=start, end=end).geometry.buffer(buffer)
+            geometry = spl.Line(points=points).geometry.buffer(buffer)
             self.add_overlay(geometry, color_name, True, linewidth, linestyle)
 
     def add_polygon(self, exterior, color, interiors, fill, linewidth,
