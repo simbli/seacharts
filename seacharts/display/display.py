@@ -133,8 +133,10 @@ class Display:
     def save_figure(self, name=None, scale=1.0):
         if name is None:
             name = self.figure.canvas.manager.get_window_title()
-        self.figure.savefig(f"reports/{name}.png", dpi=self.figure.dpi * scale,
-                            bbox_inches='tight', pad_inches=0.0)
+        self.figure.savefig(
+            f"reports/{name}.png", dpi=self.figure.dpi * scale,
+            bbox_inches=self.figure.bbox_inches, pad_inches=0.0,
+        )
 
     @property
     def is_active(self):
