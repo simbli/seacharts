@@ -47,21 +47,26 @@ class _Hypsometry(ABC):
                         print(f"\rFound {info}.\n")
                     return
 
-                if scope.parser.verbose:
-                    print(f"\rMerging {info}...", end='')
-                layer.unify(records)
+                if scope.raw_data:
+                    if scope.parser.verbose:
+                        print(f"\rExtracting raw data from {info}...", end='')
+                    layer.extract_raw(records)
+                else:
+                    if scope.parser.verbose:
+                        print(f"\rMerging {info}...", end='')
+                    layer.unify(records)
 
-                if scope.parser.verbose:
-                    print(f"\rSimplifying {info}...", end='')
-                layer.simplify(scope.tolerance)
+                    if scope.parser.verbose:
+                        print(f"\rSimplifying {info}...", end='')
+                    layer.simplify(scope.tolerance)
 
-                if scope.parser.verbose:
-                    print(f"\rBuffering {info}...", end='')
-                self.add_buffer(layer, scope.buffer)
+                    if scope.parser.verbose:
+                        print(f"\rBuffering {info}...", end='')
+                    self.add_buffer(layer, scope.buffer)
 
-                if scope.parser.verbose:
-                    print(f"\rClipping {info}...", end='')
-                layer.clip(scope.extent.bbox)
+                    if scope.parser.verbose:
+                        print(f"\rClipping {info}...", end='')
+                    layer.clip(scope.extent.bbox)
 
                 layer.save(scope.parser)
                 if scope.parser.verbose:

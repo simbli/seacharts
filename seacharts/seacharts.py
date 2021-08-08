@@ -37,6 +37,7 @@ class ENC:
                  depths: Optional[List[int]] = None,
                  files: Optional[List[str]] = None,
                  new_data: Optional[bool] = None,
+                 raw_data: Optional[bool] = None,
                  border: Optional[bool] = None,
                  verbose: Optional[bool] = None,
                  multiprocessing: bool = False,
@@ -45,8 +46,8 @@ class ENC:
             dis.Display.init_multiprocessing()
             return
         self._environment = env.Environment(
-            size, origin, center, tolerance, buffer,
-            layers, depths, files, new_data, border, verbose,
+            size, origin, center, buffer, tolerance, layers, depths, files,
+            new_data, raw_data, border, verbose,
         )
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore

@@ -21,13 +21,14 @@ class Environment:
                  depths: List[int] = None,
                  files: List[str] = None,
                  new_data: bool = None,
+                 raw_data: bool = None,
                  border: bool = None,
                  verbose: bool = None,
                  ):
         extent = Extent(size, origin, center)
         self.scope = Scope(
             extent, buffer, tolerance, layers, depths, files, new_data,
-            border, verbose,
+            raw_data, border, verbose,
         )
         self.hydrography = spl.Hydrography(self.scope)
         self.topography = spl.Topography(self.scope)

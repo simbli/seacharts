@@ -164,6 +164,13 @@ class Layer(Shape, ABC):
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = self.collect(geometries)
 
+    def extract_raw(self, records):
+        geometries = [self._record_to_geometry(r) for r in records]
+        self.geometry = geo.MultiPolygon(
+            [list(g)[0] if isinstance(g, geo.MultiPolygon) else g.buffer(1)
+             for g in geometries]
+        )
+
 
 @dataclass
 class Locations(Layer, ABC):
