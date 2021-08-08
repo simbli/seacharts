@@ -6,7 +6,7 @@ import numpy as np
 
 def _blues(bins=9):
     # noinspection PyUnresolvedReferences
-    return plt.get_cmap('Blues')(np.linspace(0.6, 0.9, bins))
+    return plt.get_cmap('Blues')(np.linspace(0.6, 1.0, bins))
 
 
 def _greens(bins=9):
@@ -17,15 +17,17 @@ def _greens(bins=9):
 _ship_colors = dict(
     red=('#ff0000', '#ff000055'),
     blue=('#0000ff', '#0000ff55'),
-    orange=('#ff9900', '#ff990055'),
-    yellow=('#ffcc00', '#ffcc0055'),
     green=('#00ff00', '#00ff0055'),
+    yellow=('#ffff00', '#ffff0055'),
     cyan=('#00ffff', '#00ffff55'),
-    purple=('#b055ff', '#b055ff55'),
-    pink=('#ff77ff', '#ff77ff55'),
+    magenta=('#ff00ff', '#ff00ff55'),
+    pink=('#ff88ff', '#ff88ff55'),
+    purple=('#bb22ff', '#bb22ff55'),
+    orange=('#ff9900', '#ff990055'),
     darkgrey=('#666666', '#66666655'),
     lightgrey=('#b7b7b7', '#b7b7b755'),
-    white=('#d9d9d9', '#ffffff77'),
+    white=('#ffffff', '#ffffff77'),
+    black=('#000000', '#00000077'),
 )
 
 _horizon_colors = dict(
