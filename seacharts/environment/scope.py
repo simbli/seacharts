@@ -30,9 +30,9 @@ class Scope:
             default = data.config.parse(key, defaults)
             self.buffer = int(default[0])
             data.config.validate(key, self.buffer, int)
-        if self.buffer < 1:
+        if self.buffer < 0:
             raise ValueError(
-                f"Buffer should be a strictly positive integer."
+                f"Buffer should be a non-negative integer."
             )
 
         key = 'tolerance'
@@ -40,9 +40,9 @@ class Scope:
             default = data.config.parse(key, defaults)
             self.tolerance = int(default[0])
         data.config.validate(key, self.tolerance, int)
-        if self.tolerance < 1:
+        if self.tolerance < 0:
             raise ValueError(
-                f"Tolerance should be a strictly positive integer."
+                f"Tolerance should be a non-negative integer."
             )
 
         key = 'layers'
