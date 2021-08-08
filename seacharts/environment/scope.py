@@ -17,6 +17,7 @@ class Scope:
     depths: List[int] = None
     files: List[str] = None
     new_data: bool = None
+    border: bool = None
     verbose: bool = None
     parser: data.parser.ShapefileParser = field(init=False)
 
@@ -78,6 +79,12 @@ class Scope:
             self.new_data = bool(int(default[0]))
         data.config.validate(key, self.new_data, bool)
 
+        key = 'border'
+        if self.border is None:
+            default = data.config.parse(key, defaults)
+            self.border = bool(int(default[0]))
+        data.config.validate(key, self.border, bool)
+
         key = 'verbose'
         if self.verbose is None:
             default = data.config.parse(key, defaults)
@@ -93,6 +100,7 @@ class Scope:
             depths=self.depths,
             files=self.files,
             new_data=int(self.new_data),
+            border=int(self.border),
             verbose=int(self.verbose),
         ))
 

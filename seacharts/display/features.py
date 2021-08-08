@@ -49,6 +49,13 @@ class FeaturesManager:
         land = self._display.environment.topography.land
         color = color_picker(land.color)
         self._land = self.new_artist(land.geometry, color, land.z_order)
+        if self._display.environment.scope.border:
+            center = self._display.environment.scope.extent.center
+            size = self._display.environment.scope.extent.size
+            geometry = spl.Rectangle(*center, width=size[0] / 2, heading=0,
+                                     height=size[1] / 2).geometry
+            color = (color_picker('black')[0], 'none')
+            self.new_artist(geometry, color, 10000, linewidth=3)
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
         kwargs['crs'] = self._display.crs

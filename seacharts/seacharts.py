@@ -22,6 +22,7 @@ class ENC:
     :param depths: list(int...) of depth bins for feature layers
     :param files: list(str...) of file names for zipped FGDB files
     :param new_data: bool indicating if new files should be parsed
+    :param border: bool for showing a border around the environment plot
     :param verbose: bool for status printing during geometry processing
     :param multiprocessing: bool for independent visualization display
     """
@@ -36,6 +37,7 @@ class ENC:
                  depths: Optional[List[int]] = None,
                  files: Optional[List[str]] = None,
                  new_data: Optional[bool] = None,
+                 border: Optional[bool] = None,
                  verbose: Optional[bool] = None,
                  multiprocessing: bool = False,
                  ):
@@ -44,7 +46,7 @@ class ENC:
             return
         self._environment = env.Environment(
             size, origin, center, tolerance, buffer,
-            layers, depths, files, new_data, verbose,
+            layers, depths, files, new_data, border, verbose,
         )
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore
