@@ -28,12 +28,16 @@ class FeaturesManager:
 
     @property
     def animated(self):
-        return [a for a in [self._horizon,
-                            *self._hazards.values(),
-                            *self._arrows.values(),
-                            self._paths[0].artist, self._paths[1].artist,
-                            *[v['artist'] for v in self._vessels.values()],
-                            self._ownship] if a]
+        return [
+            a for a in [
+                self._horizon,
+                *self._hazards.values(),
+                *self._arrows.values(),
+                self._paths[0].artist, self._paths[1].artist,
+                *[v['artist'] for v in self._vessels.values()],
+                self._ownship,
+            ] if a
+        ]
 
     def _init_layers(self):
         layers = self._display.environment.hydrography.loaded_layers
@@ -215,13 +219,22 @@ class FeaturesManager:
     def update_vessels(self):
         if self.show_vessels:
             entries = list(data.files.read_ship_poses())
-            if entries is not None and len(entries) > 0:
+            if entries is not None:
                 new_vessels = {}
                 for ship_details in entries:
                     ship_id = ship_details[0]
                     pose = ship_details[1:4]
-                    color = color_picker(ship_details[4])
-                    ship = spl.Ship(*pose, lon_scale=2.0, lat_scale=1.0)
+                    other = ship_details[4]
+                    if len(other) > 0 and isinstance(other[0], str):
+                        color = color_picker(other[0])
+                    else:
+                        color = color_picker('red')
+                    kwargs = dict(
+                        scale=float(other[1]) if len(other) > 1 else 1.0,
+                        lon_scale=float(other[2]) if len(other) > 2 else 2.0,
+                        lat_scale=float(other[3]) if len(other) > 3 else 1.0,
+                    )
+                    ship = spl.Ship(*pose, **kwargs)
                     artist = self.new_artist(ship.geometry, color)
                     if self._vessels.get(ship_id, None):
                         self._vessels.pop(ship_id)['artist'].remove()

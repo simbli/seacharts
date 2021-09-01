@@ -34,10 +34,11 @@ def read_ship_poses():
     try:
         with open(path.data / 'vessels.csv') as csv_file:
             reader = csv.reader(csv_file, delimiter=',')
-            _ = next(reader)
+            _ = next(reader, None)
             rows = tuple(reader)
-    except PermissionError or FileNotFoundError or StopIteration:
+    except (PermissionError or FileNotFoundError
+            or StopIteration or RuntimeError):
         return
     for row in rows:
         if row:
-            yield int(row[0]), int(row[1]), int(row[2]), float(row[3]), row[4]
+            yield int(row[0]), int(row[1]), int(row[2]), float(row[3]), row[4:]
