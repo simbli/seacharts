@@ -5,17 +5,6 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![python version](https://img.shields.io/badge/python-3.9-blue)]()
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
-![](images/example1.png?raw=true 
-"Example visualization with demonstration shapes")
-
-![](images/example2.png?raw=true 
-"Example visualization with default settings")
-
-![](images/example3.png?raw=true 
-"Example visualization with dark mode and ownship hazards")
-
-![](images/example4.png?raw=true 
-"Example visualization with zoom and paths")
 
 ## Features
 
