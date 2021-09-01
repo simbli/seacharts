@@ -6,7 +6,7 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
 
-![](https://github.com/simbli/seacharts/blob/master/images/example1.png?raw=True
+![](https://github.com/simbli/seacharts/blob/master/images/example1.svg?raw=True
 "Example visualization with demonstration shapes")
 
 ## Features
@@ -64,7 +64,7 @@ the terminal of your virtual environment, and go get a cup of coffee while it
 does its thing.
 
 
-![](https://github.com/simbli/seacharts/blob/master/images/example2.png?raw=True 
+![](https://github.com/simbli/seacharts/blob/master/images/example2.svg?raw=True 
 "Example visualization with default settings")
 
 
@@ -115,7 +115,7 @@ configuration file. See the documentation of the `ENC` input parameters for
 descriptions of all available configuration settings.
 
 
-![](https://github.com/simbli/seacharts/blob/master/images/example3.png?raw=True 
+![](https://github.com/simbli/seacharts/blob/master/images/example3.svg?raw=True 
 "Example visualization with dark mode and ownship hazards")
 
 
@@ -148,7 +148,7 @@ See the documentation for each top-level ENC method for all API usage and
 visualization possibilities currently available to the SeaCharts package.
 
 
-![](https://github.com/simbli/seacharts/blob/master/images/example4.png?raw=True
+![](https://github.com/simbli/seacharts/blob/master/images/example4.svg?raw=True
 "Example visualization with zoom and paths")
 
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     enc.draw_rectangle(center, (width, height), 'pink', fill=False,
                        edge_style=(0, (10, 10)), thickness=1.5)
 
-    enc.save_image('example1', scale=2.0)
+    enc.save_image('example1', extension='svg')
 
     enc.show_display()
 
