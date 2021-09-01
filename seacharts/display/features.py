@@ -104,10 +104,16 @@ class FeaturesManager:
             geometry = spl.Line(points=points).geometry.buffer(buffer)
             self.add_overlay(geometry, color_name, True, linewidth, linestyle)
 
-    def add_polygon(self, exterior, color, interiors, fill, linewidth,
-                    linestyle):
-        geometry = spl.Area.new_polygon(exterior, interiors)
-        self.add_overlay(geometry, color, fill, linewidth, linestyle)
+    def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle):
+        try:
+            shape = list(shape)
+        except TypeError:
+            shape = [shape]
+        if isinstance(shape[0], tuple) or isinstance(shape[0], list):
+            shape = [shape]
+        for geometry in shape:
+            geometry = spl.Area.new_polygon(geometry, interiors)
+            self.add_overlay(geometry, color, fill, linewidth, linestyle)
 
     def add_rectangle(self, center, size, color_name, rotation, fill,
                       linewidth, linestyle):
