@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Any
 
 import seacharts.display as dis
 import seacharts.environment as env
@@ -142,15 +142,15 @@ class ENC:
         """
         self._environment.filter_hazardous_areas(depth, buffer)
 
-    def add_arrow_overlay(self,
-                          start: Tuple[float, float],
-                          end: Tuple[float, float],
-                          color: str,
-                          width: float = None,
-                          head_size: float = None,
-                          thickness: float = None,
-                          edge_style: Union[str, tuple] = None,
-                          ):
+    def draw_arrow(self,
+                   start: Tuple[float, float],
+                   end: Tuple[float, float],
+                   color: str,
+                   width: float = None,
+                   head_size: float = None,
+                   thickness: float = None,
+                   edge_style: Union[str, tuple] = None,
+                   ):
         """
         Add a straight arrow overlay to the environment plot.
         :param start: tuple of start point coordinate pair
@@ -166,14 +166,14 @@ class ENC:
             start, end, color, width, head_size, thickness, edge_style
         )
 
-    def add_circle_overlay(self,
-                           center: Tuple[float, float],
-                           radius: float,
-                           color: str,
-                           fill: bool = True,
-                           thickness: float = None,
-                           edge_style: Union[str, tuple] = None,
-                           ):
+    def draw_circle(self,
+                    center: Tuple[float, float],
+                    radius: float,
+                    color: str,
+                    fill: bool = True,
+                    thickness: float = None,
+                    edge_style: Union[str, tuple] = None,
+                    ):
         """
         Add a circle or disk overlay to the environment plot.
         :param center: tuple of circle center coordinates
@@ -188,13 +188,13 @@ class ENC:
             center, radius, color, fill, thickness, edge_style
         )
 
-    def add_line_overlay(self,
-                         points: List[Tuple[float, float]],
-                         color: str,
-                         width: float = None,
-                         thickness: float = None,
-                         edge_style: Union[str, tuple] = None,
-                         ):
+    def draw_line(self,
+                  points: List[Tuple[float, float]],
+                  color: str,
+                  width: float = None,
+                  thickness: float = None,
+                  edge_style: Union[str, tuple] = None,
+                  ):
         """
         Add a straight line overlay to the environment plot.
         :param points: list of tuples of coordinate pairs
@@ -208,18 +208,18 @@ class ENC:
             points, color, width, thickness, edge_style
         )
 
-    def add_polygon_overlay(self,
-                            exterior: List[Tuple[float, float]],
-                            color: str,
-                            interiors: List[List[Tuple[float, float]]] = None,
-                            fill: bool = True,
-                            thickness: float = None,
-                            edge_style: Union[str, tuple] = None,
-                            ):
+    def draw_polygon(self,
+                     geometry: Union[Any, List[Tuple[float, float]]],
+                     color: str,
+                     interiors: List[List[Tuple[float, float]]] = None,
+                     fill: bool = True,
+                     thickness: float = None,
+                     edge_style: Union[str, tuple] = None,
+                     ):
         """
         Add an arbitrary polygon shape overlay to the environment plot.
-        :param exterior: list of the exterior polygon coordinates (shell)
-        :param interiors: list of lists of interior polygon coordinates (holes)
+        :param geometry: Shapely geometry or list of exterior coordinates
+        :param interiors: list of lists of interior polygon coordinates
         :param color: str of rectangle color
         :param fill: bool which toggles the interior shape color
         :param thickness: float denoting the Matplotlib linewidth
@@ -227,18 +227,18 @@ class ENC:
         :return: None
         """
         self._display.features.add_polygon(
-            exterior, color, interiors, fill, thickness, edge_style
+            geometry, color, interiors, fill, thickness, edge_style
         )
 
-    def add_rectangle_overlay(self,
-                              center: Tuple[float, float],
-                              size: Tuple[float, float],
-                              color: str,
-                              rotation: float = 0.0,
-                              fill: bool = True,
-                              thickness: float = None,
-                              edge_style: Union[str, tuple] = None,
-                              ):
+    def draw_rectangle(self,
+                       center: Tuple[float, float],
+                       size: Tuple[float, float],
+                       color: str,
+                       rotation: float = 0.0,
+                       fill: bool = True,
+                       thickness: float = None,
+                       edge_style: Union[str, tuple] = None,
+                       ):
         """
         Add a rectangle or box overlay to the environment plot.
         :param center: tuple of rectangle center coordinates
@@ -261,6 +261,13 @@ class ENC:
         :return: None
         """
         self._display.show(duration)
+
+    def refresh_display(self) -> None:
+        """
+        Manually redraw the environment display window.
+        :return: None
+        """
+        self._display.draw_plot()
 
     def close_display(self) -> None:
         """
