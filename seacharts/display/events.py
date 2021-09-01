@@ -57,10 +57,6 @@ class EventsManager:
     def _key_press(self, event):
         if event.key == 'escape':
             self._display.terminate()
-        elif event.key == 'shift':
-            self._shift_pressed = True
-        elif event.key == 'control':
-            self._control_pressed = True
         elif event.key == 'd':
             self._display.toggle_dark_mode()
         elif event.key == 't':
@@ -96,10 +92,12 @@ class EventsManager:
             self._display.toggle_colorbar()
         elif event.key == 'f':
             self._display.toggle_fullscreen()
+        elif event.key == 'ctrl+s':
+            self._display.save_figure('standard')
         elif event.key == 's':
-            self._display.save_figure('high_resolution', 2.0)
+            self._display.save_figure('low_res', 2.0)
         elif event.key == 'S':
-            self._display.save_figure('high_resolution', 10.0)
+            self._display.save_figure('high_res', 10.0)
         elif event.key in self._directions:
             if (self._display.environment.ownship
                     and self._display.features.show_ownship):
@@ -109,6 +107,14 @@ class EventsManager:
             if (self._display.environment.ownship
                     and self._display.features.show_ownship):
                 self._resize_hazards_horizon(event.key)
+        elif event.key == 'shift':
+            self._shift_pressed = True
+        elif event.key == 'control':
+            self._control_pressed = True
+        elif event.key[:4] == 'alt+':
+            key = event.key[4:]
+            if key in self._directions:
+                self._move_figure_position(key)
 
     def _key_release(self, event):
         if event.key in self._directions:
@@ -117,6 +123,16 @@ class EventsManager:
             self._shift_pressed = False
         elif event.key == 'control':
             self._control_pressed = False
+
+    def _move_figure_position(self, key):
+        matrix = self._display.window_anchors
+        j, i = self._display.anchor_index
+        if key == 'left' or key == 'right':
+            i = (i + self._directions[key]) % len(matrix[0])
+        elif key == 'up' or key == 'down':
+            j = (j - self._directions[key]) % len(matrix)
+        self._display.anchor_index = j, i
+        self._display.set_figure_position()
 
     def _add_ownship_to_plot_center(self):
         center = self._display.environment.scope.extent.center
@@ -212,6 +228,7 @@ class EventsManager:
         dic['keymap.zoom'].remove('o')
         dic['keymap.grid'].remove('g')
         dic['keymap.save'].remove('s')
+        dic['keymap.save'].remove('ctrl+s')
         dic['keymap.back'].remove('left')
         dic['keymap.xscale'].remove('k')
         dic['keymap.yscale'].remove('l')
