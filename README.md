@@ -6,12 +6,15 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
 ![](images/example1.png?raw=true 
-"Example visualization with default settings")
+"Example visualization with demonstration shapes")
 
 ![](images/example2.png?raw=true 
-"Example visualization with dark mode and ownship hazards")
+"Example visualization with default settings")
 
 ![](images/example3.png?raw=true 
+"Example visualization with dark mode and ownship hazards")
+
+![](images/example4.png?raw=true 
 "Example visualization with zoom and paths")
 
 ## Features
@@ -70,8 +73,9 @@ does its thing.
 
 
 ## Usage
-This module supports reading and processing the `FGDB` files for sea depth data 
-found [here](
+This module supports reading and processing `FGDB` files for sea depth data 
+such as the Norwegian coastal data set used for demonstration purposes, found 
+[here](
 https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
 
 ### Downloading regional datasets
@@ -101,7 +105,7 @@ if __name__ == '__main__':
 
     import seacharts
 
-    size = 18000, 12000              # w, h (east, north) distance in meters
+    size = 9000, 5062                # w, h (east, north) distance in meters
     center = 44300, 6956450          # easting/northing (UTM zone 33N)
     files = ['More_og_Romsdal.gdb']  # Norwegian county database name
 
@@ -115,11 +119,11 @@ configuration file. See the documentation of the `ENC` input parameters for
 descriptions of all available configuration settings.
 
 
-### Accessing geometric shapes
+### API usage and accessing geometric shapes
 After the spatial data is parsed into shapefiles as shown above, geometric 
 shapes based on the [Shapely](https://pypi.org/project/Shapely/) library may 
 be accessed and manipulated through various `ENC` attributes. The seacharts 
-feature layers are stored in `seabed`, `shore` and `land`.
+feature layers are stored in `seabed`, `shore` and `land`. 
 
 ```python
 if __name__ == '__main__':
@@ -140,14 +144,22 @@ parameters may be different from the one used to extract the external `ENC`
 data, allowing for loading of more specific (smaller) areas of interest into 
 memory during runtime.
 
-### Visualizing the environment
+See the documentation for each top-level ENC method for all API usage and 
+visualization possibilities currently available to the SeaCharts package. 
+
+### Interactive environment visualization
 The `ENC.show_display` method is used to show a Matplotlib figure plot of the 
 loaded seacharts features. Zoom and pan the environment view using the mouse 
 scroll button, and holding and dragging the plot with left click, respectively. 
 
-Dark mode may be toggled using the `d` key, and individual layers visibility 
-may be toggled on and off using the `t`, `g`,`h`, `b`, and `l` keys. A 
-controllable ownship with a sector horizon of hazards and arrows pointing to 
+Fullscreen mode may be toggled using the `f` key, and dark mode may be toggled 
+using the `d` key. An optional colorbar showing the various depth legends may 
+be toggled using the `c` key. Moreover, the visibility of each individual layer 
+may be toggled on and off using the `t`, `g`,`h`, `b`, and `l` keys. Press and
+hold the left `Alt` key and press any of the arrow keys to move the anchor of
+the figure window. 
+
+A controllable ownship with a sector horizon of hazards and arrows pointing to 
 the closest point on a polygon within it may be added and toggled through the 
 `o`, `z` and `a` keys, respectively. Steer the ship with the arrows keys. 
 
@@ -156,29 +168,33 @@ The filter depths of the displayed hazardous obstacles may be toggled using the
 `[`, and `]` (on a US keyboard layout). Furthermore, vessels may be added and 
 shown by passing appropriately formatted vessel poses to the `ENC.add_vessels` 
 method, or manually storing the vessel details in `data/vessels.csv` and 
-pushing the `u` key to update the display. Toggle their visibility through the 
+pressing the `u` key to update the display. Toggle their visibility through the 
 `v` key.
 
 Shift left-click on the environment to add yellow path waypoints, move them 
 around by pressing Shift and holding down the mouse button, and Shift right-
 click to remove them. One may also Shift right-click on a path edge to create 
-an intermediate waypoint between two existing waypoints. Alternatively, a 
-second path of pink color may be added and manipulated by replacing Shift with 
-the Control key.
+an intermediate waypoint between two existing waypoints. Additionally, a 
+second path of magenta color may be added and manipulated by replacing Shift 
+with the Control key.
  
-A high-resolution image of the currently shown display may be saved by 
-`shift+s` or `S`. The below snippet produces the example usage visualization 
-images shown at the top of this page, assuming default settings and that a 
-`More_og_Romsdal.gdb` directory is correctly extracted and placed as discussed 
-in the shapefile processing section:
+Images of the currently shown display may be saved in various resolutions by 
+pressing Control + `s`, Shift + `s` or `s`. The below snippet produces the 
+example usage visualization images shown at the top of this page, assuming 
+default settings and that a `More_og_Romsdal.gdb` directory is correctly 
+extracted and placed as discussed in the shapefile processing section:
 
 ```python
 if __name__ == '__main__':
 
     import seacharts
-    
+
+    size = 9000, 5062
+    center = 44300, 6956450
+    enc = seacharts.ENC(border=True)
+
     # (id, easting, northing, heading, color)
-    ships = [  
+    ships = [
         (1, 46100, 6957000, 132, 'orange'),
         (2, 45000, 6956000, 57, 'yellow'),
         (3, 44100, 6957500, 178, 'red'),
@@ -186,9 +202,40 @@ if __name__ == '__main__':
         (5, 44000, 6955500, 68, 'pink'),
     ]
 
-    enc = seacharts.ENC()
-
     enc.add_vessels(*ships)
+
+    import shapely.geometry as geo
+
+    x, y = center
+    width, height = 1900, 1900
+    box = geo.Polygon((
+        (x - width, y - height),
+        (x + width, y - height),
+        (x + width, y + height),
+        (x - width, y + height),
+    ))
+    areas = list(box.difference(enc.seabed[10].geometry))
+    enc.draw_circle(center, 1000, 'yellow', thickness=2,
+                    edge_style='--')
+    enc.draw_rectangle(center, (600, 1200), 'blue', rotation=20)
+    enc.draw_circle(center, 700, 'green', edge_style=(0, (5, 8)),
+                    thickness=3, fill=False)
+    enc.draw_line([(center[0], center[1] + 800), center,
+                   (center[0] - 300, center[1] - 400)], 'white')
+    enc.draw_line([(center[0] - 300, center[1] + 400), center,
+                   (center[0] + 200, center[1] - 600)],
+                  'magenta', width=0.0, thickness=5.0,
+                  edge_style=(0, (1, 4)))
+    enc.draw_arrow(center, (center[0] + 700, center[1] + 600), 'orange',
+                   head_size=300, width=50, thickness=5)
+    enc.draw_polygon(enc.seabed[100].geometry[-3], 'cyan')
+    enc.draw_polygon(enc.shore.geometry[56], 'highlight')
+    for area in areas[3:8] + [areas[14], areas[17]] + areas[18:21]:
+        enc.draw_polygon(area, 'red')
+    enc.draw_rectangle(center, (width, height), 'pink', fill=False,
+                       edge_style=(0, (10, 10)), thickness=1.5)
+
+    enc.save_image('example1', scale=2.0)
 
     enc.show_display()
 

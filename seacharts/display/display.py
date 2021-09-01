@@ -216,12 +216,15 @@ class Display:
             manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
     def save_figure(self, name=None, scale=1.0):
-        if name is None:
-            name = self.figure.canvas.manager.get_window_title()
-        self.figure.savefig(
-            f"reports/{name}.png", dpi=self.figure.dpi * scale,
-            bbox_inches=self.figure.bbox_inches, pad_inches=0.0,
-        )
+        try:
+            if name is None:
+                name = self.figure.canvas.manager.get_window_title()
+            self.figure.savefig(
+                f"reports/{name}.png", dpi=self.figure.dpi * scale,
+                bbox_inches=self.figure.bbox_inches, pad_inches=0.0,
+            )
+        except tk.TclError:
+            plt.close()
 
     @property
     def is_active(self):
