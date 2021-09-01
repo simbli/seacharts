@@ -6,16 +6,16 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
 
-![](images/example1.png 
+![](https://github.com/simbli/seacharts/blob/master/images/example1.png?raw=True
 "Example visualization with demonstration shapes")
 
-![](images/example2.png 
+![](https://github.com/simbli/seacharts/blob/master/images/example2.png?raw=True 
 "Example visualization with default settings")
 
-![](images/example3.png 
+![](https://github.com/simbli/seacharts/blob/master/images/example3.png?raw=True 
 "Example visualization with dark mode and ownship hazards")
 
-![](images/example4.png 
+![](https://github.com/simbli/seacharts/blob/master/images/example4.png?raw=True
 "Example visualization with zoom and paths")
 
 
