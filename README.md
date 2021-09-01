@@ -9,16 +9,6 @@ Python-based API for Electronic Navigational Charts (ENC)
 ![](https://github.com/simbli/seacharts/blob/master/images/example1.png?raw=True
 "Example visualization with demonstration shapes")
 
-![](https://github.com/simbli/seacharts/blob/master/images/example2.png?raw=True 
-"Example visualization with default settings")
-
-![](https://github.com/simbli/seacharts/blob/master/images/example3.png?raw=True 
-"Example visualization with dark mode and ownship hazards")
-
-![](https://github.com/simbli/seacharts/blob/master/images/example4.png?raw=True
-"Example visualization with zoom and paths")
-
-
 ## Features
 
 - Read and process spatial depth data from 
@@ -74,6 +64,10 @@ the terminal of your virtual environment, and go get a cup of coffee while it
 does its thing.
 
 
+![](https://github.com/simbli/seacharts/blob/master/images/example2.png?raw=True 
+"Example visualization with default settings")
+
+
 ## Usage
 This module supports reading and processing `FGDB` files for sea depth data 
 such as the Norwegian coastal data set used for demonstration purposes, found 
@@ -121,6 +115,10 @@ configuration file. See the documentation of the `ENC` input parameters for
 descriptions of all available configuration settings.
 
 
+![](https://github.com/simbli/seacharts/blob/master/images/example3.png?raw=True 
+"Example visualization with dark mode and ownship hazards")
+
+
 ### API usage and accessing geometric shapes
 After the spatial data is parsed into shapefiles as shown above, geometric 
 shapes based on the [Shapely](https://pypi.org/project/Shapely/) library may 
@@ -147,7 +145,12 @@ data, allowing for loading of more specific (smaller) areas of interest into
 memory during runtime.
 
 See the documentation for each top-level ENC method for all API usage and 
-visualization possibilities currently available to the SeaCharts package. 
+visualization possibilities currently available to the SeaCharts package.
+
+
+![](https://github.com/simbli/seacharts/blob/master/images/example4.png?raw=True
+"Example visualization with zoom and paths")
+
 
 ### Interactive environment visualization
 The `ENC.show_display` method is used to show a Matplotlib figure plot of the 
