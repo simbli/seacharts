@@ -93,7 +93,7 @@ class EventsManager:
         elif event.key == 'f':
             self._display.toggle_fullscreen()
         elif event.key == 'ctrl+s':
-            self._display.save_figure('standard')
+            self._display.save_figure('svg', extension='svg')
         elif event.key == 's':
             self._display.save_figure('low_res', 2.0)
         elif event.key == 'S':

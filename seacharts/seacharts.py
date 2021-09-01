@@ -277,11 +277,16 @@ class ENC:
         self._display.terminate()
         self.clear_vessels()
 
-    def save_image(self, name: str = None, scale: float = 1.0):
+    def save_image(self,
+                   name: str = None,
+                   scale: float = 1.0,
+                   extension: str = 'png',
+                   ):
         """
         Save the environment plot as a .png image.
         :param name: optional str of file name
         :param scale: optional float scaling the image resolution
+        :param extension: optional str of file extension name
         :return: None
         """
-        self._display.save_figure(name, scale)
+        self._display.save_figure(name, scale, extension)

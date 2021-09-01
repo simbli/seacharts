@@ -215,12 +215,12 @@ class Display:
             manager = plt.get_current_fig_manager()
             manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
-    def save_figure(self, name=None, scale=1.0):
+    def save_figure(self, name=None, scale=1.0, extension='png'):
         try:
             if name is None:
                 name = self.figure.canvas.manager.get_window_title()
             self.figure.savefig(
-                f"reports/{name}.png", dpi=self.figure.dpi * scale,
+                f"reports/{name}.{extension}", dpi=self.figure.dpi * scale,
                 bbox_inches=self.figure.bbox_inches, pad_inches=0.0,
             )
         except tk.TclError:
