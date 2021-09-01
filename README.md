@@ -6,6 +6,19 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
 
+![](images/example1.png 
+"Example visualization with demonstration shapes")
+
+![](images/example2.png 
+"Example visualization with default settings")
+
+![](images/example3.png 
+"Example visualization with dark mode and ownship hazards")
+
+![](images/example4.png 
+"Example visualization with zoom and paths")
+
+
 ## Features
 
 - Read and process spatial depth data from 
