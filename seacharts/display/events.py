@@ -94,6 +94,10 @@ class EventsManager:
             self._display.features.toggle_arrows_visibility()
         elif event.key == 'c':
             self._display.toggle_colorbar()
+        elif event.key == 'f':
+            self._display.toggle_fullscreen()
+        elif event.key == 's':
+            self._display.save_figure('high_resolution', 2.0)
         elif event.key == 'S':
             self._display.save_figure('high_resolution', 10.0)
         elif event.key in self._directions:
@@ -214,3 +218,4 @@ class EventsManager:
         dic['keymap.forward'].remove('v')
         dic['keymap.forward'].remove('right')
         dic['keymap.all_axes'].remove('a')
+        dic['keymap.fullscreen'].remove('f')

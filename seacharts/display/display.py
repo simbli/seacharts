@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import datetime
 import time
+import tkinter as tk
 from multiprocessing import Process
-from tkinter import TclError
 from typing import Tuple, List
 
 import matplotlib.pyplot as plt
@@ -20,36 +20,61 @@ from .features import FeaturesManager
 class Display:
     crs = UTM(33)
     settings = config.read_settings('DISPLAY')
+    window_anchors = (
+        ('top_left', 'top', 'top_right'),
+        ('left', 'center', 'right'),
+        ('bottom_left', 'bottom', 'bottom_right'),
+    )
 
     def __init__(self, environment: env.Environment = None):
         if environment is None:
             self.environment = env.Environment()
         else:
             self.environment = environment
-        self._colorbar = False
+        self._fullscreen_mode = False
+        self._colorbar_mode = False
         self._dark_mode = False
         self._background = None
+        self.anchor_index = self._init_anchor_index()
         self.figure, self.sizes, self.spacing, widths = self._init_figure()
-        self.axes, self.grid_spec = self._init_axes(widths)
+        self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self.draw_plot()
+        if int(self.settings['full_screen_mode'][0]):
+            self.toggle_fullscreen()
+        else:
+            self.set_figure_position()
+        if int(self.settings['color_bar'][0]):
+            self.toggle_colorbar()
         if int(self.settings['dark_mode'][0]):
             self.toggle_dark_mode()
         if environment is None:
             self.start_visualization_loop()
 
+    def _init_anchor_index(self):
+        option = self.settings['anchor'][0]
+        for j in range(len(self.window_anchors)):
+            if option in self.window_anchors[j]:
+                return j, self.window_anchors[j].index(option)
+        else:
+            raise ValueError(
+                f"Invalid window anchor option '{option}', "
+                f"possible candidates are: \n"
+                f"{[o for options in self.window_anchors for o in options]}"
+            )
+
     def _init_figure(self):
-        if int(self.settings['full_screen'][0]):
+        if int(self.settings['full_screen_mode'][0]):
             plt.rcParams['toolbar'] = 'None'
         dpi = int(self.settings['dpi'][0])
         resolution = int(self.settings['resolution'][0])
         width, height = self.environment.scope.extent.size
         window_height, ratio = resolution / dpi, width / height
         figure_width1, figure_height1 = ratio * window_height, window_height
-        axes1_width, axes2_width, width_space = figure_width1, 1.0, 0.3
+        axes1_width, axes2_width, width_space = figure_width1, 1.1, 0.3
         axes_widths = axes1_width, axes2_width
-        figure_height2 = figure_height1
+        figure_height2 = figure_height1 * 0.998
         figure_width2 = axes1_width + width_space + 2 * axes2_width
         figure_sizes = [(figure_width1, figure_height1),
                         (figure_width2, figure_height2)]
@@ -63,8 +88,7 @@ class Display:
         )
         subplot_spacing = sub1, sub2
         figure = plt.figure('SeaCharts', figsize=figure_sizes[0], dpi=dpi)
-        if int(self.settings['full_screen'][0]):
-            plt.get_current_fig_manager().full_screen_toggle()
+        figure.canvas.toolbar.pack_forget()
         return figure, figure_sizes, subplot_spacing, axes_widths
 
     def _init_axes(self, axes_widths):
@@ -76,8 +100,8 @@ class Display:
         axes1.background_patch.set_visible(False)
         axes1.outline_patch.set_visible(False)
         axes2 = self.figure.add_subplot(gs[0, 1])
-        colorbar(axes2, self.environment.scope.depths)
-        return axes1, gs
+        cb = colorbar(axes2, self.environment.scope.depths)
+        return axes1, gs, cb
 
     def start_visualization_loop(self):
         print()
@@ -107,28 +131,89 @@ class Display:
         self.draw_animated_artists()
 
     def draw_plot(self):
-        self.figure.canvas.draw()
+        try:
+            self.figure.canvas.draw()
+        except tk.TclError:
+            plt.close()
         self._background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
         self.draw_animated_artists()
 
     def draw_animated_artists(self):
         for artist in self.features.animated:
             self.axes.draw_artist(artist)
-        self.figure.canvas.blit()
-        self.figure.canvas.flush_events()
+        try:
+            self.figure.canvas.blit()
+            self.figure.canvas.flush_events()
+        except tk.TclError:
+            plt.close()
 
     def toggle_dark_mode(self, state=None):
         state = state if state is not None else not self._dark_mode
-        self.figure.set_facecolor('#142c38' if state else '#ffffff')
+        color = '#142c38' if state else '#ffffff'
+        self.figure.set_facecolor(color)
+        self._colorbar.ax.set_facecolor(color)
         self.features.toggle_topography_visibility(not state)
         self._dark_mode = state
         self.draw_plot()
 
-    def toggle_colorbar(self):
-        self._colorbar = not self._colorbar
-        self.grid_spec.update(**self.spacing[int(self._colorbar)])
-        self.figure.set_size_inches(self.sizes[int(self._colorbar)])
+    def toggle_colorbar(self, state=None):
+        if state is not None:
+            self._colorbar_mode = state
+        else:
+            self._colorbar_mode = not self._colorbar_mode
+        self.grid_spec.update(**self.spacing[int(self._colorbar_mode)])
+        if not self._fullscreen_mode:
+            self.figure.set_size_inches(self.sizes[int(self._colorbar_mode)])
+            self.set_figure_position()
         self.draw_plot()
+
+    def toggle_fullscreen(self, state=None):
+        if state is not None:
+            self._fullscreen_mode = state
+        else:
+            self._fullscreen_mode = not self._fullscreen_mode
+        plt.get_current_fig_manager().full_screen_toggle()
+        if not self._fullscreen_mode:
+            self.figure.set_size_inches(self.sizes[int(self._colorbar_mode)])
+            self.set_figure_position()
+        self.draw_plot()
+
+    def set_figure_position(self):
+        j, i = self.anchor_index
+        option = self.window_anchors[j][i]
+        if option != 'default':
+            root = tk.Tk()
+            screen_width = int(root.winfo_screenwidth())
+            screen_height = int(root.winfo_screenheight())
+            root.destroy()
+            x_margin, y_margin = -10, -73
+            dpi = int(self.settings['dpi'][0])
+            size = self.sizes[int(self._colorbar_mode)]
+            width, height = [int(size[k] * dpi) for k in range(2)]
+            x_shifted = screen_width - width
+            y_shifted = screen_height - height
+            if option == 'center':
+                x, y = x_shifted // 2, y_shifted // 2
+            elif option == 'right':
+                x, y = x_shifted, y_shifted // 2
+            elif option == 'left':
+                x, y = 4, y_shifted // 2
+            elif option == 'top':
+                x, y = x_shifted // 2, 2
+            elif option == 'bottom':
+                x, y = x_shifted // 2, y_shifted + y_margin
+            elif option == 'top_right':
+                x, y = x_shifted, 2
+            elif option == 'top_left':
+                x, y = 4, 2
+            elif option == 'bottom_right':
+                x, y = x_shifted, y_shifted + y_margin
+            elif option == 'bottom_left':
+                x, y = 4, y_shifted + y_margin
+            else:
+                x, y = 4, 2
+            manager = plt.get_current_fig_manager()
+            manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
     def save_figure(self, name=None, scale=1.0):
         if name is None:
@@ -149,7 +234,7 @@ class Display:
                 self.features.update_hazards()
         try:
             plt.pause(duration)
-        except TclError:
+        except tk.TclError:
             plt.close()
 
     @staticmethod

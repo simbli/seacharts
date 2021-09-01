@@ -64,6 +64,22 @@ class ENC:
         """Return the supported feature layers."""
         return self._environment.supported_layers
 
+    def fullscreen_mode(self, arg: bool = True):
+        """
+        Enable or disable fullscreen mode view of environment figure.
+        :param arg: boolean switching fullscreen mode on or off
+        :return: None
+        """
+        self._display.toggle_fullscreen(arg)
+
+    def colorbar(self, arg: bool = True):
+        """
+        Enable or disable the colorbar legend of environment figure.
+        :param arg: boolean switching the colorbar on or off
+        :return: None
+        """
+        self._display.toggle_colorbar(arg)
+
     def dark_mode(self, arg: bool = True):
         """
         Enable or disable dark mode view of environment figure.

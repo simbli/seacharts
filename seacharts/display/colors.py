@@ -1,7 +1,7 @@
-import matplotlib.colorbar as clb
 import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.cm import ScalarMappable
 
 
 def _blues(bins=9):
@@ -24,9 +24,10 @@ _ship_colors = dict(
     pink=('#ff88ff', '#ff88ff55'),
     purple=('#bb22ff', '#bb22ff55'),
     orange=('#ff9900', '#ff990055'),
-    darkgrey=('#666666', '#66666655'),
-    lightgrey=('#b7b7b7', '#b7b7b755'),
     white=('#ffffff', '#ffffff77'),
+    lightgrey=('#b7b7b7', '#b7b7b755'),
+    grey=('#666666', '#66666655'),
+    darkgrey=('#333333', '#33333355'),
     black=('#000000', '#00000077'),
 )
 
@@ -42,10 +43,11 @@ _horizon_colors = dict(
 )
 
 _layer_colors = dict(
-    seabed=_blues()[4],
+    seabed=_blues()[0],
     land=_greens()[4],
     shore=_greens()[3],
     highlight=('#ffffff44', '#ffffff44'),
+    blank=('#ffffffff', '#ffffffff'),
 )
 
 
@@ -76,8 +78,13 @@ def colorbar(axes, depths):
     c_map.set_over(ocean[-1])
     c_map.set_under(_layer_colors['land'])
     norm = clr.BoundaryNorm([0, 1] + depths[1:], c_map.N)
-    kwargs = dict(cmap=c_map, norm=norm, extend='both',
+    kwargs = dict(extend='both', use_gridspec=True, extendfrac=0.1,
                   format='%1i m', ticks=[0, 1] + depths[1:],
                   boundaries=([depths[0] - 100] + [0, 1] +
                               depths[1:] + [depths[-1] + 100]))
-    clb.ColorbarBase(axes, **kwargs).ax.invert_yaxis()
+    mappable = ScalarMappable(norm=norm, cmap=c_map)
+    cb = plt.colorbar(mappable, cax=axes, **kwargs)
+    cb.ax.tick_params(labelsize=20, length=5, width=1.5)
+    cb.outline.set_linewidth(1.5)
+    cb.ax.invert_yaxis()
+    return cb
