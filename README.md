@@ -2,6 +2,7 @@
 Python-based API for Electronic Navigational Charts (ENC)
 
 [![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
+[![platform](https://img.shields.io/badge/platform-linux-lightgrey)]()
 [![python version](https://img.shields.io/badge/python-3.9-blue)]()
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
@@ -11,34 +12,56 @@ Python-based API for Electronic Navigational Charts (ENC)
 
 ## Features
 
-- Read and process spatial depth data from 
-[FileGDB](https://gdal.org/drivers/vector/filegdb.html) files into shapefiles.
- - Access and manipulate standard geometric shapes such as points and polygon 
- collections.
+- Read and process spatial depth data from
+  [FileGDB](https://gdal.org/drivers/vector/filegdb.html) files into
+  shapefiles.
+- Access and manipulate standard geometric shapes such as points and polygon
+  collections.
 - Visualize colorful seacharts features and vessels using multiprocessing.
 
-
 ## Code style
-This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/) 
-convention for Python code.
 
+This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
+convention for Python code.
 
 ## Prerequisites
 
-First, ensure that [Python 3.9](https://www.python.org/downloads/) 
-(or another compatible version) and the required [C++ build tools](
-https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019) 
-are installed.
+### Anaconda
 
-Next, the required Python packages must be installed (ideally in a fresh 
-virtual environment). In order to ensure that the correct version of Numpy+mkl 
-linked to the [Intel® Math Kernel Library](
+The simplest way to acquire the necessary dependencies for the SeaCharts
+package is to install an edition of the [Anaconda](
+https://www.anaconda.com/products/individual-d) package manager, and then
+create a new _conda environment_ with **Python 3.9** using e.g. the graphical
+user interface of [PyCharm Professional](
+https://www.jetbrains.com/lp/pycharm-anaconda/) as detailed [here](
+https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html
+).
+
+The required data processing libraries for spatial calculations and
+visualization may subsequently be installed simply by running the following
+command in the terminal of your chosen environment:
+
+```
+conda install -c conda-forge fiona cartopy matplotlib
+```
+
+### Pipwin (Windows)
+
+Alternatively, one may manually install the required packages manually by
+following these steps:
+
+First, ensure that [Python 3.9](https://www.python.org/downloads/)
+(or another compatible version) and the required [C++ build tools](
+https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
+are installed. Next, the required Python packages must be installed (ideally in
+a fresh virtual environment). In order to ensure that the correct version of
+Numpy+mkl linked to the [Intel® Math Kernel Library](
 https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html#gs.31vx8p)
-is installed, download the wheel according to your Python version and 
-Windows platform from [here](
-https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel 
-file e.g. in the same directory the terminal is run from, and install it. 
-The below snippet corresponds to Python 3.9 on Windows 64-bit:
+is installed, download the wheel according to your Python version and Windows
+platform from [here](
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel
+file e.g. in the same directory the terminal is run from, and install it. The
+below snippet corresponds to Python 3.9 on Windows 64-bit:
 ```
 pip install --upgrade pip
 pip install wheel
@@ -59,30 +82,41 @@ pipwin install matplotlib
 
 ```
 
-Simply copy and paste the entire block above (including the empty line) into 
-the terminal of your virtual environment, and go get a cup of coffee while it 
+Simply copy and paste the entire block above (including the empty line) into
+the terminal of your virtual environment, and go get a cup of coffee while it
 does its thing.
 
+## Installation
 
-![](https://github.com/simbli/seacharts/blob/master/images/example2.svg?raw=True 
+After the necessary dependencies have been correctly installed, the SeaCharts
+package may be installed directly through the Python Package Index ([PyPI](
+https://pypi.org/
+)) by running the following command in the terminal:
+
+```
+pip install seacharts
+```
+
+![](https://github.com/simbli/seacharts/blob/master/images/example2.svg?raw=True
 "Example visualization with default settings")
 
-
 ## Usage
-This module supports reading and processing `FGDB` files for sea depth data 
-such as the Norwegian coastal data set used for demonstration purposes, found 
+
+This module supports reading and processing `FGDB` files for sea depth data
+such as the Norwegian coastal data set used for demonstration purposes, found
 [here](
 https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
 
 ### Downloading regional datasets
-Follow the above link to download the `Depth data` (`Sjøkart - Dybdedata`) 
+
+Follow the above link to download the `Depth data` (`Sjøkart - Dybdedata`)
 dataset from the [Norwegian Mapping Authority](
-https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority), 
-by adding it to the Download queue and navigating to the separate 
-[download page](https://kartkatalog.geonorge.no/nedlasting). 
-Choose one or more county areas (e.g. `Møre og Romsdal`), and select the 
-`EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0` 
-format. Finally, select your appropriate user group and purpose, and click 
+https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority),
+by adding it to the Download queue and navigating to the separate
+[download page](https://kartkatalog.geonorge.no/nedlasting). Choose one or more
+county areas (e.g. `Møre og Romsdal`), and select the
+`EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0`
+format. Finally, select your appropriate user group and purpose, and click
 `Download` to obtain the ZIP file(s).
 
 ### Processing ENC data into shapefiles
