@@ -1,5 +1,7 @@
 from typing import List, Optional, Tuple, Union, Any
 
+import matplotlib
+
 import seacharts.display as dis
 import seacharts.environment as env
 
@@ -42,6 +44,7 @@ class ENC:
                  verbose: Optional[bool] = None,
                  multiprocessing: bool = False,
                  ):
+        matplotlib.use('TkAgg')
         if multiprocessing:
             dis.Display.init_multiprocessing()
             return
