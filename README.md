@@ -47,17 +47,16 @@ conda install -c conda-forge fiona cartopy matplotlib
 
 ### Pipwin (Windows)
 
-Alternatively, one may manually install the required packages manually by
-following these steps:
+Alternatively, one may manually install the required packages by following
+these steps:
 
 First, ensure that [Python 3.9](https://www.python.org/downloads/)
 (or another compatible version) and the required [C++ build tools](
 https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
-are installed. Next, the required Python packages must be installed (ideally in
-a fresh virtual environment). In order to ensure that the correct version of
-Numpy+mkl linked to the [Intel® Math Kernel Library](
+are installed. In order to ensure that the correct version of Numpy+mkl linked
+to the [Intel® Math Kernel Library](
 https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html#gs.31vx8p)
-is installed, download the wheel according to your Python version and Windows
+is acquired, download the wheel according to your Python version and Windows
 platform from [here](
 https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel
 file e.g. in the same directory the terminal is run from, and install it. The
