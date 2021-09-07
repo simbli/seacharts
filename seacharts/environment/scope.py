@@ -23,6 +23,7 @@ class Scope:
     parser: data.parser.ShapefileParser = field(init=False)
 
     def __post_init__(self):
+        data.files.build_directory_structure()
         defaults = data.config.read_settings()
 
         key = 'buffer'

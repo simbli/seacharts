@@ -151,7 +151,8 @@ class FeaturesManager:
         color = color_picker(path.color)
         path.artist = self.new_artist(path.multi_shape, color)
         points = [(wp.x, wp.y) for wp in path.waypoints]
-        data.files.write_rows_to_csv(points, str(number), 'paths')
+        file_path = [data.files.path.path1, data.files.path.path2][number - 1]
+        data.files.write_rows_to_csv(points, file_path)
 
     def update_ownship(self):
         if self.show_ownship:
@@ -202,8 +203,12 @@ class FeaturesManager:
                         self._arrows[color] = self.new_artist(
                             arrow, color_picker('orange')
                         )
-            data.files.write_rows_to_csv(static_points, 'static', 'hazards')
-            data.files.write_rows_to_csv(dynamic_points, 'dynamic', 'hazards')
+            data.files.write_rows_to_csv(
+                static_points, data.files.path.static
+            )
+            data.files.write_rows_to_csv(
+                dynamic_points, data.files.path.dynamic
+            )
 
     @staticmethod
     def closest(ownship, hazards):
@@ -331,5 +336,6 @@ class FeaturesManager:
     @staticmethod
     def vessels_to_file(vessel_poses: list):
         data.files.write_rows_to_csv(
-            [('id', 'easting', 'northing', 'heading', 'color')] + vessel_poses
+            [('id', 'easting', 'northing', 'heading', 'color')] + vessel_poses,
+            data.files.path.vessels
         )

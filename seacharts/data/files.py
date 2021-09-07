@@ -10,21 +10,28 @@ def verify_directory_exists(dir_path):
         )
 
 
-def build_directory_structure(features):
-    path.reports.mkdir(parents=True, exist_ok=True)
-    path.external.mkdir(parents=True, exist_ok=True)
-    path.shapefiles.mkdir(parents=True, exist_ok=True)
-    path.frames_dir.mkdir(parents=True, exist_ok=True)
-    for feature in features:
-        shapefile_dir = path.shapefiles / feature.lower()
-        shapefile_dir.mkdir(parents=True, exist_ok=True)
+def build_directory_structure(features=None):
+    if features is None:
+        path.data.mkdir(exist_ok=True)
+        path.reports.mkdir(exist_ok=True)
 
+        path.external.mkdir(exist_ok=True)
+        path.hazards.mkdir(exist_ok=True)
+        path.paths.mkdir(exist_ok=True)
+        path.shapefiles.mkdir(exist_ok=True)
 
-def write_rows_to_csv(rows, file_name='vessels', folder=None):
-    if folder:
-        file_path = path.data / folder / (file_name + '.csv')
+        path.vessels.touch(exist_ok=True)
+        path.dynamic.touch(exist_ok=True)
+        path.static.touch(exist_ok=True)
+        path.path1.touch(exist_ok=True)
+        path.path2.touch(exist_ok=True)
     else:
-        file_path = path.data / (file_name + '.csv')
+        for feature in features:
+            shapefile_dir = path.shapefiles / feature.lower()
+            shapefile_dir.mkdir(parents=True, exist_ok=True)
+
+
+def write_rows_to_csv(rows, file_path):
     with open(file_path, 'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
         writer.writerows(rows)
