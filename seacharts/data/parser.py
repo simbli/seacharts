@@ -1,3 +1,5 @@
+import warnings
+
 import fiona
 
 from . import paths as path
@@ -33,8 +35,10 @@ class ShapefileParser:
 
     def _read_spatial_file(self, file_path, **kwargs):
         with fiona.open(file_path, 'r', **kwargs) as source:
-            for record in source.filter(bbox=self.bounding_box):
-                yield record
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                for record in source.filter(bbox=self.bounding_box):
+                    yield record
         return
 
     def _parse_records(self, records, label):
