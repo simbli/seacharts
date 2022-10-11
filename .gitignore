@@ -133,3 +133,4 @@ dmypy.json
 # Package main
 main.py
 todo.txt
+data/external/
