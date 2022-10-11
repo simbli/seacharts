@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 
-import seacharts.data.config as config
+import seacharts.utilities.config as config
 import seacharts.environment as env
 from .colors import colorbar
 from .events import EventsManager

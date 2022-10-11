@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Tuple
 
-import seacharts.data.config as config
+import seacharts.utilities.config as config
 
 
 @dataclass
