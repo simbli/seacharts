@@ -97,8 +97,8 @@ class Display:
         axes1 = self.figure.add_subplot(gs[0, 0], projection=self.crs)
         x_min, y_min, x_max, y_max = self.environment.scope.extent.bbox
         axes1.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
-        axes1.background_patch.set_visible(False)
-        axes1.outline_patch.set_visible(False)
+        # axes1.background_patch.set_visible(False)
+        # axes1.outline_patch.set_visible(False)
         axes2 = self.figure.add_subplot(gs[0, 1])
         cb = colorbar(axes2, self.environment.scope.depths)
         return axes1, gs, cb

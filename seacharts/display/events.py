@@ -234,5 +234,5 @@ class EventsManager:
         dic['keymap.yscale'].remove('l')
         dic['keymap.forward'].remove('v')
         dic['keymap.forward'].remove('right')
-        dic['keymap.all_axes'].remove('a')
+        # dic['keymap.all_axes'].remove('a')
         dic['keymap.fullscreen'].remove('f')

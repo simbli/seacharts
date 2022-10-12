@@ -26,6 +26,21 @@ convention for Python code.
 
 ## Prerequisites
 
+### Linux
+
+First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
+```
+sudo apt-get install libgeos-dev libgdal-dev
+```
+
+Then, install the required packages from the **requirements.txt** file as follows:
+
+```
+pip install -r requirements.txt
+```
+
+The package can then be installed locally using `pip install -e .` and imported in your python project.
+
 ### Anaconda
 
 The simplest way to acquire the necessary dependencies for the SeaCharts
@@ -119,14 +134,14 @@ format. Finally, select your appropriate user group and purpose, and click
 `Download` to obtain the ZIP file(s).
 
 ### Processing ENC data into shapefiles
-Unpack the downloaded file(s) and place the extracted `.gdb` in the 
+Unpack the downloaded file(s) and place the extracted `.gdb` in the
 `data/external/` directory, where the top-level folder `data` is located in the
 same directory as the executing script.
 
 Import the module, and initialize an instance of `seacharts.ENC` with optional
-settings. The `new_data` keyword argument must be set to `True` during the 
-initial setup run, and/or for any subsequent desired re-parsing in order 
-to unpack and store `ENC` features from the downloaded FGDB files as 
+settings. The `new_data` keyword argument must be set to `True` during the
+initial setup run, and/or for any subsequent desired re-parsing in order
+to unpack and store `ENC` features from the downloaded FGDB files as
 shapefiles:
 
 ```python
@@ -142,21 +157,21 @@ if __name__ == '__main__':
 
 ```
 Note that all `ENC` settings parameters may be set and modified directly in
-`data/config.ini`, wherein user settings are saved alongside the project 
-defaults. Parameters passed to `ENC` overrides the defaults of the 
-configuration file. See the documentation of the `ENC` input parameters for 
+`data/config.ini`, wherein user settings are saved alongside the project
+defaults. Parameters passed to `ENC` overrides the defaults of the
+configuration file. See the documentation of the `ENC` input parameters for
 descriptions of all available configuration settings.
 
 
-![](https://github.com/simbli/seacharts/blob/master/images/example3.svg?raw=True 
+![](https://github.com/simbli/seacharts/blob/master/images/example3.svg?raw=True
 "Example visualization with dark mode and ownship hazards")
 
 
 ### API usage and accessing geometric shapes
-After the spatial data is parsed into shapefiles as shown above, geometric 
-shapes based on the [Shapely](https://pypi.org/project/Shapely/) library may 
-be accessed and manipulated through various `ENC` attributes. The seacharts 
-feature layers are stored in `seabed`, `shore` and `land`. 
+After the spatial data is parsed into shapefiles as shown above, geometric
+shapes based on the [Shapely](https://pypi.org/project/Shapely/) library may
+be accessed and manipulated through various `ENC` attributes. The seacharts
+feature layers are stored in `seabed`, `shore` and `land`.
 
 ```python
 if __name__ == '__main__':
@@ -170,14 +185,14 @@ if __name__ == '__main__':
     print(enc.land)
 
 ```
-Note how the `new_data` argument may be set to `False` (or omitted) if the 
-desired regional spatial data has already been unpacked and processed into 
-shapefiles in a previous call. Additionally, the `size`, `center` or `origin` 
-parameters may be different from the one used to extract the external `ENC` 
-data, allowing for loading of more specific (smaller) areas of interest into 
+Note how the `new_data` argument may be set to `False` (or omitted) if the
+desired regional spatial data has already been unpacked and processed into
+shapefiles in a previous call. Additionally, the `size`, `center` or `origin`
+parameters may be different from the one used to extract the external `ENC`
+data, allowing for loading of more specific (smaller) areas of interest into
 memory during runtime.
 
-See the documentation for each top-level ENC method for all API usage and 
+See the documentation for each top-level ENC method for all API usage and
 visualization possibilities currently available to the SeaCharts package.
 
 
@@ -186,40 +201,40 @@ visualization possibilities currently available to the SeaCharts package.
 
 
 ### Interactive environment visualization
-The `ENC.show_display` method is used to show a Matplotlib figure plot of the 
-loaded seacharts features. Zoom and pan the environment view using the mouse 
-scroll button, and holding and dragging the plot with left click, respectively. 
+The `ENC.show_display` method is used to show a Matplotlib figure plot of the
+loaded seacharts features. Zoom and pan the environment view using the mouse
+scroll button, and holding and dragging the plot with left click, respectively.
 
-Fullscreen mode may be toggled using the `f` key, and dark mode may be toggled 
-using the `d` key. An optional colorbar showing the various depth legends may 
-be toggled using the `c` key. Moreover, the visibility of each individual layer 
+Fullscreen mode may be toggled using the `f` key, and dark mode may be toggled
+using the `d` key. An optional colorbar showing the various depth legends may
+be toggled using the `c` key. Moreover, the visibility of each individual layer
 may be toggled on and off using the `t`, `g`,`h`, `b`, and `l` keys. Press and
 hold the left `Alt` key and press any of the arrow keys to move the anchor of
-the figure window. 
+the figure window.
 
-A controllable ownship with a sector horizon of hazards and arrows pointing to 
-the closest point on a polygon within it may be added and toggled through the 
-`o`, `z` and `a` keys, respectively. Steer the ship with the arrows keys. 
+A controllable ownship with a sector horizon of hazards and arrows pointing to
+the closest point on a polygon within it may be added and toggled through the
+`o`, `z` and `a` keys, respectively. Steer the ship with the arrows keys.
 
 The filter depths of the displayed hazardous obstacles may be toggled using the
 `n` and `m` keys, and the size of the horizon may be altered using `,`, `.`,
-`[`, and `]` (on a US keyboard layout). Furthermore, vessels may be added and 
-shown by passing appropriately formatted vessel poses to the `ENC.add_vessels` 
-method, or manually storing the vessel details in `data/vessels.csv` and 
-pressing the `u` key to update the display. Toggle their visibility through the 
+`[`, and `]` (on a US keyboard layout). Furthermore, vessels may be added and
+shown by passing appropriately formatted vessel poses to the `ENC.add_vessels`
+method, or manually storing the vessel details in `data/vessels.csv` and
+pressing the `u` key to update the display. Toggle their visibility through the
 `v` key.
 
-Shift left-click on the environment to add yellow path waypoints, move them 
+Shift left-click on the environment to add yellow path waypoints, move them
 around by pressing Shift and holding down the mouse button, and Shift right-
-click to remove them. One may also Shift right-click on a path edge to create 
-an intermediate waypoint between two existing waypoints. Additionally, a 
-second path of magenta color may be added and manipulated by replacing Shift 
+click to remove them. One may also Shift right-click on a path edge to create
+an intermediate waypoint between two existing waypoints. Additionally, a
+second path of magenta color may be added and manipulated by replacing Shift
 with the Control key.
- 
-Images of the currently shown display may be saved in various resolutions by 
-pressing Control + `s`, Shift + `s` or `s`. The below snippet produces the 
-example usage visualization images shown at the top of this page, assuming 
-default settings and that a `More_og_Romsdal.gdb` directory is correctly 
+
+Images of the currently shown display may be saved in various resolutions by
+pressing Control + `s`, Shift + `s` or `s`. The below snippet produces the
+example usage visualization images shown at the top of this page, assuming
+default settings and that a `More_og_Romsdal.gdb` directory is correctly
 extracted and placed as discussed in the shapefile processing section:
 
 ```python
@@ -280,23 +295,23 @@ if __name__ == '__main__':
 ```
 
 The `id` values of the vessel details should be unique identifiers, used as
-references to the feature artists added to the Matplotlib plot. The color 
-values may be strings of one of the custom ship colors of this package, or any 
+references to the feature artists added to the Matplotlib plot. The color
+values may be strings of one of the custom ship colors of this package, or any
 named Matplotlib [CSS4 color](
 https://matplotlib.org/stable/gallery/color/named_colors.html).
 
 ### Visualization using multiprocessing
-Initializing an `ENC` instance with the `multiprocessing` parameter set to 
-`True` spawns a `Process` thread from the Python standard library 
+Initializing an `ENC` instance with the `multiprocessing` parameter set to
+`True` spawns a `Process` thread from the Python standard library
 [multiprocessing module](
-https://docs.python.org/3/library/multiprocessing.html), creating an 
-independent environment display running an infinite visualization loop, based 
+https://docs.python.org/3/library/multiprocessing.html), creating an
+independent environment display running an infinite visualization loop, based
 on the current user (or default) settings stored in the `data/config.ini` file.
-The visualization loop continuously reads the `data/vessels.csv` file, and 
-updates the plot with any present vessels. Repeated updating of the vessels 
+The visualization loop continuously reads the `data/vessels.csv` file, and
+updates the plot with any present vessels. Repeated updating of the vessels
 file by any arbitrary alternative method is thus reflected in the plot in near
-real-time. As such, this feature may be utilized for parallel or concurrent 
-visualization of vessels in an environment, e.g. based on vessel trajectories 
+real-time. As such, this feature may be utilized for parallel or concurrent
+visualization of vessels in an environment, e.g. based on vessel trajectories
 produced by a separate and independent simulation or optimization algorithm.
 
 
