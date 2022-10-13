@@ -26,21 +26,6 @@ convention for Python code.
 
 ## Prerequisites
 
-### Linux
-
-First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
-```
-sudo apt-get install libgeos-dev libgdal-dev
-```
-
-Then, install the required packages from the **requirements.txt** file as follows:
-
-```
-pip install -r requirements.txt
-```
-
-The package can then be installed locally using `pip install -e .` and imported in your python project.
-
 ### Anaconda
 
 The simplest way to acquire the necessary dependencies for the SeaCharts
@@ -60,10 +45,21 @@ command in the terminal of your chosen environment:
 conda install -c conda-forge fiona cartopy matplotlib
 ```
 
-### Pipwin (Windows)
+### Linux
 
-Alternatively, one may manually install the required packages by following
-these steps:
+First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
+```
+sudo apt-get install libgeos-dev libgdal-dev
+```
+
+Then, install the required packages from the **requirements.txt** file as follows:
+
+```
+pip install -r requirements.txt
+```
+This should preferably be done inside a virtual environment in order to prevent python packaging conflicts. A virtual environment is created using `python3 -m venv /path/to/new/virtual/environment`.
+
+### Pipwin (Windows)
 
 First, ensure that [Python 3.9](https://www.python.org/downloads/)
 (or another compatible version) and the required [C++ build tools](
@@ -110,6 +106,8 @@ https://pypi.org/
 ```
 pip install seacharts
 ```
+
+or locally inside the seacharts root folder as an editable package with `pip install -e .`
 
 ![](https://github.com/simbli/seacharts/blob/master/images/example2.svg?raw=True
 "Example visualization with default settings")

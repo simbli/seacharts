@@ -138,7 +138,7 @@ class ENC:
 
     def add_hazards(self, depth: int, buffer: int = 0) -> None:
         """
-        Add hazardous areas the environment, filtered by given depth.
+        Add hazardous areas to the environment, filtered by given depth.
         :param depth: int denoting the filter depth
         :param buffer: optional int denoting the buffer distance
         :return: None
