@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Tuple
 
 import seacharts.spatial as spl
+
 from .extent import Extent
 from .scope import Scope
 
@@ -52,7 +53,7 @@ class Environment:
         self.depth = depth
         if buffer < 0:
             raise ValueError(
-                f"Buffer should be a positive integer."
+                "Buffer should be a positive integer."
             )
         self.safe_area = self.hydrography.bathymetry[depth]
         if buffer:

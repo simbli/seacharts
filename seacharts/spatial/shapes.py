@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, InitVar
-from typing import Tuple, List
+from dataclasses import InitVar, dataclass
+from typing import List, Tuple
 
-from shapely import affinity, geometry as geo
+from shapely import affinity
+from shapely import geometry as geo
 
 from . import base
 
@@ -332,15 +333,13 @@ class Path:
         for i, waypoint in enumerate(self.waypoints):
             if waypoint.contains(x, y):
                 return i
-        else:
-            return None
+        return None
 
     def locate_edge(self, x, y):
         for i, edge in enumerate(self.edges):
             if edge.contains(base.geo.Point(x, y)):
                 return i
-        else:
-            return None
+        return None
 
     @staticmethod
     def edge_between(wp1, wp2):

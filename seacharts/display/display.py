@@ -4,14 +4,14 @@ import datetime
 import time
 import tkinter as tk
 from multiprocessing import Process
-from typing import Tuple, List
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
+import seacharts.environment as env
+import seacharts.utilities.config as config
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 
-import seacharts.utilities.config as config
-import seacharts.environment as env
 from .colors import colorbar
 from .events import EventsManager
 from .features import FeaturesManager
@@ -57,12 +57,11 @@ class Display:
         for j in range(len(self.window_anchors)):
             if option in self.window_anchors[j]:
                 return j, self.window_anchors[j].index(option)
-        else:
-            raise ValueError(
-                f"Invalid window anchor option '{option}', "
-                f"possible candidates are: \n"
-                f"{[o for options in self.window_anchors for o in options]}"
-            )
+        raise ValueError(
+            f"Invalid window anchor option '{option}', "
+            f"possible candidates are: \n"
+            f"{[o for options in self.window_anchors for o in options]}"
+        )
 
     def _init_figure(self):
         if int(self.settings['full_screen_mode'][0]):
