@@ -14,10 +14,10 @@ class Extent:
     bbox: Tuple[int, int, int, int] = field(init=False)
     area: int = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.origin is not None and self.center is not None:
             raise ValueError(
-                f"Multiple location arguments given."
+                "Multiple location arguments given."
             )
         defaults = config.read_settings()
 
@@ -45,20 +45,20 @@ class Extent:
 
         if self.size[0] < 1 or self.size[1] < 1:
             raise ValueError(
-                f"Input size (width / x_max, height / y_max) "
-                f"must be strictly positive."
+                "Input size (width / x_max, height / y_max) "
+                "must be strictly positive."
             )
         self.area = self.size[0] * self.size[1]
 
-    def _origin_from_center(self):
+    def _origin_from_center(self) -> None:
         self.origin = (self.center[0] - self.size[0] // 2,
                        self.center[1] - self.size[1] // 2)
 
-    def _center_from_origin(self):
+    def _center_from_origin(self) -> None:
         self.center = (self.origin[0] + self.size[0] // 2,
                        self.origin[1] + self.size[1] // 2)
 
-    def _bounding_box_from_origin_size(self):
+    def _bounding_box_from_origin_size(self) -> Tuple[float, float, float, float]:
         x_min, y_min = self.origin
         x_max, y_max = x_min + self.size[0], y_min + self.size[1]
         return x_min, y_min, x_max, y_max

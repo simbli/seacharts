@@ -37,13 +37,13 @@ class Environment:
         self.ownship = None
         self.depth = None
 
-    def create_ownship(self, x, y, heading, hull_scale, lon_scale, lat_scale):
+    def create_ownship(self, x, y, heading, hull_scale, lon_scale, lat_scale) -> None:
         self.ownship = spl.Ship(
             x, y, heading, scale=hull_scale,
             lon_scale=lon_scale, lat_scale=lat_scale,
         )
 
-    def filter_hazardous_areas(self, depth, buffer=0):
+    def filter_hazardous_areas(self, depth, buffer=0) -> None:
         if (not isinstance(depth, int)
                 or depth not in self.scope.depths):
             raise ValueError(
