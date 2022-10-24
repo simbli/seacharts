@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import seacharts.environment as env
-import seacharts.utilities.config as config
+import seacharts.utils.config as config
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 
@@ -26,11 +26,12 @@ class Display:
         ('bottom_left', 'bottom', 'bottom_right'),
     )
 
-    def __init__(self, environment: env.Environment = None):
+    def __init__(self, environment: env.Environment = None, config_file: str = None):
         if environment is None:
             self.environment = env.Environment()
         else:
             self.environment = environment
+        self.settings = config.read_settings(config_file, 'DISPLAY')
         self._fullscreen_mode = False
         self._colorbar_mode = False
         self._dark_mode = False
@@ -54,9 +55,9 @@ class Display:
 
     def _init_anchor_index(self):
         option = self.settings['anchor'][0]
-        for j in range(len(self.window_anchors)):
-            if option in self.window_anchors[j]:
-                return j, self.window_anchors[j].index(option)
+        for j, window_anchor in enumerate(self.window_anchors):
+            if option in window_anchor:
+                return j, window_anchor.index(option)
         raise ValueError(
             f"Invalid window anchor option '{option}', "
             f"possible candidates are: \n"

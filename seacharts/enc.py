@@ -1,9 +1,10 @@
-from typing import List, Optional, Tuple, Union, Any
+from typing import Any, List, Optional, Tuple, Union
 
 import matplotlib
 
 import seacharts.display as dis
 import seacharts.environment as env
+import seacharts.utils as utils
 
 
 class ENC:
@@ -15,6 +16,7 @@ class ENC:
     multiprocessing option. Geometric shapes may be accessed through the
     attributes 'land', 'shore', and 'seabed'.
 
+    :param config_file: string containing path to configuration file
     :param size: tuple(width, height) of bounding box size
     :param origin: tuple(easting, northing) box origin of coordinates
     :param center: tuple(easting, northing) box center of coordinates
@@ -30,6 +32,7 @@ class ENC:
     """
 
     def __init__(self,
+                 config_file: str = utils.paths.config,
                  size: Tuple[int, int] = None,
                  origin: Tuple[int, int] = None,
                  center: Tuple[int, int] = None,
@@ -48,14 +51,18 @@ class ENC:
         if multiprocessing:
             dis.Display.init_multiprocessing()
             return
-        self._environment = env.Environment(
+
+        self._settings = utils.config.read_settings(config_file, 'USER')
+        self._display_settings = utils.config.read_settings(config_file, 'DISPLAY')
+
+        self._environment = env.Environment(self._settings,
             size, origin, center, buffer, tolerance, layers, depths, files,
             new_data, raw_data, border, verbose,
         )
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore
         self.seabed = self._environment.hydrography.bathymetry
-        self._display = dis.Display(self._environment)
+        self._display = dis.Display(self._display_settings, self._environment)
 
     @property
     def supported_crs(self) -> str:

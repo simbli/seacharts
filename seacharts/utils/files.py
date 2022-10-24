@@ -1,3 +1,4 @@
+"""Contains file/directory related utility functions, such as functions for writing to csv files."""
 import csv
 
 from . import paths as path
@@ -39,7 +40,7 @@ def write_rows_to_csv(rows, file_path):
 
 def read_ship_poses():
     try:
-        with open(path.data / 'vessels.csv') as csv_file:
+        with open(path.vessels) as csv_file:
             reader = csv.reader(csv_file, delimiter=',')
             _ = next(reader, None)
             rows = tuple(reader)

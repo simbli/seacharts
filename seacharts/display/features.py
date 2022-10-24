@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from cartopy.feature import ShapelyFeature
-
-import seacharts.utilities as utilities
 import seacharts.display as dis
 import seacharts.spatial as spl
+import seacharts.utils as utils
+from cartopy.feature import ShapelyFeature
+
 from .colors import color_picker
 
 
@@ -151,9 +151,9 @@ class FeaturesManager:
         color = color_picker(path.color)
         path.artist = self.new_artist(path.multi_shape, color)
         points = [(wp.x, wp.y) for wp in path.waypoints]
-        file_path = [utilities.files.path.path1,
-                     utilities.files.path.path2][number - 1]
-        utilities.files.write_rows_to_csv(points, file_path)
+        file_path = [utils.files.path.path1,
+                     utils.files.path.path2][number - 1]
+        utils.files.write_rows_to_csv(points, file_path)
 
     def update_ownship(self):
         if self.show_ownship:
@@ -204,11 +204,11 @@ class FeaturesManager:
                         self._arrows[color] = self.new_artist(
                             arrow, color_picker('orange')
                         )
-            utilities.files.write_rows_to_csv(
-                static_points, utilities.files.path.static
+            utils.files.write_rows_to_csv(
+                static_points, utils.files.path.static
             )
-            utilities.files.write_rows_to_csv(
-                dynamic_points, utilities.files.path.dynamic
+            utils.files.write_rows_to_csv(
+                dynamic_points, utils.files.path.dynamic
             )
 
     @staticmethod
@@ -230,7 +230,7 @@ class FeaturesManager:
 
     def update_vessels(self):
         if self.show_vessels:
-            entries = list(utilities.files.read_ship_poses())
+            entries = list(utils.files.read_ship_poses())
             if entries is not None:
                 new_vessels = {}
                 for ship_details in entries:
@@ -336,7 +336,7 @@ class FeaturesManager:
 
     @staticmethod
     def vessels_to_file(vessel_poses: list):
-        utilities.files.write_rows_to_csv(
+        utils.files.write_rows_to_csv(
             [('id', 'easting', 'northing', 'heading', 'color')] + vessel_poses,
-            utilities.files.path.vessels
+            utils.files.path.vessels
         )

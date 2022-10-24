@@ -52,7 +52,7 @@ class Arrow(base.Shape):
         if not head_size >= 0:
             raise ValueError(
                 f"{self.__class__.__name__} "
-                f"should have a non-negative head size"
+                "should have a non-negative head size"
             )
         length = self.geometry.length
         arrow_head_length = max(length - head_size, 0)
@@ -73,7 +73,7 @@ class Arrow(base.Shape):
 @dataclass
 class Circle(Area, base.Radial, base.Coordinates):
     def __post_init__(self):
-        if not self.radius > 0:
+        if self.radius <= 0:
             raise ValueError(
                 f"{self.__class__.__name__} should have a positive area"
             )

@@ -13,6 +13,7 @@ class Environment:
     supported_layers = ", ".join(spl.supported_layers)
 
     def __init__(self,
+                 settings: dict,
                  size: Tuple[int, int] = None,
                  origin: Tuple[int, int] = None,
                  center: Tuple[int, int] = None,
@@ -47,7 +48,7 @@ class Environment:
         if (not isinstance(depth, int)
                 or depth not in self.scope.depths):
             raise ValueError(
-                f"Danger area depth must be an integer from chosen depths: "
+                "Danger area depth must be an integer from chosen depths: "
                 f"{self.scope.depths}"
             )
         self.depth = depth

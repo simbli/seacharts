@@ -1,9 +1,10 @@
+"""Contains functionality for reading, processing and validating seacharts configuration settings"""
 import configparser
 
 from . import paths as path
 
 
-def read_settings(file_name=path.config ,category='USER') -> dict:
+def read_settings(file_name=path.config, category='USER') -> dict:
     """Reads configuration settings for a given category from file
 
     Args:
@@ -18,6 +19,8 @@ def read_settings(file_name=path.config ,category='USER') -> dict:
     config.read(file_name, encoding='utf8')
     for key, value in config[category].items():
         settings[key] = [v.strip(' ') for v in value.split(',')]
+
+
     return settings
 
 
