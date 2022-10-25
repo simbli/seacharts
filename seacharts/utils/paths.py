@@ -4,7 +4,8 @@ import pathlib
 root = pathlib.Path(__file__).parents[2]
 package = root / 'seacharts'
 
-config = package / 'config.ini'
+config = package / 'config.yaml'
+config_schema = package / 'config_schema.yaml'
 
 data = root / 'data'
 external = data / 'external'

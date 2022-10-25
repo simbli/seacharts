@@ -1,0 +1,22 @@
+
+enc:
+  size: 9000, 5062
+  center: 44300, 6956450
+  buffer: 0
+  tolerance: 0
+  layers: ["seabed", "land", "shore"]
+  depths: [0, 5, 10, 20, 50, 100, 200, 350, 500]
+  files: "More_og_Romsdal.gdb"
+  new_data: true
+  raw_data: false
+  border: false
+  verbose: true
+  center_lla: [62.457464, 6.146678]
+
+display:
+  dpi: 96
+  anchor: "center"
+  resolution: 1080
+  full_screen_mode: true
+  color_bar: true
+  dark_mode: false

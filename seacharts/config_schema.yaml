@@ -1,0 +1,65 @@
+enc:
+  required: True
+  type: dict
+  schema:
+    size:
+      required: True
+      type: [float, float] #Tuple(float float)
+    center:
+      required: True
+      type: [float, float] #Tuple(float float)
+    buffer:
+      required: True
+      type: integer
+      min: 0
+    tolerance:
+      required: True
+      type: float
+      min: 0
+    layers:
+      required: True
+      type: list #List[float]
+      allowed: ["seabed", "land", "shore"]
+    depths:
+      required: True
+      type: list #List[float]
+    files:
+      required: True
+      type: list #List[String]
+    new_data:
+      required: True
+      type: boolean
+    raw_data:
+      required: True
+      type: boolean
+    border:
+      required: True
+      type: boolean
+    verbose:
+      required: True
+      type: boolean
+    center_lla:
+      required: False
+      type: [float, float] #Tuple(float float)
+display:
+  required: True
+  type: dict
+  schema:
+    dpi:
+      required: True
+      type: integer
+    anchor:
+      required: True
+      type: string
+    resolution:
+      required: True
+      type: integer
+    full_screen_mode:
+      required: True
+      type: boolean
+    color_bar:
+      required: True
+      type: boolean
+    dark_mode:
+      required: True
+      type: boolean
