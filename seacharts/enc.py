@@ -52,7 +52,7 @@ class ENC:
             dis.Display.init_multiprocessing()
             return
 
-        self._settings = utils.config.read_settings(config_file, 'USER')
+        self._settings = utils.config.parse(config_file)
         self._display_settings = utils.config.read_settings(config_file, 'DISPLAY')
 
         self._environment = env.Environment(self._settings,

@@ -1,7 +1,146 @@
 """Contains functionality for reading, processing and validating seacharts configuration settings"""
 import configparser
+from typing import List, String, Tuple
 
 from . import paths as path
+
+
+def validate_settings(settings, defaults) -> None:
+    """Checks if the settings contain the minimum required parameters, and with valid values.
+
+    Args:
+        settings (dict): _description_
+        defaults (dict): _description_
+    """
+    required_values = {
+        'size': Tuple(float, float),
+        'center': Tuple(float, float),
+        'buffer': int,
+        'tolerance': float,
+        'layers': List[float],
+        'depths': List[float],
+        'files': List[String],
+        'new_data': bool,
+        'raw_data': bool,
+        'border': bool,
+        'verbose': bool,
+        'center_lla': Tuple(float, float)
+    }
+
+    # FIX 1 SETTINGS; DROP DEFAULT SHITEN
+
+    for key, value in required_values.items():
+        if settings[key] is None:
+            settings[key] = defaults[key]
+        if settings[key] is None:
+
+
+def validate_display_settings(settings):
+
+
+
+def parse(file_name=path.config) -> Tuple[dict, dict]:
+    """Parses a configuration file and returns the seacharts settings, split into user, default and display settings. Keys not provided by the user are defaulted.
+
+    Args:
+        file_name (str, optional): Absolute path to configuration file. Defaults to path.config.
+
+    Returns:
+        Tuple(dict, dict, dict): Configuration settings tuple of user and default settings, and display settings.
+    """
+    settings = read_settings(file_name, category='USER')
+    defaults = read_settings(file_name, category='DEFAULT')
+
+    validate_settings(settings, defaults)
+    key = 'buffer'
+        if settings['buffer'] is None:
+            default = parse_key(key, defaults)
+            self.buffer = int(default[0])
+            utils.config.validate(key, self.buffer, int)
+        if self.buffer < 0:
+            raise ValueError(
+                "Buffer should be a non-negative integer."
+            )
+
+        key = 'tolerance'
+        if self.tolerance is None:
+            default = utils.config.parse(key, defaults)
+            self.tolerance = int(default[0])
+        utils.config.validate(key, self.tolerance, int)
+        if self.tolerance < 0:
+            raise ValueError(
+                "Tolerance should be a non-negative integer."
+            )
+
+        key = 'layers'
+        if self.layers is None:
+            self.layers = utils.config.parse(key, defaults)
+        utils.config.validate(key, self.layers, list, str)
+        for layer in self.layers:
+            if layer.capitalize() not in spl.supported_layers:
+                raise ValueError(
+                    f"Feature '{layer}' not supported, "
+                    f"possible candidates are: {spl.supported_layers}"
+                )
+
+        key = 'depths'
+        if self.depths is None:
+            default = utils.config.parse(key, defaults)
+            self.depths = [int(v) for v in default]
+        utils.config.validate(key, self.depths, list, int)
+        if any(d < 0 for d in self.depths):
+            raise ValueError(
+                "Depth bins should be non-negative."
+            )
+        self.depths.sort()
+
+        key = 'files'
+        if self.files is None:
+            self.files = utils.config.parse(key, defaults)
+        utils.config.validate(key, self.files, list, str)
+        for file_name in self.files:
+            utils.files.verify_directory_exists(file_name)
+
+        key = 'new_data'
+        if self.new_data is None:
+            default = utils.config.parse(key, defaults)
+            self.new_data = bool(int(default[0]))
+        utils.config.validate(key, self.new_data, bool)
+
+        key = 'raw_data'
+        if self.raw_data is None:
+            default = utils.config.parse(key, defaults)
+            self.raw_data = bool(int(default[0]))
+        utils.config.validate(key, self.raw_data, bool)
+
+        key = 'border'
+        if self.border is None:
+            default = utils.config.parse(key, defaults)
+            self.border = bool(int(default[0]))
+        utils.config.validate(key, self.border, bool)
+
+        key = 'verbose'
+        if self.verbose is None:
+            default = utils.config.parse(key, defaults)
+            self.verbose = bool(int(default[0]))
+        utils.config.validate(key, self.verbose, bool)
+
+        utils.config.save(dict(
+            size=self.extent.size,
+            center=self.extent.center,
+            buffer=self.buffer,
+            tolerance=self.tolerance,
+            layers=self.layers,
+            depths=self.depths,
+            files=self.files,
+            new_data=int(self.new_data),
+            raw_data=int(self.raw_data),
+            border=int(self.border),
+            verbose=int(self.verbose),
+        ), utils.paths.config)
+
+    display = read_settings(file_name, category='DISPLAY')
+    return settings, defaults, display
 
 
 def read_settings(file_name=path.config, category='USER') -> dict:
@@ -44,7 +183,7 @@ def save(kwargs, file_name) -> None:
         config.write(configfile)
 
 
-def parse(key, defaults):
+def parse_key(key, defaults):
     """Returns default config parameter value for a given key, if it exists.
 
     Args:

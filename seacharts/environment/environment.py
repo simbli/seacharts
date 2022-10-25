@@ -28,7 +28,7 @@ class Environment:
                  verbose: bool = None,
                  ):
         extent = Extent(size, origin, center)
-        self.scope = Scope(
+        self.scope = Scope(settings,
             extent, buffer, tolerance, layers, depths, files, new_data,
             raw_data, border, verbose,
         )
