@@ -18,6 +18,6 @@ display:
   dpi: 96
   anchor: "center"
   resolution: 1080
-  fullscreen_mode: true
+  fullscreen_mode: false
   colorbar_mode: true
   dark_mode: false
