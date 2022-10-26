@@ -1,12 +1,13 @@
 
 enc:
-  size: [9000, 5062]
-  center: [44300, 6956450]
+  utm_zone: 33
+  size: [9000.0, 5062.0]
+  origin: [44300.0, 6956450.0]
   buffer: 0
   tolerance: 0
   layers: ["seabed", "land", "shore"]
-  depths: [0, 5, 10, 20, 50, 100, 200, 350, 500]
-  files: "Trondheim.gdb"
+  depths: [0.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 350.0, 500.0]
+  files: ["Trondheim.gdb"]
   new_data: true
   raw_data: false
   border: false
@@ -17,6 +18,6 @@ display:
   dpi: 96
   anchor: "center"
   resolution: 1080
-  full_screen_mode: true
-  color_bar: true
+  fullscreen_mode: true
+  colorbar_mode: true
   dark_mode: false

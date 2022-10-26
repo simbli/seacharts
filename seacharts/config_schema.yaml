@@ -2,14 +2,24 @@ enc:
   required: True
   type: dict
   schema:
+    utm_zone:
+      required: True
+      type: integer
     size:
       required: True
       type: list #Tuple(float float)
       maxlength: 2
       schema:
         type: float
-    center:
+        min: 1.0
+    origin:
       required: True
+      type: list #Tuple(float float)
+      maxlength: 2
+      schema:
+        type: float
+    center:
+      required: False
       type: list #Tuple(float float)
       maxlength: 2
       schema:
@@ -28,8 +38,6 @@ enc:
       allowed: ["seabed", "land", "shore"]
       minlength: 1
       maxlength: 3
-      schema:
-        type: float
     depths:
       required: True
       type: list
@@ -73,10 +81,10 @@ display:
     resolution:
       required: True
       type: integer
-    full_screen_mode:
+    fullscreen_mode:
       required: True
       type: boolean
-    color_bar:
+    colorbar_mode:
       required: True
       type: boolean
     dark_mode:

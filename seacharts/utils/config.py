@@ -4,6 +4,7 @@ from typing import List, Tuple
 import yaml
 from cerberus import Validator
 
+from . import files
 from . import paths as path
 
 
@@ -15,9 +16,11 @@ def validate(settings) -> None:
         schema = yaml.safe_load(config_schema)
 
     validator = Validator(schema)
-    validator.errors()
-    return validator.validate(settings)
 
+    res = validator.validate(settings)
+
+    if res is not True:
+        raise ValueError(f"Cerberus: {validator.errors}")
 
 def parse(file_name=path.config) -> dict:
 
@@ -25,23 +28,14 @@ def parse(file_name=path.config) -> dict:
 
     validate(settings)
 
-        # key = 'depths'
-        # if self.depths is None:
-        #     default = utils.config.parse(key, defaults)
-        #     self.depths = [int(v) for v in default]
-        # utils.config.validate(key, self.depths, list, int)
-        # if any(d < 0 for d in self.depths):
-        #     raise ValueError(
-        #         "Depth bins should be non-negative."
-        #     )
-        # self.depths.sort()
+    if any(d < 0 for d in settings['enc']['depths']):
+        raise ValueError(
+            "Depth bins should be non-negative."
+        )
+    settings['enc']['depths'].sort()
 
-        # key = 'files'
-        # if self.files is None:
-        #     self.files = utils.config.parse(key, defaults)
-        # utils.config.validate(key, self.files, list, str)
-        # for file_name in self.files:
-        #     utils.files.verify_directory_exists(file_name)
+    for file_name in settings['enc']['files']:
+        files.verify_directory_exists(file_name)
 
     return settings
 

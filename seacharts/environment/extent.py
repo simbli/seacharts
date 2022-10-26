@@ -3,60 +3,38 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Tuple
 
-import seacharts.utils.config as config
-
 
 @dataclass
 class Extent:
-    settings: dict
+
     size: Tuple[int, int] = None
     origin: Tuple[int, int] = None
     center: Tuple[int, int] = None
-    bbox: Tuple[int, int, int, int] = field(init=False)
-    area: int = field(init=False)
+    bbox: Tuple[int, int, int, int] = None
+    area: int = None
 
-    def __post_init__(self) -> None:
-        if self.origin is not None and self.center is not None:
-            raise ValueError(
-                "Multiple location arguments given."
-            )
+    def __init__(self, settings: dict):
+        self.size = settings['enc']['size']
+        self.size = self.size[0], self.size[1]
+        self.origin = settings['enc']['origin']
+        self.origin = self.origin[0], self.origin[1]
 
-        # if self.origin is None:
-        #     key = 'center'
-        #     if self.center is None:
-        #         default = config.parse(key, defaults)
-        #         self.center = int(default[0]), int(default[1])
-        #     config.validate(key, self.center, tuple, int, 2)
-        # else:
-        #     config.validate('center', self.origin, tuple, int, 2)
-
-        # key = 'size'
-        # if self.size is None:
-        #     default = config.parse(key, defaults)
-        #     self.size = int(default[0]), int(default[1])
-        # config.validate(key, self.size, tuple, int, 2)
-
-        if self.center is None:
-            self._center_from_origin()
+        if 'center' in settings['enc']:
+            self.center = settings['enc']['center']
+            self.center = self.center[0], self.center[1]
         else:
-            self._origin_from_center()
+            self._center_from_origin()
 
         self.bbox = self._bounding_box_from_origin_size()
-
-        if self.size[0] < 1 or self.size[1] < 1:
-            raise ValueError(
-                "Input size (width / x_max, height / y_max) "
-                "must be strictly positive."
-            )
         self.area = self.size[0] * self.size[1]
 
     def _origin_from_center(self) -> None:
-        self.origin = (self.center[0] - self.size[0] // 2,
-                       self.center[1] - self.size[1] // 2)
+        self.origin = (self.center[0] - self.size[0] // 2.0,
+                       self.center[1] - self.size[1] // 2.0)
 
     def _center_from_origin(self) -> None:
-        self.center = (self.origin[0] + self.size[0] // 2,
-                       self.origin[1] + self.size[1] // 2)
+        self.center = (self.origin[0] + self.size[0] // 2.0,
+                       self.origin[1] + self.size[1] // 2.0)
 
     def _bounding_box_from_origin_size(self) -> Tuple[float, float, float, float]:
         x_min, y_min = self.origin

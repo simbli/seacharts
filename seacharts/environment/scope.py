@@ -11,7 +11,6 @@ from .extent import Extent
 
 @dataclass
 class Scope:
-    settings: dict
     extent: Extent
     buffer: int = None
     tolerance: int = None
@@ -24,7 +23,18 @@ class Scope:
     verbose: bool = None
     parser: utils.parser.ShapefileParser = field(init=False)
 
-    def __post_init__(self):
+    def __init__(self, settings: dict, extent: Extent):
+        self.extent = extent
+        self.buffer = settings['enc']['buffer']
+        self.tolerance = settings['enc']['tolerance']
+        self.layers = settings['enc']['layers']
+        self.depths = settings['enc']['depths']
+        self.files = settings['enc']['files']
+        self.new_data = settings['enc']['new_data']
+        self.raw_data = settings['enc']['raw_data']
+        self.border = settings['enc']['border']
+        self.verbose = settings['enc']['verbose']
+
         utils.files.build_directory_structure()
 
         seabed = spl.supported_layers[0].lower()

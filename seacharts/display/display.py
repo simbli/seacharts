@@ -17,8 +17,7 @@ from .features import FeaturesManager
 
 
 class Display:
-    crs = UTM(33)
-    settings = None
+    crs = None
     window_anchors = (
         ('top_left', 'top', 'top_right'),
         ('left', 'center', 'right'),
@@ -30,30 +29,33 @@ class Display:
             self.environment = env.Environment()
         else:
             self.environment = environment
-        self.settings = settings
-        self._fullscreen_mode = False
-        self._colorbar_mode = False
-        self._dark_mode = False
+        self.crs = UTM(settings['enc']['utm_zone'])
+        self._fullscreen_mode = settings['display']['fullscreen_mode']
+        self._colorbar_mode = settings['display']['colorbar_mode']
+        self._dark_mode = settings['display']['dark_mode']
         self._background = None
-        self.anchor_index = self._init_anchor_index()
-        self.figure, self.sizes, self.spacing, widths = self._init_figure()
+        self.anchor_index = self._init_anchor_index(settings)
+        self.figure, self.sizes, self.spacing, widths = self._init_figure(settings)
         self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self.draw_plot()
-        if int(self.settings['full_screen_mode'][0]):
+
+        if self._fullscreen_mode:
             self.toggle_fullscreen()
         else:
             self.set_figure_position()
-        if int(self.settings['color_bar'][0]):
+
+        if self._colorbar_mode:
             self.toggle_colorbar()
-        if int(self.settings['dark_mode'][0]):
+
+        if self._dark_mode:
             self.toggle_dark_mode()
         if environment is None:
             self.start_visualization_loop()
 
-    def _init_anchor_index(self):
-        option = self.settings['anchor'][0]
+    def _init_anchor_index(self, settings):
+        option = settings['display']['anchor']
         for j, window_anchor in enumerate(self.window_anchors):
             if option in window_anchor:
                 return j, window_anchor.index(option)
@@ -63,11 +65,11 @@ class Display:
             f"{[o for options in self.window_anchors for o in options]}"
         )
 
-    def _init_figure(self):
-        if int(self.settings['full_screen_mode'][0]):
+    def _init_figure(self, settings):
+        if self._fullscreen_mode:
             plt.rcParams['toolbar'] = 'None'
-        dpi = int(self.settings['dpi'][0])
-        resolution = int(self.settings['resolution'][0])
+        dpi = settings['display']['dpi']
+        resolution = settings['display']['resolution']
         width, height = self.environment.scope.extent.size
         window_height, ratio = resolution / dpi, width / height
         figure_width1, figure_height1 = ratio * window_height, window_height

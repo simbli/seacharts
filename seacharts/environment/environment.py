@@ -12,22 +12,8 @@ class Environment:
     supported_crs = "EUREF89 UTM zone 33"
     supported_layers = ", ".join(spl.supported_layers)
 
-    def __init__(self,
-                 settings: dict = None,
-                #  size: Tuple[int, int] = None,
-                #  origin: Tuple[int, int] = None,
-                #  center: Tuple[int, int] = None,
-                #  buffer: int = None,
-                #  tolerance: int = None,
-                #  layers: List[str] = None,
-                #  depths: List[int] = None,
-                #  files: List[str] = None,
-                #  new_data: bool = None,
-                #  raw_data: bool = None,
-                #  border: bool = None,
-                #  verbose: bool = None,
-                 ):
-        extent = Extent(settings['size'], settings['origin'], settings['center'])
+    def __init__(self, settings: dict = None):
+        extent = Extent(settings)
         self.scope = Scope(settings, extent)
         self.hydrography = spl.Hydrography(self.scope)
         self.topography = spl.Topography(self.scope)
