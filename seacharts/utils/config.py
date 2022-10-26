@@ -15,6 +15,7 @@ def validate(settings) -> None:
         schema = yaml.safe_load(config_schema)
 
     validator = Validator(schema)
+    validator.errors()
     return validator.validate(settings)
 
 
@@ -23,17 +24,6 @@ def parse(file_name=path.config) -> dict:
     settings = read(file_name)
 
     validate(settings)
-
-        # key = 'layers'
-        # if self.layers is None:
-        #     self.layers = utils.config.parse(key, defaults)
-        # utils.config.validate(key, self.layers, list, str)
-        # for layer in self.layers:
-        #     if layer.capitalize() not in spl.supported_layers:
-        #         raise ValueError(
-        #             f"Feature '{layer}' not supported, "
-        #             f"possible candidates are: {spl.supported_layers}"
-        #         )
 
         # key = 'depths'
         # if self.depths is None:

@@ -26,9 +26,6 @@ class Scope:
 
     def __post_init__(self):
         utils.files.build_directory_structure()
-        defaults = utils.config.read_settings()
-
-
 
         seabed = spl.supported_layers[0].lower()
         if seabed in self.layers:

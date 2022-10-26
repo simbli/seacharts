@@ -1,14 +1,16 @@
 if __name__ == '__main__':
+    import pathlib
+
     import matplotlib.pyplot as plt
-    import seacharts
+    import seacharts.enc
 
     size = 20000, 12062                # w, h (east, north) distance in meters
     center = 44300, 6956450          # easting/northing (UTM zone 33N)
     # Norwegian county database name
-    files = ['Basisdata_50_Trondelag_25833_Dybdedata_FGDB.gdb']
+    files = ['Trondheim.gdb']
+    path_to_config = pathlib.Path(__file__).parents[1] / 'seacharts/config.yaml'
 
-    enc = seacharts.enc.ENC(size=size, center=center, files=files,
-                    new_data=True, multiprocessing=False)
+    enc = seacharts.enc.ENC(path_to_config, multiprocessing=False)
 
     shore = enc.shore
     land = enc.land

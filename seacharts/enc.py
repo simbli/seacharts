@@ -33,18 +33,18 @@ class ENC:
 
     def __init__(self,
                  config_file: str = utils.paths.config,
-                 size: Tuple[int, int] = None,
-                 origin: Tuple[int, int] = None,
-                 center: Tuple[int, int] = None,
-                 buffer: Optional[int] = None,
-                 tolerance: Optional[int] = None,
-                 layers: Optional[List[str]] = None,
-                 depths: Optional[List[int]] = None,
-                 files: Optional[List[str]] = None,
-                 new_data: Optional[bool] = None,
-                 raw_data: Optional[bool] = None,
-                 border: Optional[bool] = None,
-                 verbose: Optional[bool] = None,
+                #  size: Tuple[int, int] = None,
+                #  origin: Tuple[int, int] = None,
+                #  center: Tuple[int, int] = None,
+                #  buffer: Optional[int] = None,
+                #  tolerance: Optional[int] = None,
+                #  layers: Optional[List[str]] = None,
+                #  depths: Optional[List[int]] = None,
+                #  files: Optional[List[str]] = None,
+                #  new_data: Optional[bool] = None,
+                #  raw_data: Optional[bool] = None,
+                #  border: Optional[bool] = None,
+                #  verbose: Optional[bool] = None,
                  multiprocessing: bool = False,
                  ):
         matplotlib.use('TkAgg')
@@ -53,16 +53,12 @@ class ENC:
             return
 
         self._settings = utils.config.parse(config_file)
-        self._display_settings = utils.config.read_settings(config_file, 'DISPLAY')
 
-        self._environment = env.Environment(self._settings,
-            size, origin, center, buffer, tolerance, layers, depths, files,
-            new_data, raw_data, border, verbose,
-        )
+        self._environment = env.Environment(self._settings)
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore
         self.seabed = self._environment.hydrography.bathymetry
-        self._display = dis.Display(self._display_settings, self._environment)
+        self._display = dis.Display(self._settings, self._environment)
 
     @property
     def supported_crs(self) -> str:

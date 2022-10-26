@@ -1,12 +1,12 @@
 
 enc:
-  size: 9000, 5062
-  center: 44300, 6956450
+  size: [9000, 5062]
+  center: [44300, 6956450]
   buffer: 0
   tolerance: 0
   layers: ["seabed", "land", "shore"]
   depths: [0, 5, 10, 20, 50, 100, 200, 350, 500]
-  files: "More_og_Romsdal.gdb"
+  files: "Trondheim.gdb"
   new_data: true
   raw_data: false
   border: false

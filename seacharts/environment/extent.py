@@ -8,6 +8,7 @@ import seacharts.utils.config as config
 
 @dataclass
 class Extent:
+    settings: dict
     size: Tuple[int, int] = None
     origin: Tuple[int, int] = None
     center: Tuple[int, int] = None
@@ -19,22 +20,21 @@ class Extent:
             raise ValueError(
                 "Multiple location arguments given."
             )
-        defaults = config.read_settings()
 
-        if self.origin is None:
-            key = 'center'
-            if self.center is None:
-                default = config.parse(key, defaults)
-                self.center = int(default[0]), int(default[1])
-            config.validate(key, self.center, tuple, int, 2)
-        else:
-            config.validate('center', self.origin, tuple, int, 2)
+        # if self.origin is None:
+        #     key = 'center'
+        #     if self.center is None:
+        #         default = config.parse(key, defaults)
+        #         self.center = int(default[0]), int(default[1])
+        #     config.validate(key, self.center, tuple, int, 2)
+        # else:
+        #     config.validate('center', self.origin, tuple, int, 2)
 
-        key = 'size'
-        if self.size is None:
-            default = config.parse(key, defaults)
-            self.size = int(default[0]), int(default[1])
-        config.validate(key, self.size, tuple, int, 2)
+        # key = 'size'
+        # if self.size is None:
+        #     default = config.parse(key, defaults)
+        #     self.size = int(default[0]), int(default[1])
+        # config.validate(key, self.size, tuple, int, 2)
 
         if self.center is None:
             self._center_from_origin()

@@ -8,7 +8,6 @@ from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import seacharts.environment as env
-import seacharts.utils.config as config
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 
@@ -19,19 +18,19 @@ from .features import FeaturesManager
 
 class Display:
     crs = UTM(33)
-    settings = config.read_settings('DISPLAY')
+    settings = None
     window_anchors = (
         ('top_left', 'top', 'top_right'),
         ('left', 'center', 'right'),
         ('bottom_left', 'bottom', 'bottom_right'),
     )
 
-    def __init__(self, environment: env.Environment = None, config_file: str = None):
+    def __init__(self, settings: dict, environment: env.Environment = None):
         if environment is None:
             self.environment = env.Environment()
         else:
             self.environment = environment
-        self.settings = config.read_settings(config_file, 'DISPLAY')
+        self.settings = settings
         self._fullscreen_mode = False
         self._colorbar_mode = False
         self._dark_mode = False

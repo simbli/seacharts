@@ -4,10 +4,16 @@ enc:
   schema:
     size:
       required: True
-      type: [float, float] #Tuple(float float)
+      type: list #Tuple(float float)
+      maxlength: 2
+      schema:
+        type: float
     center:
       required: True
-      type: [float, float] #Tuple(float float)
+      type: list #Tuple(float float)
+      maxlength: 2
+      schema:
+        type: float
     buffer:
       required: True
       type: integer
@@ -18,14 +24,24 @@ enc:
       min: 0
     layers:
       required: True
-      type: list #List[float]
+      type: list
       allowed: ["seabed", "land", "shore"]
+      minlength: 1
+      maxlength: 3
+      schema:
+        type: float
     depths:
       required: True
-      type: list #List[float]
+      type: list
+      minlength: 1
+      schema:
+        type: float
     files:
       required: True
-      type: list #List[String]
+      type: list
+      minlength: 1
+      schema:
+        type: string
     new_data:
       required: True
       type: boolean
@@ -40,7 +56,10 @@ enc:
       type: boolean
     center_lla:
       required: False
-      type: [float, float] #Tuple(float float)
+      type: list #Tuple(float float)
+      maxlength: 2
+      schema:
+        type: float
 display:
   required: True
   type: dict
