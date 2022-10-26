@@ -33,18 +33,18 @@ class ENC:
 
     def __init__(self,
                  config_file: str = utils.paths.config,
-                #  size: Tuple[int, int] = None,
-                #  origin: Tuple[int, int] = None,
-                #  center: Tuple[int, int] = None,
-                #  buffer: Optional[int] = None,
-                #  tolerance: Optional[int] = None,
-                #  layers: Optional[List[str]] = None,
-                #  depths: Optional[List[int]] = None,
-                #  files: Optional[List[str]] = None,
-                #  new_data: Optional[bool] = None,
-                #  raw_data: Optional[bool] = None,
-                #  border: Optional[bool] = None,
-                #  verbose: Optional[bool] = None,
+                 size: Tuple[int, int] = None,
+                 origin: Tuple[int, int] = None,
+                 center: Tuple[int, int] = None,
+                 buffer: Optional[int] = None,
+                 tolerance: Optional[int] = None,
+                 layers: Optional[List[str]] = None,
+                 depths: Optional[List[int]] = None,
+                 files: Optional[List[str]] = None,
+                 new_data: Optional[bool] = None,
+                 raw_data: Optional[bool] = None,
+                 border: Optional[bool] = None,
+                 verbose: Optional[bool] = None,
                  multiprocessing: bool = False,
                  ):
         matplotlib.use('TkAgg')
@@ -70,7 +70,7 @@ class ENC:
         """Return the supported feature layers."""
         return self._environment.supported_layers
 
-    def fullscreen_mode(self, arg: bool = True):
+    def fullscreen_mode(self, arg: bool = True) -> None:
         """
         Enable or disable fullscreen mode view of environment figure.
         :param arg: boolean switching fullscreen mode on or off
@@ -78,15 +78,14 @@ class ENC:
         """
         self._display.toggle_fullscreen(arg)
 
-    def colorbar(self, arg: bool = True):
+    def colorbar(self, arg: bool = True) -> None:
         """
         Enable or disable the colorbar legend of environment figure.
-        :param arg: boolean switching the colorbar on or off
-        :return: None
+        :param arg: boolean switching the colorbar on or off.
         """
         self._display.toggle_colorbar(arg)
 
-    def dark_mode(self, arg: bool = True):
+    def dark_mode(self, arg: bool = True) -> None:
         """
         Enable or disable dark mode view of environment figure.
         :param arg: boolean switching dark mode on or off
@@ -116,7 +115,7 @@ class ENC:
                     hull_scale: float = 1.0,
                     lon_scale: float = 10.0,
                     lat_scale: float = 10.0,
-                    ):
+                    ) -> None:
         """
         Add the body of a controllable vessel to the environment.
         :param easting: int denoting the ownship X coordinate
@@ -132,7 +131,7 @@ class ENC:
         )
         self._display.update_plot()
 
-    def remove_ownship(self):
+    def remove_ownship(self) -> None:
         """
         Remove the controllable vessel from the environment.
         :return: None
@@ -156,7 +155,7 @@ class ENC:
                    head_size: float = None,
                    thickness: float = None,
                    edge_style: Union[str, tuple] = None,
-                   ):
+                   ) -> None:
         """
         Add a straight arrow overlay to the environment plot.
         :param start: tuple of start point coordinate pair
@@ -179,7 +178,7 @@ class ENC:
                     fill: bool = True,
                     thickness: float = None,
                     edge_style: Union[str, tuple] = None,
-                    ):
+                    ) -> None:
         """
         Add a circle or disk overlay to the environment plot.
         :param center: tuple of circle center coordinates
@@ -200,7 +199,7 @@ class ENC:
                   width: float = None,
                   thickness: float = None,
                   edge_style: Union[str, tuple] = None,
-                  ):
+                  ) -> None:
         """
         Add a straight line overlay to the environment plot.
         :param points: list of tuples of coordinate pairs
@@ -221,7 +220,7 @@ class ENC:
                      fill: bool = True,
                      thickness: float = None,
                      edge_style: Union[str, tuple] = None,
-                     ):
+                     ) -> None:
         """
         Add an arbitrary polygon shape overlay to the environment plot.
         :param geometry: Shapely geometry or list of exterior coordinates
@@ -244,7 +243,7 @@ class ENC:
                        fill: bool = True,
                        thickness: float = None,
                        edge_style: Union[str, tuple] = None,
-                       ):
+                       ) -> None:
         """
         Add a rectangle or box overlay to the environment plot.
         :param center: tuple of rectangle center coordinates
@@ -287,7 +286,7 @@ class ENC:
                    name: str = None,
                    scale: float = 1.0,
                    extension: str = 'png',
-                   ):
+                   ) -> None:
         """
         Save the environment plot as a .png image.
         :param name: optional str of file name

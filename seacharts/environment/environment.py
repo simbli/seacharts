@@ -9,10 +9,10 @@ from .scope import Scope
 
 
 class Environment:
-    supported_crs = "EUREF89 UTM zone 33"
     supported_layers = ", ".join(spl.supported_layers)
 
     def __init__(self, settings: dict = None):
+        self.supported_crs = "EUREF89 UTM zone " + settings['enc']['utm_zone'].to_string()
         extent = Extent(settings)
         self.scope = Scope(settings, extent)
         self.hydrography = spl.Hydrography(self.scope)
@@ -28,8 +28,7 @@ class Environment:
         )
 
     def filter_hazardous_areas(self, depth, buffer=0) -> None:
-        if (not isinstance(depth, int)
-                or depth not in self.scope.depths):
+        if not isinstance(depth, int) or depth not in self.scope.depths:
             raise ValueError(
                 "Danger area depth must be an integer from chosen depths: "
                 f"{self.scope.depths}"

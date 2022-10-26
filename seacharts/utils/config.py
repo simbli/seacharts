@@ -6,62 +6,58 @@ from . import files
 from . import paths as path
 
 
-def validate(settings) -> None:
-    if not settings:
-        raise ValueError("Empty settings!")
+class ENCConfig:
+    settings = None
+    _schema = None
 
-    with open(path.config_schema, encoding='utf-8') as config_schema:
-        schema = yaml.safe_load(config_schema)
+    def __init__(self, config_file_name: str = path.config):
 
-    validator = Validator(schema)
+        self._schema = self.read_yaml_into_dict(path.config_schema)
 
-    res = validator.validate(settings)
+        self.parse(config_file_name)
 
-    if res is not True:
-        raise ValueError(f"Cerberus: {validator.errors}")
+    @property
+    def settings(self):
+        return self.settings
 
-def parse(file_name=path.config) -> dict:
+    def validate(self, settings: dict) -> None:
+        if not settings:
+            raise ValueError("Empty settings!")
 
-    settings = read(file_name)
+        if not self._schema:
+            raise ValueError("Empty schema!")
 
-    validate(settings)
+        validator = Validator(self._schema)
+        res = validator.validate(settings)
 
-    if any(d < 0 for d in settings['enc']['depths']):
-        raise ValueError(
-            "Depth bins should be non-negative."
-        )
-    settings['enc']['depths'].sort()
-
-    for file_name in settings['enc']['files']:
-        files.verify_directory_exists(file_name)
-
-    return settings
+        if res is not True:
+            raise ValueError(f"Cerberus: {validator.errors}")
 
 
-def read(file_name=path.config) -> dict:
+    def parse(self, file_name=path.config) -> None:
+
+        self.settings = read_yaml_into_dict(file_name)
+        self.validate(self.settings)
+
+        if any(d < 0 for d in self.settings['enc']['depths']):
+            raise ValueError(
+                "Depth bins should be non-negative."
+            )
+        self.settings['enc']['depths'].sort()
+
+        for file_name in self.settings['enc']['files']:
+            files.verify_directory_exists(file_name)
+
+    def validate_runtime_provided_settings(self, defaults, **kwargs) -> None:
+        for key, value in kwargs.items():
+            if key in defaults.items():
+
+
+
+def read_yaml_into_dict(file_name=path.config) -> dict:
     with open(file_name, encoding='utf-8') as config_file:
-        settings = yaml.safe_load(config_file)
-    return settings
-
-
-# def save(kwargs, file_name) -> None:
-#     """Saves configuration with values given by kwargs, in file file_name.
-
-#     Args:
-#         file_name (str): Absolute path to the configuration file
-#         kwargs (dict): Dictionary representing the configuration
-#     """
-#     config = configparser.ConfigParser()
-#     user_strings = {}
-#     for key, value in kwargs.items():
-#         if isinstance(value, tuple) or isinstance(value, list):
-#             string = ', '.join([str(v) for v in value])
-#         else:
-#             string = str(value)
-#         user_strings[key] = string
-#     config['USER'] = user_strings
-#     with open(file_name, 'w', encoding='utf8') as configfile:
-#         config.write(configfile)
+        output_dict = yaml.safe_load(config_file)
+    return output_dict
 
 
 def parse_key(key, defaults):
@@ -116,3 +112,23 @@ def validate_key(key, value, v_type, sub_type=None, length=None) -> None:
                 "Invalid input format: "
                 f"'{key}' should have type {v_type}."
             )
+
+
+# def save(kwargs, file_name) -> None:
+#     """Saves configuration with values given by kwargs, in file file_name.
+
+#     Args:
+#         file_name (str): Absolute path to the configuration file
+#         kwargs (dict): Dictionary representing the configuration
+#     """
+#     config = configparser.ConfigParser()
+#     user_strings = {}
+#     for key, value in kwargs.items():
+#         if isinstance(value, tuple) or isinstance(value, list):
+#             string = ', '.join([str(v) for v in value])
+#         else:
+#             string = str(value)
+#         user_strings[key] = string
+#     config['USER'] = user_strings
+#     with open(file_name, 'w', encoding='utf8') as configfile:
+#         config.write(configfile)

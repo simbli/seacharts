@@ -16,6 +16,7 @@ class Extent:
     def __init__(self, settings: dict):
         self.size = settings['enc']['size']
         self.size = self.size[0], self.size[1]
+
         self.origin = settings['enc']['origin']
         self.origin = self.origin[0], self.origin[1]
 
