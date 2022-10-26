@@ -1,6 +1,4 @@
 """Contains functionality for reading, processing and validating seacharts configuration settings"""
-from typing import List, Tuple
-
 import yaml
 from cerberus import Validator
 

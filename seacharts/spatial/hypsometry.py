@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import time
 from abc import ABC
-from dataclasses import dataclass, InitVar, field
-from typing import List, Dict
+from dataclasses import InitVar, dataclass, field
+from typing import Dict, List
 
 import seacharts.environment.scope as env
+
 from .base import Layer
-from .layers import Seabed, Land, Shore
+from .layers import Land, Seabed, Shore
 
 
 @dataclass

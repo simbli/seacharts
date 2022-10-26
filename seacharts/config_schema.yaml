@@ -43,7 +43,7 @@ enc:
       type: list
       minlength: 1
       schema:
-        type: float
+        type: integer
     files:
       required: True
       type: list

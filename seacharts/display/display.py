@@ -30,9 +30,7 @@ class Display:
         else:
             self.environment = environment
         self.crs = UTM(settings['enc']['utm_zone'])
-        self._fullscreen_mode = settings['display']['fullscreen_mode']
-        self._colorbar_mode = settings['display']['colorbar_mode']
-        self._dark_mode = settings['display']['dark_mode']
+
         self._background = None
         self.anchor_index = self._init_anchor_index(settings)
         self.figure, self.sizes, self.spacing, widths = self._init_figure(settings)
@@ -66,12 +64,17 @@ class Display:
         )
 
     def _init_figure(self, settings):
+        self._fullscreen_mode = settings['display']['fullscreen_mode']
+        self._colorbar_mode = settings['display']['colorbar_mode']
+        self._dark_mode = settings['display']['dark_mode']
+        self._dpi = settings['display']['dpi']
+        self._resolution = settings['display']['resolution']
+
         if self._fullscreen_mode:
             plt.rcParams['toolbar'] = 'None'
-        dpi = settings['display']['dpi']
-        resolution = settings['display']['resolution']
+
         width, height = self.environment.scope.extent.size
-        window_height, ratio = resolution / dpi, width / height
+        window_height, ratio = self._resolution / self._dpi, width / height
         figure_width1, figure_height1 = ratio * window_height, window_height
         axes1_width, axes2_width, width_space = figure_width1, 1.1, 0.3
         axes_widths = axes1_width, axes2_width
@@ -88,8 +91,9 @@ class Display:
             wspace=2 * width_space / axes1_width,
         )
         subplot_spacing = sub1, sub2
-        figure = plt.figure('SeaCharts', figsize=figure_sizes[0], dpi=dpi)
-        figure.canvas.toolbar.pack_forget()
+        figure = plt.figure('SeaCharts', figsize=figure_sizes[0], dpi=self._dpi)
+        if not self._fullscreen_mode:
+            figure.canvas.toolbar.pack_forget()
         return figure, figure_sizes, subplot_spacing, axes_widths
 
     def _init_axes(self, axes_widths):
@@ -188,7 +192,7 @@ class Display:
             screen_height = int(root.winfo_screenheight())
             root.destroy()
             x_margin, y_margin = -10, -73
-            dpi = int(self.settings['dpi'][0])
+            dpi = self._dpi
             size = self.sizes[int(self._colorbar_mode)]
             width, height = [int(size[k] * dpi) for k in range(2)]
             x_shifted = screen_width - width
