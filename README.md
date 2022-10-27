@@ -330,6 +330,7 @@ produced by a separate and independent simulation or optimization algorithm.
 ## Contributors
 
 - Simon Blindheim ([simon.blindheim@ntnu.no](mailto:simon.blindheim@ntnu.no))
+- Trym Tengesdal ([trym.tengesdal@ntnu.no](mailto:trym.tengesdal@ntnu.no))
 
 
 ## License
