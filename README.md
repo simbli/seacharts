@@ -45,19 +45,17 @@ command in the terminal of your chosen environment:
 conda install -c conda-forge fiona cartopy matplotlib
 ```
 
-### Linux
+### Linux (Virtual Environment)
 
 First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
 ```
 sudo apt-get install libgeos-dev libgdal-dev
 ```
-
-Then, install the required packages from the **requirements.txt** file as follows:
-
+Then, from the root folder you can install an editable version of the package as follows:
 ```
-pip install -r requirements.txt
+pip install -e .
 ```
-This should preferably be done inside a virtual environment in order to prevent python packaging conflicts. A virtual environment is created using `python3 -m venv /path/to/new/virtual/environment`.
+This should preferably be done inside a virtual environment in order to prevent python packaging conflicts.
 
 ### Pipwin (Windows)
 
@@ -136,8 +134,24 @@ Unpack the downloaded file(s) and place the extracted `.gdb` in the
 `data/external/` directory, where the top-level folder `data` is located in the
 same directory as the executing script.
 
-Import the module, and initialize an instance of `seacharts.ENC` with optional
-settings. The `new_data` keyword argument must be set to `True` during the
+The `config.yaml` file specifies what ENC data to load and how it will be processed and displayed.
+The corresponding `config_schema.yaml` specifies the required parameters that must be provided for the software to function properly.
+
+The minimal example below imports the `ENC` class from `seacharts.enc` with the default configuration under `seacharts/config.yaml`, and
+shows the interactive seachart display.
+
+```python
+if __name__ == '__main__':
+
+    from seacharts.enc import ENC
+
+    enc = ENC()
+    enc.show_display()
+```
+
+You can also specify settings at run-time, such as the window size, coordinate (easting, northing) origin and file
+to load shapefile data from, and whether or not to load new data. Here, the
+`new_data` keyword argument must be set to `True` during the
 initial setup run, and/or for any subsequent desired re-parsing in order
 to unpack and store `ENC` features from the downloaded FGDB files as
 shapefiles:
@@ -145,13 +159,13 @@ shapefiles:
 ```python
 if __name__ == '__main__':
 
-    import seacharts
+    from seacharts.enc import ENC
 
     size = 9000, 5062                # w, h (east, north) distance in meters
     center = 44300, 6956450          # easting/northing (UTM zone 33N)
     files = ['More_og_Romsdal.gdb']  # Norwegian county database name
 
-    enc = seacharts.ENC(size=size, center=center, files=files, new_data=True)
+    enc = ENC(size=size, center=center, files=files, new_data=True)
 
 ```
 Note that all `ENC` settings parameters may be set and modified directly in

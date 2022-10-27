@@ -1,6 +1,0 @@
-numpy
-scipy
-gdal
-fiona
-cartopy
-matplotlib

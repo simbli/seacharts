@@ -7,20 +7,20 @@ enc:
       type: integer
     size:
       required: True
-      type: list #Tuple(float float)
+      type: list
       maxlength: 2
       schema:
         type: float
         min: 1.0
     origin:
       required: True
-      type: list #Tuple(float float)
+      type: list
       maxlength: 2
       schema:
         type: float
     center:
       required: False
-      type: list #Tuple(float float)
+      type: list
       maxlength: 2
       schema:
         type: float
@@ -64,7 +64,7 @@ enc:
       type: boolean
     center_lla:
       required: False
-      type: list #Tuple(float float)
+      type: list
       maxlength: 2
       schema:
         type: float
