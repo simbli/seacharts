@@ -6,7 +6,7 @@ enc:
   buffer: 0                                                               # int of dilation or erosion distance for geometries
   tolerance: 0                                                            # int of maximum tolerance distance for geometries
   layers: ["seabed", "land", "shore"]                                     # list(str...) of feature layers to load or show
-  depths: [0, 2, 5, 10, 20, 50, 100, 200, 350, 500]                       # list(int...) of depth bins for feature layers
+  depths: [0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500]                       # list(int...) of depth bins for feature layers
   files: ["More_og_Romsdal.gdb"]                                          # seacharts source database name
   new_data: true                                                          # bool indicating if new files should be parsed
   raw_data: false

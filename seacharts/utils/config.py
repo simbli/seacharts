@@ -1,4 +1,6 @@
 """Contains functionality for reading, processing and validating seacharts configuration settings"""
+from typing import List
+
 import yaml
 from cerberus import Validator
 
@@ -7,25 +9,36 @@ from . import paths as path
 
 
 class ENCConfig:
-    settings = None
+    _settings = None
     _schema = None
+    _valid_sections = None
+    validator = None
 
-<<<<<<< HEAD
     def __init__(self, config_file_name: str = path.config, **kwargs):
-=======
-    def __init__(self, config_file_name: str = path.config):
->>>>>>> def759c266485e5c09fe06424fdc5b9bb3813001
 
-        self._schema = self.read_yaml_into_dict(path.config_schema)
+        self._schema = read_yaml_into_dict(path.config_schema)
+        self.validator = Validator(self._schema)
+        self._valid_sections = self.extract_valid_sections()
 
         self.parse(config_file_name)
-
-<<<<<<< HEAD
         self.override(**kwargs)
 
     @property
     def settings(self):
-        return self.settings
+        return self._settings
+
+    @settings.setter
+    def settings(self, new_settings: dict):
+        self._settings = new_settings
+
+    def extract_valid_sections(self) -> List[str]:
+        if self._schema is None:
+            raise ValueError("No configuration schema provided!")
+
+        sections = []
+        for section in self._schema.keys():
+            sections.append(section)
+        return sections
 
     def validate(self, settings: dict) -> None:
         if not settings:
@@ -34,64 +47,39 @@ class ENCConfig:
         if not self._schema:
             raise ValueError("Empty schema!")
 
-        validator = Validator(self._schema)
-        res = validator.validate(settings)
+        if not self.validator.validate(settings):
+            raise ValueError(f"Cerberus validation Error: {self.validator.errors}")
 
-=======
-    @property
-    def settings(self):
-        return self.settings
+        self._settings['enc']['depths'].sort()
 
-    def validate(self, settings: dict) -> None:
-        if not settings:
-            raise ValueError("Empty settings!")
-
-        if not self._schema:
-            raise ValueError("Empty schema!")
-
-        validator = Validator(self._schema)
-        res = validator.validate(settings)
-
->>>>>>> def759c266485e5c09fe06424fdc5b9bb3813001
-        if res is not True:
-            raise ValueError(f"Cerberus: {validator.errors}")
+        for file_name in self._settings['enc']['files']:
+            files.verify_directory_exists(file_name)
 
 
     def parse(self, file_name=path.config) -> None:
+        self._settings = read_yaml_into_dict(file_name)
+        self.validate(self._settings)
 
-        self.settings = read_yaml_into_dict(file_name)
-        self.validate(self.settings)
+    def override(self, section='enc', **kwargs) -> None:
+        if not kwargs:
+            return
 
-        if any(d < 0 for d in self.settings['enc']['depths']):
-            raise ValueError(
-                "Depth bins should be non-negative."
-            )
-        self.settings['enc']['depths'].sort()
+        if section not in self._valid_sections:
+            raise ValueError("Override settings in non-existing section!")
 
-        for file_name in self.settings['enc']['files']:
-            files.verify_directory_exists(file_name)
-
-<<<<<<< HEAD
-    def override(self, **kwargs) -> None:
-        new_settings = self.settings
-
-        for key, new_val in kwargs.items():
-            for section, value in self._schema.items():
-                for key, sub_val in self._schema.items():
-
-=======
-    def validate_runtime_provided_settings(self, defaults, **kwargs) -> None:
+        new_settings = self._settings
         for key, value in kwargs.items():
-            if key in defaults.items():
->>>>>>> def759c266485e5c09fe06424fdc5b9bb3813001
+            new_settings[section][key] = value
 
+        self.validate(new_settings)
+
+        self._settings = new_settings
 
 
 def read_yaml_into_dict(file_name=path.config) -> dict:
     with open(file_name, encoding='utf-8') as config_file:
         output_dict = yaml.safe_load(config_file)
     return output_dict
-
 
 def parse_key(key, defaults):
     """Returns default config parameter value for a given key, if it exists.

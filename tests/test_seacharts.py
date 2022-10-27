@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     from seacharts.enc import ENC
 
-    enc = ENC()
+    enc = ENC(border=True)
     enc.show_display()
 
     shore = enc.shore

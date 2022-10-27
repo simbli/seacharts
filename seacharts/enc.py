@@ -17,6 +17,7 @@ class ENC:
     attributes 'land', 'shore', and 'seabed'.
 
     :param config_file: string containing path to configuration file
+    :param multiprocessing: bool for independent visualization display
     :param kwargs: Includes the following optional parameters:
         :param size: tuple(width, height) of bounding box size
         :param origin: tuple(easting, northing) box origin of coordinates
@@ -29,40 +30,24 @@ class ENC:
         :param new_data: bool indicating if new files should be parsed
         :param border: bool for showing a border around the environment plot
         :param verbose: bool for status printing during geometry processing
-        :param multiprocessing: bool for independent visualization display
     """
-
     def __init__(self,
                  config_file: str = utils.paths.config,
+                 multiprocessing=False,
                  **kwargs
-                #  size: Tuple[int, int] = None,
-                #  origin: Tuple[int, int] = None,
-                #  center: Tuple[int, int] = None,
-                #  buffer: Optional[int] = None,
-                #  tolerance: Optional[int] = None,
-                #  layers: Optional[List[str]] = None,
-                #  depths: Optional[List[int]] = None,
-                #  files: Optional[List[str]] = None,
-                #  new_data: Optional[bool] = None,
-                #  raw_data: Optional[bool] = None,
-                #  border: Optional[bool] = None,
-                #  verbose: Optional[bool] = None,
-                #  multiprocessing: bool = False,
                  ):
         matplotlib.use('TkAgg')
-        if kwargs['multiprocessing'] is True:
+        if multiprocessing:
             dis.Display.init_multiprocessing()
             return
 
-        self._settings = utils.config.parse(config_file)
+        self._cfg = utils.config.ENCConfig(config_file, **kwargs)
 
-        utils.config.override(self._settings, kwargs)
-
-        self._environment = env.Environment(self._settings, kwargs)
+        self._environment = env.Environment(self._cfg.settings)
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore
         self.seabed = self._environment.hydrography.bathymetry
-        self._display = dis.Display(self._settings, self._environment)
+        self._display = dis.Display(self._cfg.settings, self._environment)
 
     @property
     def supported_crs(self) -> str:

@@ -44,6 +44,7 @@ enc:
       minlength: 1
       schema:
         type: integer
+        min: 0
     files:
       required: True
       type: list

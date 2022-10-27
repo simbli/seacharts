@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Tuple
-
 import seacharts.spatial as spl
 
 from .extent import Extent
@@ -12,7 +10,7 @@ class Environment:
     supported_layers = ", ".join(spl.supported_layers)
 
     def __init__(self, settings: dict = None):
-        self.supported_crs = "EUREF89 UTM zone " + settings['enc']['utm_zone'].to_string()
+        self.supported_crs = "EUREF89 UTM zone " + str(settings['enc']['utm_zone'])
         extent = Extent(settings)
         self.scope = Scope(settings, extent)
         self.hydrography = spl.Hydrography(self.scope)
