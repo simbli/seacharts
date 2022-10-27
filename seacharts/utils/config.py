@@ -10,12 +10,17 @@ class ENCConfig:
     settings = None
     _schema = None
 
+<<<<<<< HEAD
     def __init__(self, config_file_name: str = path.config, **kwargs):
+=======
+    def __init__(self, config_file_name: str = path.config):
+>>>>>>> def759c266485e5c09fe06424fdc5b9bb3813001
 
         self._schema = self.read_yaml_into_dict(path.config_schema)
 
         self.parse(config_file_name)
 
+<<<<<<< HEAD
         self.override(**kwargs)
 
     @property
@@ -32,6 +37,22 @@ class ENCConfig:
         validator = Validator(self._schema)
         res = validator.validate(settings)
 
+=======
+    @property
+    def settings(self):
+        return self.settings
+
+    def validate(self, settings: dict) -> None:
+        if not settings:
+            raise ValueError("Empty settings!")
+
+        if not self._schema:
+            raise ValueError("Empty schema!")
+
+        validator = Validator(self._schema)
+        res = validator.validate(settings)
+
+>>>>>>> def759c266485e5c09fe06424fdc5b9bb3813001
         if res is not True:
             raise ValueError(f"Cerberus: {validator.errors}")
 
@@ -50,6 +71,7 @@ class ENCConfig:
         for file_name in self.settings['enc']['files']:
             files.verify_directory_exists(file_name)
 
+<<<<<<< HEAD
     def override(self, **kwargs) -> None:
         new_settings = self.settings
 
@@ -57,6 +79,11 @@ class ENCConfig:
             for section, value in self._schema.items():
                 for key, sub_val in self._schema.items():
 
+=======
+    def validate_runtime_provided_settings(self, defaults, **kwargs) -> None:
+        for key, value in kwargs.items():
+            if key in defaults.items():
+>>>>>>> def759c266485e5c09fe06424fdc5b9bb3813001
 
 
 
