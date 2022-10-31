@@ -1,22 +1,20 @@
 """Contains functionality for reading, processing and validating seacharts configuration settings"""
+from pathlib import Path
 from typing import List
 
 import yaml
 from cerberus import Validator
 
 from . import files
-from . import paths as path
+from . import paths as dcp  # default configuratin paths
 
 
 class ENCConfig:
-    _settings = None
-    _schema = None
-    _valid_sections = None
-    validator = None
+    """Class for maintaining Electronic Navigational Charts configuration settings"""
 
-    def __init__(self, config_file_name: str = path.config, **kwargs):
+    def __init__(self, config_file_name: Path = dcp.config, **kwargs):
 
-        self._schema = read_yaml_into_dict(path.config_schema)
+        self._schema = read_yaml_into_dict(dcp.config_schema)
         self.validator = Validator(self._schema)
         self._valid_sections = self.extract_valid_sections()
 
@@ -50,17 +48,16 @@ class ENCConfig:
         if not self.validator.validate(settings):
             raise ValueError(f"Cerberus validation Error: {self.validator.errors}")
 
-        self._settings['enc']['depths'].sort()
+        self._settings["enc"]["depths"].sort()
 
-        for file_name in self._settings['enc']['files']:
+        for file_name in self._settings["enc"]["files"]:
             files.verify_directory_exists(file_name)
 
-
-    def parse(self, file_name=path.config) -> None:
+    def parse(self, file_name=dcp.config) -> None:
         self._settings = read_yaml_into_dict(file_name)
         self.validate(self._settings)
 
-    def override(self, section='enc', **kwargs) -> None:
+    def override(self, section="enc", **kwargs) -> None:
         if not kwargs:
             return
 
@@ -76,10 +73,11 @@ class ENCConfig:
         self._settings = new_settings
 
 
-def read_yaml_into_dict(file_name=path.config) -> dict:
-    with open(file_name, encoding='utf-8') as config_file:
+def read_yaml_into_dict(file_name=dcp.config) -> dict:
+    with open(file_name, encoding="utf-8") as config_file:
         output_dict = yaml.safe_load(config_file)
     return output_dict
+
 
 def parse_key(key, defaults):
     """Returns default config parameter value for a given key, if it exists.
@@ -118,21 +116,12 @@ def validate_key(key, value, v_type, sub_type=None, length=None) -> None:
     """
     if isinstance(value, list) or isinstance(value, tuple):
         if not all([isinstance(v, sub_type) for v in value]):
-            raise ValueError(
-                "Invalid input format: "
-                f"'{key}' should be a {v_type.__name__} of {sub_type}."
-            )
+            raise ValueError("Invalid input format: " f"'{key}' should be a {v_type.__name__} of {sub_type}.")
         if length is not None and len(value) != length:
-            raise ValueError(
-                "Invalid input format: "
-                f"'{key}' should be a {v_type.__name__} of length {length}."
-            )
+            raise ValueError("Invalid input format: " f"'{key}' should be a {v_type.__name__} of length {length}.")
     else:
         if not isinstance(value, v_type):
-            raise ValueError(
-                "Invalid input format: "
-                f"'{key}' should have type {v_type}."
-            )
+            raise ValueError("Invalid input format: " f"'{key}' should have type {v_type}.")
 
 
 # def save(kwargs, file_name) -> None:
