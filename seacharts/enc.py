@@ -31,12 +31,9 @@ class ENC:
         :param border: bool for showing a border around the environment plot
         :param verbose: bool for status printing during geometry processing
     """
-    def __init__(self,
-                 config_file: str = utils.paths.config,
-                 multiprocessing=False,
-                 **kwargs
-                 ):
-        matplotlib.use('TkAgg')
+
+    def __init__(self, config_file: str = utils.paths.config, multiprocessing=False, **kwargs):
+        matplotlib.use("TkAgg")
         if multiprocessing:
             dis.Display.init_multiprocessing()
             return
@@ -48,6 +45,27 @@ class ENC:
         self.shore = self._environment.topography.shore
         self.seabed = self._environment.hydrography.bathymetry
         self._display = dis.Display(self._cfg.settings, self._environment)
+
+    @property
+    def size(self) -> Tuple[int, int]:
+        """
+        :return: tuple of bounding box size
+        """
+        return self._environment.scope.extent.size
+
+    @property
+    def center(self) -> Tuple[int, int]:
+        """
+        :return: tuple of ENC center coordinates
+        """
+        return self._environment.scope.extent.center
+
+    @property
+    def origin(self) -> Tuple[int, int]:
+        """
+        :return: tuple of ENC origin (lower left) coordinates.
+        """
+        return self._environment.scope.extent.origin
 
     @property
     def supported_crs(self) -> str:
@@ -97,14 +115,15 @@ class ENC:
         """
         self._display.refresh_vessels([])
 
-    def add_ownship(self,
-                    easting: int,
-                    northing: int,
-                    heading: float,
-                    hull_scale: float = 1.0,
-                    lon_scale: float = 10.0,
-                    lat_scale: float = 10.0,
-                    ) -> None:
+    def add_ownship(
+        self,
+        easting: int,
+        northing: int,
+        heading: float,
+        hull_scale: float = 1.0,
+        lon_scale: float = 10.0,
+        lat_scale: float = 10.0,
+    ) -> None:
         """
         Add the body of a controllable vessel to the environment.
         :param easting: int denoting the ownship X coordinate
@@ -115,9 +134,7 @@ class ENC:
         :param lat_scale: optional float scaling the lateral horizon
         :return: None
         """
-        self._environment.create_ownship(
-            easting, northing, heading, hull_scale, lon_scale, lat_scale
-        )
+        self._environment.create_ownship(easting, northing, heading, hull_scale, lon_scale, lat_scale)
         self._display.update_plot()
 
     def remove_ownship(self) -> None:
@@ -136,15 +153,16 @@ class ENC:
         """
         self._environment.filter_hazardous_areas(depth, buffer)
 
-    def draw_arrow(self,
-                   start: Tuple[float, float],
-                   end: Tuple[float, float],
-                   color: str,
-                   width: float = None,
-                   head_size: float = None,
-                   thickness: float = None,
-                   edge_style: Union[str, tuple] = None,
-                   ) -> None:
+    def draw_arrow(
+        self,
+        start: Tuple[float, float],
+        end: Tuple[float, float],
+        color: str,
+        width: float = None,
+        head_size: float = None,
+        thickness: float = None,
+        edge_style: Union[str, tuple] = None,
+    ) -> None:
         """
         Add a straight arrow overlay to the environment plot.
         :param start: tuple of start point coordinate pair
@@ -156,18 +174,17 @@ class ENC:
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        self._display.features.add_arrow(
-            start, end, color, width, head_size, thickness, edge_style
-        )
+        self._display.features.add_arrow(start, end, color, width, head_size, thickness, edge_style)
 
-    def draw_circle(self,
-                    center: Tuple[float, float],
-                    radius: float,
-                    color: str,
-                    fill: bool = True,
-                    thickness: float = None,
-                    edge_style: Union[str, tuple] = None,
-                    ) -> None:
+    def draw_circle(
+        self,
+        center: Tuple[float, float],
+        radius: float,
+        color: str,
+        fill: bool = True,
+        thickness: float = None,
+        edge_style: Union[str, tuple] = None,
+    ) -> None:
         """
         Add a circle or disk overlay to the environment plot.
         :param center: tuple of circle center coordinates
@@ -178,17 +195,16 @@ class ENC:
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :return: None
         """
-        self._display.features.add_circle(
-            center, radius, color, fill, thickness, edge_style
-        )
+        self._display.features.add_circle(center, radius, color, fill, thickness, edge_style)
 
-    def draw_line(self,
-                  points: List[Tuple[float, float]],
-                  color: str,
-                  width: float = None,
-                  thickness: float = None,
-                  edge_style: Union[str, tuple] = None,
-                  ) -> None:
+    def draw_line(
+        self,
+        points: List[Tuple[float, float]],
+        color: str,
+        width: float = None,
+        thickness: float = None,
+        edge_style: Union[str, tuple] = None,
+    ) -> None:
         """
         Add a straight line overlay to the environment plot.
         :param points: list of tuples of coordinate pairs
@@ -198,18 +214,17 @@ class ENC:
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :return: None
         """
-        self._display.features.add_line(
-            points, color, width, thickness, edge_style
-        )
+        self._display.features.add_line(points, color, width, thickness, edge_style)
 
-    def draw_polygon(self,
-                     geometry: Union[Any, List[Tuple[float, float]]],
-                     color: str,
-                     interiors: List[List[Tuple[float, float]]] = None,
-                     fill: bool = True,
-                     thickness: float = None,
-                     edge_style: Union[str, tuple] = None,
-                     ) -> None:
+    def draw_polygon(
+        self,
+        geometry: Union[Any, List[Tuple[float, float]]],
+        color: str,
+        interiors: List[List[Tuple[float, float]]] = None,
+        fill: bool = True,
+        thickness: float = None,
+        edge_style: Union[str, tuple] = None,
+    ) -> None:
         """
         Add an arbitrary polygon shape overlay to the environment plot.
         :param geometry: Shapely geometry or list of exterior coordinates
@@ -220,19 +235,18 @@ class ENC:
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :return: None
         """
-        self._display.features.add_polygon(
-            geometry, color, interiors, fill, thickness, edge_style
-        )
+        self._display.features.add_polygon(geometry, color, interiors, fill, thickness, edge_style)
 
-    def draw_rectangle(self,
-                       center: Tuple[float, float],
-                       size: Tuple[float, float],
-                       color: str,
-                       rotation: float = 0.0,
-                       fill: bool = True,
-                       thickness: float = None,
-                       edge_style: Union[str, tuple] = None,
-                       ) -> None:
+    def draw_rectangle(
+        self,
+        center: Tuple[float, float],
+        size: Tuple[float, float],
+        color: str,
+        rotation: float = 0.0,
+        fill: bool = True,
+        thickness: float = None,
+        edge_style: Union[str, tuple] = None,
+    ) -> None:
         """
         Add a rectangle or box overlay to the environment plot.
         :param center: tuple of rectangle center coordinates
@@ -244,9 +258,7 @@ class ENC:
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :return: None
         """
-        self._display.features.add_rectangle(
-            center, size, color, rotation, fill, thickness, edge_style
-        )
+        self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style)
 
     def show_display(self, duration: float = 0.0) -> None:
         """
@@ -271,11 +283,12 @@ class ENC:
         self._display.terminate()
         self.clear_vessels()
 
-    def save_image(self,
-                   name: str = None,
-                   scale: float = 1.0,
-                   extension: str = 'png',
-                   ) -> None:
+    def save_image(
+        self,
+        name: str = None,
+        scale: float = 1.0,
+        extension: str = "png",
+    ) -> None:
         """
         Save the environment plot as a .png image.
         :param name: optional str of file name
