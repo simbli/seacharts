@@ -1,7 +1,7 @@
+from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
 import matplotlib
-
 import seacharts.display as dis
 import seacharts.environment as env
 import seacharts.utils as utils
@@ -32,7 +32,7 @@ class ENC:
         :param verbose: bool for status printing during geometry processing
     """
 
-    def __init__(self, config_file: str = utils.paths.config, multiprocessing=False, **kwargs):
+    def __init__(self, config_file: Path = utils.paths.config, multiprocessing=False, **kwargs):
         matplotlib.use("TkAgg")
         if multiprocessing:
             dis.Display.init_multiprocessing()
