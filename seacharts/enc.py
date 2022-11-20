@@ -268,6 +268,10 @@ class ENC:
         """
         self._display.show(duration)
 
+    def get_display_handle(self):
+        """Returns figure and axes handles to the seacharts display."""
+        return self._display.figure, self._display.axes
+
     def refresh_display(self) -> None:
         """
         Manually redraw the environment display window.
