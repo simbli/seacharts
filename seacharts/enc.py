@@ -5,6 +5,7 @@ import matplotlib
 import seacharts.display as dis
 import seacharts.environment as env
 import seacharts.utils as utils
+from cartopy.crs import UTM
 
 
 class ENC:
@@ -68,8 +69,20 @@ class ENC:
         return self._environment.scope.extent.origin
 
     @property
+    def bbox(self) -> Tuple[int, int, int, int]:
+        """
+        :return: tuple of bounding box coordinates (xmin, ymin, xmax, ymax)
+        """
+        return self._environment.scope.extent.bbox
+
+    @property
+    def crs(self) -> UTM:
+        """Return the coordinate reference system projection used, as UTM object."""
+        return self._display.crs
+
+    @property
     def supported_crs(self) -> str:
-        """Return the supported coordinate reference system."""
+        """Return the supported coordinate reference system, as string."""
         return self._environment.supported_crs
 
     @property
