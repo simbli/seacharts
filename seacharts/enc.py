@@ -78,7 +78,14 @@ class ENC:
     @property
     def crs(self) -> UTM:
         """Return the coordinate reference system projection used, as UTM object."""
+        if self._display.crs is None:
+            return UTM(self.utm_zone)
         return self._display.crs
+
+    @property
+    def utm_zone(self) -> int:
+        """Return the UTM zone number of the coordinate reference system."""
+        return self._display.utm_zone
 
     @property
     def supported_crs(self) -> str:
