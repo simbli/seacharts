@@ -7,7 +7,7 @@ enc:
   tolerance: 0                                                            # int of maximum tolerance distance for geometries
   layers: ["seabed", "land", "shore"]                                     # list(str...) of feature layers to load or show
   depths: [0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500]                       # list(int...) of depth bins for feature layers
-  files: ["More_og_Romsdal.gdb"]                                          # seacharts source database name
+  files: ["More_og_Romsdal_utm33.gdb"]                                          # seacharts source database name
   new_data: True                                                          # bool indicating if new files should be parsed
   raw_data: False
   border: False                                                           # bool for showing a border around the environment plot
@@ -15,6 +15,7 @@ enc:
   #origin_lla: [62.457464, 6.146678]                                       # origin in latitude longitude (degrees) for transformation purposes (NOT IMPLEMENTED YET)
 
 display:
+  show_figure: True # Disable ENC display or not
   dpi: 96
   anchor: "center"
   resolution: 1080

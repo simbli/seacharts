@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 import matplotlib
 import seacharts.display as dis
@@ -76,8 +76,31 @@ class ENC:
         return self._environment.scope.extent.bbox
 
     @property
+    def considered_depths(self) -> List[int]:
+        """
+        :return: list of considered depth bins
+        """
+        return self._environment.scope.depths
+
+    @property
+    def utm_zone(self) -> int:
+        """
+        :return: integer of UTM zone number
+        """
+        return self._environment.scope.extent.utm_zone
+
+    @property
+    def figure_active(self) -> bool:
+        """
+        :return: boolean indicating if a figure is active
+        """
+        return self._display.is_active
+
+    @property
     def crs(self) -> UTM:
         """Return the coordinate reference system projection used, as UTM object."""
+        if self._display.crs is None:
+            return UTM(self.utm_zone)
         return self._display.crs
 
     @property
@@ -217,6 +240,7 @@ class ENC:
         width: float = None,
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
+        marker_type: str = None,
     ) -> None:
         """
         Add a straight line overlay to the environment plot.
@@ -225,9 +249,10 @@ class ENC:
         :param width: float denoting the line buffer width
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param marker_type: str denoting the Matplotlib marker type
         :return: None
         """
-        self._display.features.add_line(points, color, width, thickness, edge_style)
+        self._display.features.add_line(points, color, width, thickness, edge_style, marker_type)
 
     def draw_polygon(
         self,
@@ -272,6 +297,13 @@ class ENC:
         :return: None
         """
         self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style)
+
+    def start_display(self) -> None:
+        """
+        Start the ENC figure display.
+        :return: None
+        """
+        self._display.start(self._cfg.settings)
 
     def show_display(self, duration: float = 0.0) -> None:
         """

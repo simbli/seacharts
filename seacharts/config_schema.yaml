@@ -73,6 +73,9 @@ display:
   required: True
   type: dict
   schema:
+    show_figure:
+      required: True
+      type: boolean
     dpi:
       required: True
       type: integer

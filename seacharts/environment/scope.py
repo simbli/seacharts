@@ -11,29 +11,17 @@ from .extent import Extent
 
 @dataclass
 class Scope:
-    extent: Extent
-    buffer: int = None
-    tolerance: int = None
-    layers: List[str] = None
-    depths: List[int] = None
-    files: List[str] = None
-    new_data: bool = None
-    raw_data: bool = None
-    border: bool = None
-    verbose: bool = None
-    parser: utils.parser.ShapefileParser = field(init=False)
-
     def __init__(self, settings: dict, extent: Extent):
-        self.extent = extent
-        self.buffer = settings['enc']['buffer']
-        self.tolerance = settings['enc']['tolerance']
-        self.layers = settings['enc']['layers']
-        self.depths = settings['enc']['depths']
-        self.files = settings['enc']['files']
-        self.new_data = settings['enc']['new_data']
-        self.raw_data = settings['enc']['raw_data']
-        self.border = settings['enc']['border']
-        self.verbose = settings['enc']['verbose']
+        self.extent: Extent = extent
+        self.buffer: int = settings["enc"]["buffer"]
+        self.tolerance: int = settings["enc"]["tolerance"]
+        self.layers: list = settings["enc"]["layers"]
+        self.depths: list = settings["enc"]["depths"]
+        self.files: list = settings["enc"]["files"]
+        self.new_data: bool = settings["enc"]["new_data"]
+        self.raw_data: bool = settings["enc"]["raw_data"]
+        self.border: bool = settings["enc"]["border"]
+        self.verbose: bool = settings["enc"]["verbose"]
 
         utils.files.build_directory_structure()
 
@@ -45,6 +33,4 @@ class Scope:
 
         utils.files.build_directory_structure(self.layers)
 
-        self.parser = utils.ShapefileParser(
-            self.extent.bbox, self.files, self.verbose
-        )
+        self.parser: utils.parser.ShapefileParser = utils.ShapefileParser(self.extent.bbox, self.files, self.verbose)
