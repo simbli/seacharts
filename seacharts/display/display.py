@@ -27,7 +27,7 @@ class Display:
     def __init__(self, settings: dict, environment: env.Environment):
         self.environment = environment
         self._show_figure = settings["display"]["show_figure"]
-
+        self._utm_zone = settings["enc"]["utm_zone"]
         self._setup_figure_stuff(settings)
 
     def _setup_figure_stuff(self, settings: dict) -> None:
@@ -271,6 +271,10 @@ class Display:
             )
         except tk.TclError:
             plt.close()
+
+    @property
+    def utm_zone(self):
+        return self._utm_zone
 
     @property
     def is_active(self):
