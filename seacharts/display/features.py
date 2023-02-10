@@ -3,6 +3,7 @@ from __future__ import annotations
 import seacharts.display as dis
 import seacharts.spatial as spl
 import seacharts.utils as utils
+import shapely.geometry as sgeo
 from cartopy.feature import ShapelyFeature
 
 from .colors import color_picker
@@ -109,7 +110,10 @@ class FeaturesManager:
 
     def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle):
         try:
-            shape = list(shape)
+            if isinstance(shape, sgeo.MultiPolygon) or isinstance(shape, sgeo.GeometryCollection):
+                shape = list(shape.geoms)
+            else:
+                shape = list(shape)
         except TypeError:
             shape = [shape]
         if isinstance(shape[0], tuple) or isinstance(shape[0], list):
