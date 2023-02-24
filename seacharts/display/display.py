@@ -46,8 +46,8 @@ class Display:
             else:
                 self.set_figure_position()
 
-            if self._colorbar_mode:
-                self.toggle_colorbar()
+            # if self._colorbar_mode:
+            #     self.toggle_colorbar()
 
             if self._dark_mode:
                 self.toggle_dark_mode()
@@ -63,6 +63,7 @@ class Display:
             settings (dict): The ENC settings dictionary.
         """
         if self.is_active:
+            plt.show(block=False)
             return None
 
         if not self._show_figure:
