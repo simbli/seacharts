@@ -15,7 +15,7 @@ enc:
   #origin_lla: [62.457464, 6.146678]                                       # origin in latitude longitude (degrees) for transformation purposes (NOT IMPLEMENTED YET)
 
 display:
-  show_figure: True # Disable ENC display or not
+  show_figure: False # Disable ENC display or not
   dpi: 96
   anchor: "center"
   resolution: 1080
