@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import seacharts.display as dis
+
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
 
 
 class EventsManager:
@@ -70,11 +74,7 @@ class EventsManager:
         elif event.key == "l":
             self._display.features.toggle_topography_visibility()
         elif event.key in ["n", "m"]:
-            if (
-                self._display.environment.ownship
-                and self._display.features.show_ownship
-                and self._display.environment.depth is not None
-            ):
+            if self._display.environment.ownship and self._display.features.show_ownship and self._display.environment.depth is not None:
                 self._toggle_depth_filter_values(event.key)
         elif event.key == "o":
             if self._display.environment.ownship:

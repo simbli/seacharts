@@ -6,6 +6,7 @@ import tkinter as tk
 from multiprocessing import Process
 from typing import List, Tuple
 
+import matplotlib
 import matplotlib.pyplot as plt
 import seacharts.environment as env
 from cartopy.crs import UTM
@@ -14,6 +15,9 @@ from matplotlib.gridspec import GridSpec
 from .colors import colorbar
 from .events import EventsManager
 from .features import FeaturesManager
+
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
 
 
 class Display:
