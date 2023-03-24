@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seacharts.environment as env
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
+from matplotlib_scalebar.scalebar import ScaleBar
 
 from .colors import colorbar
 from .events import EventsManager
@@ -43,6 +44,7 @@ class Display:
             self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
             self.events = EventsManager(self)
             self.features = FeaturesManager(self)
+            self.axes.add_artist(ScaleBar(1, units="m", location="lower left", frameon=False, color="white", box_alpha=0.0, pad=0.5, font_properties={"size": 12}))
             self.draw_plot()
 
             if self._fullscreen_mode:
