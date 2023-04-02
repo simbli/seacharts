@@ -86,9 +86,9 @@ class FeaturesManager:
         body = spl.Arrow(start=start, end=end, width=buffer).body(head_size)
         self.add_overlay(body, color_name, True, linewidth, linestyle)
 
-    def add_circle(self, center, radius, color_name, fill, linewidth, linestyle):
+    def add_circle(self, center, radius, color_name, fill, linewidth, linestyle, alpha):
         geometry = spl.Circle(*center, radius).geometry
-        self.add_overlay(geometry, color_name, fill, linewidth, linestyle)
+        self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
     def add_line(self, points, color_name, buffer, linewidth, linestyle, marker):
         if buffer is None:
@@ -100,15 +100,9 @@ class FeaturesManager:
             )
         else:
             geometry = spl.Line(points=points).geometry.buffer(buffer)
-            self.add_overlay(
-                geometry,
-                color_name,
-                True,
-                linewidth,
-                linestyle,
-            )
+            self.add_overlay(geometry, color_name, True, linewidth, linestyle)
 
-    def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle):
+    def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0):
         try:
             if isinstance(shape, sgeo.MultiPolygon) or isinstance(shape, sgeo.GeometryCollection):
                 shape = list(shape.geoms)
@@ -120,13 +114,13 @@ class FeaturesManager:
             shape = [shape]
         for geometry in shape:
             geometry = spl.Area.new_polygon(geometry, interiors)
-            self.add_overlay(geometry, color, fill, linewidth, linestyle)
+            self.add_overlay(geometry, color, fill, linewidth, linestyle, alpha)
 
-    def add_rectangle(self, center, size, color_name, rotation, fill, linewidth, linestyle):
+    def add_rectangle(self, center, size, color_name, rotation, fill, linewidth, linestyle, alpha):
         geometry = spl.Rectangle(*center, heading=rotation, width=size[0], height=size[1]).geometry
-        self.add_overlay(geometry, color_name, fill, linewidth, linestyle)
+        self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
-    def add_overlay(self, geometry, color_name, fill, linewidth, linestyle):
+    def add_overlay(self, geometry, color_name, fill, linewidth, linestyle, alpha=1.0):
         color = color_picker(color_name)
         if fill is False:
             color = color[0], "none"
@@ -135,6 +129,7 @@ class FeaturesManager:
             kwargs["linewidth"] = linewidth
         if linestyle is not None:
             kwargs["linestyle"] = linestyle
+        kwargs["alpha"] = alpha
         self.new_artist(geometry, color, 0, **kwargs)
 
     def update_waypoints(self, number, pick, coords=None):
