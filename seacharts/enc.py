@@ -296,6 +296,7 @@ class ENC:
         fill: bool = True,
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
+        alpha: float = 1.0,
     ) -> None:
         """
         Add a rectangle or box overlay to the environment plot.
@@ -306,9 +307,10 @@ class ENC:
         :param fill: bool which toggles the interior rectangle color
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style)
+        self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style, alpha)
 
     def start_display(self) -> None:
         """
