@@ -228,6 +228,7 @@ class ENC:
         fill: bool = True,
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
+        alpha: float = 1.0,
     ) -> None:
         """
         Add a circle or disk overlay to the environment plot.
@@ -237,9 +238,10 @@ class ENC:
         :param fill: bool which toggles the interior disk color
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_circle(center, radius, color, fill, thickness, edge_style)
+        self._display.features.add_circle(center, radius, color, fill, thickness, edge_style, alpha)
 
     def draw_line(
         self,
@@ -270,6 +272,7 @@ class ENC:
         fill: bool = True,
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
+        alpha: float = 1.0,
     ) -> None:
         """
         Add an arbitrary polygon shape overlay to the environment plot.
@@ -279,9 +282,10 @@ class ENC:
         :param fill: bool which toggles the interior shape color
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_polygon(geometry, color, interiors, fill, thickness, edge_style)
+        self._display.features.add_polygon(geometry, color, interiors, fill, thickness, edge_style, alpha)
 
     def draw_rectangle(
         self,
@@ -343,14 +347,16 @@ class ENC:
     def save_image(
         self,
         name: str = None,
+        path: Path | None = None,
         scale: float = 1.0,
         extension: str = "png",
     ) -> None:
         """
         Save the environment plot as a .png image.
         :param name: optional str of file name
+        :param path: optional Path of file path
         :param scale: optional float scaling the image resolution
         :param extension: optional str of file extension name
         :return: None
         """
-        self._display.save_figure(name, scale, extension)
+        self._display.save_figure(name, path, scale, extension)
