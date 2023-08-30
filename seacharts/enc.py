@@ -203,6 +203,7 @@ class ENC:
         end: Tuple[float, float],
         color: str,
         width: float = None,
+        fill: bool = False,
         head_size: float = None,
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
@@ -213,12 +214,13 @@ class ENC:
         :param end: tuple of end point coordinate pair
         :param color: str of line color
         :param width: float denoting the line buffer width
+        :param fill: bool which toggles the interior arrow color on/off
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        self._display.features.add_arrow(start, end, color, width, head_size, thickness, edge_style)
+        self._display.features.add_arrow(start, end, color, width, fill, head_size, thickness, edge_style)
 
     def draw_circle(
         self,
