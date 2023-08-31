@@ -4,6 +4,7 @@ import datetime
 import time
 import tkinter as tk
 from multiprocessing import Process
+from pathlib import Path
 from typing import List, Tuple
 
 import matplotlib
@@ -45,6 +46,7 @@ class Display:
             self.events = EventsManager(self)
             self.features = FeaturesManager(self)
             self.axes.add_artist(ScaleBar(1, units="m", location="lower left", frameon=False, color="white", box_alpha=0.0, pad=0.5, font_properties={"size": 12}))
+
             self.draw_plot()
 
             if self._fullscreen_mode:
@@ -263,15 +265,21 @@ class Display:
             manager = plt.get_current_fig_manager()
             manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
-    def save_figure(self, name=None, scale=1.0, extension="png"):
+    def save_figure(self, name: str | None = None, path: Path | None = None, scale: float = 1.0, extension: str = "png"):
         if not self._show_figure:
             return
 
         try:
             if name is None:
                 name = self.figure.canvas.manager.get_window_title()
+
+            if path is None:
+                path_str = f"reports/{name}.{extension}"
+            else:
+                path_str = str(path / f"{name}.{extension}")
+
             self.figure.savefig(
-                f"reports/{name}.{extension}",
+                path_str,
                 dpi=self.figure.dpi * scale,
                 bbox_inches=self.figure.bbox_inches,
                 pad_inches=0.0,
