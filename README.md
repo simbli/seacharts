@@ -24,6 +24,14 @@ Python-based API for Electronic Navigational Charts (ENC)
 This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
+## Roadmap
+
+- Add support for multiple map data formats (.gis, .gdb, .json, ) from any region in the world
+- Improve visualization wrt run-time, decouple fully from the data aquisition functionality
+- Add support for reading and loading in weather data (wind and current maps++) in a separate module
+- Refactor package structure to separate front end visualization from data aquisition of map data and weather data
+- Add windows capability by possibly porting some code from cartopy usage to alternatives
+
 ## Prerequisites
 
 ### Anaconda
@@ -252,11 +260,11 @@ extracted and placed as discussed in the shapefile processing section:
 ```python
 if __name__ == '__main__':
 
-    import seacharts
+    import seacharts.enc as senc
 
     size = 9000, 5062
     center = 44300, 6956450
-    enc = seacharts.ENC(border=True)
+    enc = senc.ENC(border=True)
 
     # (id, easting, northing, heading, color)
     ships = [
@@ -325,12 +333,6 @@ file by any arbitrary alternative method is thus reflected in the plot in near
 real-time. As such, this feature may be utilized for parallel or concurrent
 visualization of vessels in an environment, e.g. based on vessel trajectories
 produced by a separate and independent simulation or optimization algorithm.
-
-
-## Contributors
-
-- Simon Blindheim ([simon.blindheim@ntnu.no](mailto:simon.blindheim@ntnu.no))
-- Trym Tengesdal ([trym.tengesdal@ntnu.no](mailto:trym.tengesdal@ntnu.no))
 
 
 ## License
