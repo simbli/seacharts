@@ -17,6 +17,7 @@ class Extent:
         if "center" in settings["enc"]:
             self.center: Tuple[int, int] = settings["enc"]["center"]
             self.center = self.center[0], self.center[1]
+            self._origin_from_center()
         else:
             self._center_from_origin()
 
@@ -24,10 +25,10 @@ class Extent:
         self.area: int = self.size[0] * self.size[1]
 
     def _origin_from_center(self) -> None:
-        self.origin = (self.center[0] - self.size[0] // 2.0, self.center[1] - self.size[1] // 2.0)
+        self.origin = (self.center[0] - self.size[0] / 2.0, self.center[1] - self.size[1] / 2.0)
 
     def _center_from_origin(self) -> None:
-        self.center = (self.origin[0] + self.size[0] // 2.0, self.origin[1] + self.size[1] // 2.0)
+        self.center = (self.origin[0] + self.size[0] / 2.0, self.origin[1] + self.size[1] / 2.0)
 
     def _bounding_box_from_origin_size(self) -> Tuple[int, int, int, int]:
         x_min, y_min = self.origin

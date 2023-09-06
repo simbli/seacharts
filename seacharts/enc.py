@@ -107,11 +107,6 @@ class ENC:
         return self._display.crs
 
     @property
-    def utm_zone(self) -> int:
-        """Return the UTM zone number of the coordinate reference system."""
-        return self._display.utm_zone
-
-    @property
     def supported_crs(self) -> str:
         """Return the supported coordinate reference system, as string."""
         return self._environment.supported_crs
