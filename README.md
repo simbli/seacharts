@@ -25,10 +25,11 @@ This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
 ## Roadmap
-- Add support for multiple map data formats (.gis, .gdb, .json, ) from any region in the world
-- Improve visualization wrt run-time, decouple fully from the data aquisition/backend functionality
+- Add support for multiple map data formats (.gis, .gdb, .json, ) from any region in the world, in all UTM zones or lat/lon coordinates.
+- Improve visualization refresh rate
 - Add support for reading and loading in weather data (wind and current maps++) in a separate module
-- Refactor package structure to separate front end visualization from data aquisition of map data and weather data
+- Add support for reading and loading in traffic management data
+- Refactor package structure to separate front end visualization from data aquisition and processing in the backend
 - Add windows capability by possibly porting some code from cartopy usage to alternatives
 
 ## Prerequisites
