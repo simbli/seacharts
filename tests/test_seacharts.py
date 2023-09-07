@@ -4,7 +4,7 @@ if __name__ == "__main__":
 
     size = 9000, 5062
     center = 44300, 6956450
-    enc = ENC(new_data=False, size=size, center=center)
+    enc = ENC(new_data=True, size=size, center=center)
     enc.start_display()
 
     # (id, easting, northing, heading, color)

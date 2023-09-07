@@ -57,8 +57,7 @@ class Display:
             # if self._colorbar_mode:
             #     self.toggle_colorbar()
 
-            if self._dark_mode:
-                self.toggle_dark_mode()
+            self.toggle_dark_mode(self._dark_mode)
 
             if self.environment is None:
                 self.start_visualization_loop()
@@ -165,7 +164,7 @@ class Display:
     def draw_plot(self):
         if not self._show_figure:
             return
-
+        plt.show(block=False)
         try:
             self.figure.canvas.draw()
         except tk.TclError:
@@ -192,6 +191,7 @@ class Display:
         state = state if state is not None else not self._dark_mode
         color = "#142c38" if state else "#ffffff"
         self.figure.set_facecolor(color)
+        self.figure.axes[0].set_facecolor(color)
         self._colorbar.ax.set_facecolor(color)
         self.features.toggle_topography_visibility(not state)
         self._dark_mode = state
