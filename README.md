@@ -1,9 +1,9 @@
 # SeaCharts
 Python-based API for Electronic Navigational Charts (ENC)
 
-[![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
 [![platform](https://img.shields.io/badge/platform-linux-lightgrey)]()
-[![python version](https://img.shields.io/badge/python-3.9-blue)]()
+[![python version](https://img.shields.io/badge/python-3.10-blue)]()
+[![python version](https://img.shields.io/badge/python-3.11-blue)]()
 [![license](https://img.shields.io/badge/license-MIT-green)]()
 
 
@@ -25,9 +25,8 @@ This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
 ## Roadmap
-
 - Add support for multiple map data formats (.gis, .gdb, .json, ) from any region in the world
-- Improve visualization wrt run-time, decouple fully from the data aquisition functionality
+- Improve visualization wrt run-time, decouple fully from the data aquisition/backend functionality
 - Add support for reading and loading in weather data (wind and current maps++) in a separate module
 - Refactor package structure to separate front end visualization from data aquisition of map data and weather data
 - Add windows capability by possibly porting some code from cartopy usage to alternatives
@@ -65,7 +64,7 @@ pip install -e .
 ```
 This should preferably be done inside a virtual environment in order to prevent python packaging conflicts.
 
-### Pipwin (Windows)
+### Pipwin (Windows) DEPRECATED at the moment
 
 First, ensure that [Python 3.9](https://www.python.org/downloads/)
 (or another compatible version) and the required [C++ build tools](
@@ -154,7 +153,7 @@ if __name__ == '__main__':
     from seacharts.enc import ENC
 
     enc = ENC()
-    enc.show_display()
+    enc.start_display()
 ```
 
 You can also specify settings at run-time, such as the window size, coordinate (easting, northing) origin and file
@@ -177,8 +176,7 @@ if __name__ == '__main__':
 
 ```
 Note that all `ENC` settings parameters may be set and modified directly in
-`data/config.ini`, wherein user settings are saved alongside the project
-defaults. Parameters passed to `ENC` overrides the defaults of the
+`seacharts/config.yaml`, which are validated by the `seacharts/config_schema.yaml` using `cerberus`. Parameters passed to `ENC` overrides the defaults of the
 configuration file. See the documentation of the `ENC` input parameters for
 descriptions of all available configuration settings.
 
@@ -195,10 +193,12 @@ feature layers are stored in `seabed`, `shore` and `land`.
 
 ```python
 if __name__ == '__main__':
+    from seacharts.enc import ENC
 
-    import seacharts
-
-    enc = seacharts.ENC(new_data=False)
+    size = 9000, 5062
+    center = 44300, 6956450
+    enc = ENC(new_data=True, size=size, center=center)
+    enc.start_display()
 
     print(enc.seabed[10])
     print(enc.shore)
@@ -221,7 +221,7 @@ visualization possibilities currently available to the SeaCharts package.
 
 
 ### Interactive environment visualization
-The `ENC.show_display` method is used to show a Matplotlib figure plot of the
+The `ENC.start_display` method is used to show a Matplotlib figure plot of the
 loaded seacharts features. Zoom and pan the environment view using the mouse
 scroll button, and holding and dragging the plot with left click, respectively.
 
@@ -258,60 +258,51 @@ default settings and that a `More_og_Romsdal.gdb` directory is correctly
 extracted and placed as discussed in the shapefile processing section:
 
 ```python
-if __name__ == '__main__':
-
-    import seacharts.enc as senc
+if __name__ == "__main__":
+    import shapely.geometry as geo
+    from seacharts.enc import ENC
 
     size = 9000, 5062
     center = 44300, 6956450
-    enc = senc.ENC(border=True)
+    enc = ENC(new_data=True, size=size, center=center)
+    enc.start_display()
 
     # (id, easting, northing, heading, color)
     ships = [
-        (1, 46100, 6957000, 132, 'orange'),
-        (2, 45000, 6956000, 57, 'yellow'),
-        (3, 44100, 6957500, 178, 'red'),
-        (4, 42000, 6955200, 86, 'green'),
-        (5, 44000, 6955500, 68, 'pink'),
+        (1, 46100, 6957000, 132, "orange"),
+        (2, 45000, 6956000, 57, "yellow"),
+        (3, 44100, 6957500, 178, "red"),
+        (4, 42000, 6955200, 86, "green"),
+        (5, 44000, 6955500, 68, "pink"),
     ]
 
     enc.add_vessels(*ships)
 
-    import shapely.geometry as geo
-
     x, y = center
     width, height = 1900, 1900
-    box = geo.Polygon((
-        (x - width, y - height),
-        (x + width, y - height),
-        (x + width, y + height),
-        (x - width, y + height),
-    ))
+    box = geo.Polygon(
+        (
+            (x - width, y - height),
+            (x + width, y - height),
+            (x + width, y + height),
+            (x - width, y + height),
+        )
+    )
     areas = list(box.difference(enc.seabed[10].geometry))
-    enc.draw_circle(center, 1000, 'yellow', thickness=2,
-                    edge_style='--')
-    enc.draw_rectangle(center, (600, 1200), 'blue', rotation=20)
-    enc.draw_circle(center, 700, 'green', edge_style=(0, (5, 8)),
-                    thickness=3, fill=False)
-    enc.draw_line([(center[0], center[1] + 800), center,
-                   (center[0] - 300, center[1] - 400)], 'white')
-    enc.draw_line([(center[0] - 300, center[1] + 400), center,
-                   (center[0] + 200, center[1] - 600)],
-                  'magenta', width=0.0, thickness=5.0,
-                  edge_style=(0, (1, 4)))
-    enc.draw_arrow(center, (center[0] + 700, center[1] + 600), 'orange',
-                   head_size=300, width=50, thickness=5)
-    enc.draw_polygon(enc.seabed[100].geometry[-3], 'cyan')
-    enc.draw_polygon(enc.shore.geometry[56], 'highlight')
+    enc.draw_circle(center, 1000, "yellow", thickness=2, edge_style="--", alpha=0.5)
+    enc.draw_rectangle(center, (600, 1200), "blue", rotation=20, alpha=0.5)
+    enc.draw_circle(center, 700, "green", edge_style=(0, (5, 8)), thickness=3, fill=False)
+    enc.draw_line([(center[0], center[1] + 800), center, (center[0] - 300, center[1] - 400)], "white")
+    enc.draw_line([(center[0] - 300, center[1] + 400), center, (center[0] + 200, center[1] - 600)], "magenta", width=0.0, thickness=5.0, edge_style=(0, (1, 4)))
+    enc.draw_arrow(center, (center[0] + 700, center[1] + 600), "orange", head_size=300, width=50, thickness=5)
+    enc.draw_polygon(enc.seabed[100].geometry[-3], "cyan", alpha=0.5)
+    enc.draw_polygon(enc.shore.geometry[56], "highlight", alpha=0.5)
     for area in areas[3:8] + [areas[14], areas[17]] + areas[18:21]:
-        enc.draw_polygon(area, 'red')
-    enc.draw_rectangle(center, (width, height), 'pink', fill=False,
-                       edge_style=(0, (10, 10)), thickness=1.5)
+        enc.draw_polygon(area, "red", alpha=0.5)
+    enc.draw_rectangle(center, (width, height), "pink", fill=False, edge_style=(0, (10, 10)), thickness=1.5)
 
-    enc.save_image('example1', extension='svg')
-
-    enc.show_display()
-
+    enc.save_image("example1", extension="svg")
+    enc.close_display()
 ```
 
 The `id` values of the vessel details should be unique identifiers, used as
