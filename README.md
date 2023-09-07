@@ -302,7 +302,6 @@ if __name__ == "__main__":
     enc.draw_rectangle(center, (width, height), "pink", fill=False, edge_style=(0, (10, 10)), thickness=1.5)
 
     enc.save_image("example1", extension="svg")
-    enc.close_display()
 ```
 
 The `id` values of the vessel details should be unique identifiers, used as
