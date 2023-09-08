@@ -138,3 +138,4 @@ data/external/
 data/shapefiles/
 .vscode/
 data/paths/
+data/vessel.csv
