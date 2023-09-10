@@ -70,8 +70,7 @@ class Display:
             settings (dict): The ENC settings dictionary.
         """
         if self.is_active:
-            plt.show(block=False)
-            return None
+            return
 
         if not self._show_figure:
             self._show_figure = True
