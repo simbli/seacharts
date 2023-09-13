@@ -34,12 +34,23 @@ convention for Python code.
 
 ## Prerequisites
 
+### Linux (Virtual Environment)
+
+First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
+```
+sudo apt-get install libgeos-dev libgdal-dev
+```
+Then, from the root folder you can install an editable version of the package as follows:
+```
+pip install -e .
+```
+This should preferably be done inside a virtual environment in order to prevent python packaging conflicts.
+
 ### Anaconda
 
-The simplest way to acquire the necessary dependencies for the SeaCharts
-package is to install an edition of the [Anaconda](
+Install an edition of the [Anaconda](
 https://www.anaconda.com/products/individual-d) package manager, and then
-create a new _conda environment_ with **Python 3.9** using e.g. the graphical
+create a new _conda environment_ with **Python 3.10** or higher using e.g. the graphical
 user interface of [PyCharm Professional](
 https://www.jetbrains.com/lp/pycharm-anaconda/) as detailed [here](
 https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html
@@ -52,18 +63,6 @@ command in the terminal of your chosen environment:
 ```
 conda install -c conda-forge fiona cartopy matplotlib
 ```
-
-### Linux (Virtual Environment)
-
-First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
-```
-sudo apt-get install libgeos-dev libgdal-dev
-```
-Then, from the root folder you can install an editable version of the package as follows:
-```
-pip install -e .
-```
-This should preferably be done inside a virtual environment in order to prevent python packaging conflicts.
 
 ### Pipwin (Windows) DEPRECATED at the moment
 
