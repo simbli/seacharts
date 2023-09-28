@@ -65,7 +65,7 @@ command in the terminal of your chosen environment:
 conda install -c conda-forge fiona cartopy matplotlib
 ```
 
-### Pipwin (Windows) DEPRECATED at the moment
+### Pipwin (Windows) DEPRECATED at the moment, needs revision.
 
 First, ensure that [Python 3.9](https://www.python.org/downloads/)
 (or another compatible version) and the required [C++ build tools](
@@ -221,7 +221,7 @@ visualization possibilities currently available to the SeaCharts package.
 "Example visualization with zoom and paths")
 
 
-### Interactive environment visualization
+### Interactive environment visualization (Parts of this is DEPRECATED)
 The `ENC.start_display` method is used to show a Matplotlib figure plot of the
 loaded seacharts features. Zoom and pan the environment view using the mouse
 scroll button, and holding and dragging the plot with left click, respectively.
@@ -311,7 +311,7 @@ values may be strings of one of the custom ship colors of this package, or any
 named Matplotlib [CSS4 color](
 https://matplotlib.org/stable/gallery/color/named_colors.html).
 
-### Visualization using multiprocessing
+### Visualization using multiprocessing (DEPRECATED)
 Initializing an `ENC` instance with the `multiprocessing` parameter set to
 `True` spawns a `Process` thread from the Python standard library
 [multiprocessing module](
