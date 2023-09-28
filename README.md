@@ -25,12 +25,13 @@ This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
 ## Roadmap
-- Add support for multiple map data formats (.gis, .gdb, .json, ) from any region in the world, in all UTM zones or lat/lon coordinates.
-- Improve visualization refresh rate
-- Add support for reading and loading in weather data (wind and current maps++) in a separate module
-- Add support for reading and loading in traffic management data
-- Refactor package structure to separate front end visualization from data aquisition and processing in the backend
-- Add windows capability by possibly porting some code from cartopy usage to alternatives
+- 1: Add better compatibility for all operating systems (Windows, Linux++). Right now, gdal and cartopy are problematic to install on most platforms. Consider finding other packages for map loading and chart projections.
+- 2: Add support for multiple map data formats (.gis, .gdb, .json, ) from any region in the world, in all UTM zones or lat/lon coordinates. To do this, the current loading functionality should be separated from the simplification and geometry classification, such that one can load from any map data file first.
+- 3: Separate backend (Environment object) from frontend (Display object).
+- 4: Use another plotting framework that has higher refresh rate/ is feasible for real-time (Qt?, React?)
+- 5: Create clearly defined interface between Environment/ENC backend and frontend Display
+- 6: Add option for plotting trajectories, ships, traffic information/AIS data etc. on the frontend display.
+- 7: Add support for reading and loading in weather data (wind and current maps++) in a separate module
 
 ## Prerequisites
 
