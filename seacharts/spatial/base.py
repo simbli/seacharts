@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import Any, List
 
-from shapely import geometry as geo, ops
+from shapely import geometry as geo
+from shapely import ops
 
 
 @dataclass
@@ -51,9 +52,7 @@ class SingleDepth:
 class MultiDepth:
     @property
     def depth(self):
-        raise AttributeError(
-            f"Multi-depth shapes have no single depth."
-        )
+        raise AttributeError("Multi-depth shapes have no single depth.")
 
 
 @dataclass
@@ -68,9 +67,7 @@ class Shape(Drawable, ABC):
         self.geometry = bounding_box.intersection(self.geometry)
 
     def dilate(self, distance):
-        self.geometry = self.geometry.buffer(
-            distance, cap_style=2, join_style=3
-        )
+        self.geometry = self.geometry.buffer(distance, cap_style=2, join_style=3)
 
     def erode(self, distance):
         self.dilate(-distance)
@@ -95,12 +92,11 @@ class Shape(Drawable, ABC):
 
     @staticmethod
     def is_multi(geometry):
-        return (isinstance(geometry, geo.MultiPolygon)
-                or isinstance(geometry, geo.GeometryCollection))
+        return isinstance(geometry, geo.MultiPolygon) or isinstance(geometry, geo.GeometryCollection)
 
     @staticmethod
     def _record_to_geometry(record):
-        return geo.shape(record['geometry'])
+        return geo.shape(record["geometry"])
 
     @staticmethod
     def as_multi(geometry):
@@ -116,8 +112,7 @@ class Shape(Drawable, ABC):
     @staticmethod
     def collect(geometries):
         if any(not g.is_valid for g in geometries):
-            geometries = [g.buffer(0) if not g.is_valid else g
-                          for g in geometries]
+            geometries = [g.buffer(0) if not g.is_valid else g for g in geometries]
         geometry = ops.unary_union(geometries)
         if not geometry.is_valid:
             geometry = geometry.buffer(0)
@@ -157,7 +152,7 @@ class Layer(Shape, ABC):
                 self.geometry = self.as_multi(self.geometry)
 
     def load_fgdb(self, parser):
-        depth = self.depth if hasattr(self, 'depth') else 0
+        depth = self.depth if hasattr(self, "depth") else 0
         return list(parser.read_fgdb(self.label, self._external_labels, depth))
 
     def unify(self, records):
@@ -167,8 +162,7 @@ class Layer(Shape, ABC):
     def extract_raw(self, records):
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = geo.MultiPolygon(
-            [list(g)[0] if isinstance(g, geo.MultiPolygon) else g.buffer(1)
-             for g in geometries]
+            [list(g)[0] if isinstance(g, geo.MultiPolygon) else g.buffer(1) for g in geometries]
         )
 
 

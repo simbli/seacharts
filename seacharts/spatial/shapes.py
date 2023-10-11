@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, InitVar
-from typing import Tuple, List
+from dataclasses import InitVar, dataclass
+from typing import List, Tuple
 
-from shapely import affinity, geometry as geo
+from shapely import affinity
+from shapely import geometry as geo
 
 from . import base
 
@@ -51,7 +52,7 @@ class Arrow(base.Shape):
         if not head_size >= 0:
             raise ValueError(
                 f"{self.__class__.__name__} "
-                f"should have a non-negative head size"
+                "should have a non-negative head size"
             )
         length = self.geometry.length
         arrow_head_length = max(length - head_size, 0)
@@ -72,7 +73,7 @@ class Arrow(base.Shape):
 @dataclass
 class Circle(Area, base.Radial, base.Coordinates):
     def __post_init__(self):
-        if not self.radius > 0:
+        if self.radius <= 0:
             raise ValueError(
                 f"{self.__class__.__name__} should have a positive area"
             )
@@ -332,15 +333,13 @@ class Path:
         for i, waypoint in enumerate(self.waypoints):
             if waypoint.contains(x, y):
                 return i
-        else:
-            return None
+        return None
 
     def locate_edge(self, x, y):
         for i, edge in enumerate(self.edges):
             if edge.contains(base.geo.Point(x, y)):
                 return i
-        else:
-            return None
+        return None
 
     @staticmethod
     def edge_between(wp1, wp2):

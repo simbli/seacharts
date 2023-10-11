@@ -3,8 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.DS_Store
 # C extensions
 *.so
+
+*.zip
 
 # Distribution / packaging
 .Python
@@ -131,3 +134,8 @@ dmypy.json
 # Package main
 main.py
 todo.txt
+data/external/
+data/shapefiles/
+.vscode/
+data/paths/
+data/vessels.csv

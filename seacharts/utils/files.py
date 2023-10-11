@@ -1,16 +1,17 @@
+"""Contains file/directory related utility functions, such as functions for writing to csv files."""
 import csv
 
 from . import paths as path
 
 
-def verify_directory_exists(dir_path):
+def verify_directory_exists(dir_path) -> None:
     if not (path.external / dir_path).is_dir():
         raise FileNotFoundError(
             f"Folder {dir_path} not found at:\r\n{path.external}."
         )
 
 
-def build_directory_structure(features=None):
+def build_directory_structure(features=None) -> None:
     if features is None:
         path.data.mkdir(exist_ok=True)
         path.reports.mkdir(exist_ok=True)
@@ -31,7 +32,7 @@ def build_directory_structure(features=None):
             shapefile_dir.mkdir(parents=True, exist_ok=True)
 
 
-def write_rows_to_csv(rows, file_path):
+def write_rows_to_csv(rows, file_path) -> None:
     with open(file_path, 'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
         writer.writerows(rows)
@@ -39,7 +40,7 @@ def write_rows_to_csv(rows, file_path):
 
 def read_ship_poses():
     try:
-        with open(path.data / 'vessels.csv') as csv_file:
+        with open(path.vessels) as csv_file:
             reader = csv.reader(csv_file, delimiter=',')
             _ = next(reader, None)
             rows = tuple(reader)
