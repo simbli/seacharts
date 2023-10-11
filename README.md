@@ -67,7 +67,7 @@ conda install -c conda-forge fiona cartopy matplotlib
 
 ### Pipwin (Windows) DEPRECATED at the moment, needs revision.
 
-First, ensure that [Python 3.9](https://www.python.org/downloads/)
+First, ensure that [Python 3.10](https://www.python.org/downloads/)
 (or another compatible version) and the required [C++ build tools](
 https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
 are installed. In order to ensure that the correct version of Numpy+mkl linked
@@ -77,7 +77,7 @@ is acquired, download the wheel according to your Python version and Windows
 platform from [here](
 https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel
 file e.g. in the same directory the terminal is run from, and install it. The
-below snippet corresponds to Python 3.9 on Windows 64-bit:
+below snippet corresponds to Python 3.10 on Windows 64-bit:
 ```
 pip install --upgrade pip
 pip install wheel
