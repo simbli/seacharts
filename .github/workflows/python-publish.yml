@@ -9,6 +9,7 @@
 name: Upload Python Package
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -18,7 +19,7 @@ permissions:
 jobs:
   deploy:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -29,13 +30,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install wheel pipwin
-        pipwin install numpy gdal fiona shapely
-        pip install cartopy pyyaml cerberus matplotlib-scalebar build
+        conda install -c conda-forge gdal
+        pip install fiona cartopy matplotlib
+        pip install matplotlib_scalebar cerberus pyyaml build
     - name: Build package
       run: python -m build
     - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
