@@ -72,7 +72,7 @@ command in the terminal of your chosen environment:
 conda install -c conda-forge fiona cartopy matplotlib
 ```
 
-### Pipwin (Windows) DEPRECATED at the moment, needs revision.
+### Windows (Pipwin)
 
 First, ensure that [Python 3.10](https://www.python.org/downloads/)
 (or another compatible version) and the required [C++ build tools](
@@ -86,22 +86,17 @@ https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel
 file e.g. in the same directory the terminal is run from, and install it. The
 below snippet corresponds to Python 3.10 on Windows 64-bit:
 ```
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install wheel
-pip install numpy-1.20.3+mkl-cp39-cp39-win_amd64.whl
-
-```
-
-The remaining required packages may be installed by the following:
-
-```
 pip install pipwin
+pipwin install numpy
 pipwin install gdal
-pipwin install scipy
 pipwin install fiona
 pipwin install shapely
-pipwin install cartopy
-pipwin install matplotlib
+pip install cartopy
+pip install pyyaml
+pip install cerberus
+pip install matplotlib-scalebar
 
 ```
 
@@ -178,7 +173,7 @@ if __name__ == '__main__':
 
     size = 9000, 5062                # w, h (east, north) distance in meters
     center = 44300, 6956450          # easting/northing (UTM zone 33N)
-    files = ['More_og_Romsdal.gdb']  # Norwegian county database name
+    files = ['More_og_Romsdal_utm33.gdb']  # Norwegian county database name
 
     enc = ENC(size=size, center=center, files=files, new_data=True)
 
