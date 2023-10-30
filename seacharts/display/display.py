@@ -9,11 +9,11 @@ from typing import List, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
-import seacharts.environment as env
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 from matplotlib_scalebar.scalebar import ScaleBar
 
+import seacharts.environment as env
 from .colors import colorbar
 from .events import EventsManager
 from .features import FeaturesManager
@@ -34,9 +34,9 @@ class Display:
         self.environment = environment
         self._show_figure = settings["display"]["show_figure"]
         self._utm_zone = settings["enc"]["utm_zone"]
-        self._setup_figure_stuff(settings)
+        self._setup_figure_parameters(settings)
 
-    def _setup_figure_stuff(self, settings: dict) -> None:
+    def _setup_figure_parameters(self, settings: dict) -> None:
         if self._show_figure:
             self.crs = UTM(settings["enc"]["utm_zone"])
             self._background = None
@@ -45,7 +45,18 @@ class Display:
             self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
             self.events = EventsManager(self)
             self.features = FeaturesManager(self)
-            self.axes.add_artist(ScaleBar(1, units="m", location="lower left", frameon=False, color="white", box_alpha=0.0, pad=0.5, font_properties={"size": 12}))
+            self.axes.add_artist(
+                ScaleBar(
+                    1,
+                    units="m",
+                    location="lower left",
+                    frameon=False,
+                    color="white",
+                    box_alpha=0.0,
+                    pad=0.5,
+                    font_properties={"size": 12},
+                )
+            )
 
             self.draw_plot()
 
@@ -75,7 +86,7 @@ class Display:
         if not self._show_figure:
             self._show_figure = True
 
-        self._setup_figure_stuff(settings)
+        self._setup_figure_parameters(settings)
         plt.show(block=False)
 
     def _init_anchor_index(self, settings):
@@ -83,7 +94,11 @@ class Display:
         for j, window_anchor in enumerate(self.window_anchors):
             if option in window_anchor:
                 return j, window_anchor.index(option)
-        raise ValueError(f"Invalid window anchor option '{option}', " f"possible candidates are: \n" f"{[o for options in self.window_anchors for o in options]}")
+        raise ValueError(
+            f"Invalid window anchor option '{option}', "
+            f"possible candidates are: \n"
+            f"{[o for options in self.window_anchors for o in options]}"
+        )
 
     def _init_figure(self, settings):
         self._fullscreen_mode = settings["display"]["fullscreen_mode"]
@@ -102,7 +117,10 @@ class Display:
         axes_widths = axes1_width, axes2_width
         figure_height2 = figure_height1 * 0.998
         figure_width2 = axes1_width + width_space + 2 * axes2_width
-        figure_sizes = [(figure_width1, figure_height1), (figure_width2, figure_height2)]
+        figure_sizes = [
+            (figure_width1, figure_height1),
+            (figure_width2, figure_height2),
+        ]
         sub1 = dict(
             right=(axes1_width + width_space + axes2_width) / figure_width1,
             wspace=2 * width_space / (axes1_width + axes2_width),
@@ -113,12 +131,19 @@ class Display:
         )
         subplot_spacing = sub1, sub2
         figure = plt.figure("SeaCharts", figsize=figure_sizes[0], dpi=self._dpi)
-        # if not self._fullscreen_mode:
-        # figure.canvas.toolbar.pack_forget()
         return figure, figure_sizes, subplot_spacing, axes_widths
 
     def _init_axes(self, axes_widths):
-        gs = GridSpec(1, 2, width_ratios=axes_widths, **self.spacing[0], left=0.0, top=1.0, bottom=0.0, hspace=0.0)
+        gs = GridSpec(
+            1,
+            2,
+            width_ratios=axes_widths,
+            **self.spacing[0],
+            left=0.0,
+            top=1.0,
+            bottom=0.0,
+            hspace=0.0,
+        )
         axes1 = self.figure.add_subplot(gs[0, 0], projection=self.crs)
         x_min, y_min, x_max, y_max = self.environment.scope.extent.bbox
         axes1.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
@@ -264,7 +289,13 @@ class Display:
             manager = plt.get_current_fig_manager()
             manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
-    def save_figure(self, name: str | None = None, path: Path | None = None, scale: float = 1.0, extension: str = "png"):
+    def save_figure(
+        self,
+        name: str | None = None,
+        path: Path | None = None,
+        scale: float = 1.0,
+        extension: str = "png",
+    ):
         if not self._show_figure:
             return
 
