@@ -31,7 +31,14 @@ convention for Python code.
 - 4: Use another plotting framework that has higher refresh rate/ is feasible for real-time (Qt?, React?)
 - 5: Create clearly defined interface between Environment/ENC backend and frontend Display
 - 6: Add option for plotting trajectories, ships, traffic information/AIS data etc. on the frontend display.
-- 7: Add support for reading and loading in weather data (wind and current maps++) in a separate module
+- 7: Add support for reading and loading in weather data (wind and current
+  maps++) in a separate module.
+- 8: Select and adopt rules for project-wide (automatic) formatting, e.g.
+  Black.
+- 9: Use Poetry for packaging management.
+- 10: Add deprecation warnings for planned API changes.
+- 11: Refactor and simplify the exposed top-level API.
+- 12: Document all sub-modules after API cleanup.
 
 ## Prerequisites
 
