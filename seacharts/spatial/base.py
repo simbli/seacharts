@@ -168,7 +168,7 @@ class Layer(Shape, ABC):
 
 @dataclass
 class Locations(Layer, ABC):
-    geometry: geo.MultiPoint = geo.MultiPoint()
+    geometry: geo.MultiPoint = field(default_factory=geo.MultiPoint)
 
 
 @dataclass
@@ -188,7 +188,7 @@ class MultiDepthLocations(Locations, MultiDepth, ABC):
 
 @dataclass
 class Regions(Layer, ABC):
-    geometry: geo.MultiPolygon = geo.MultiPolygon()
+    geometry: geo.MultiPolygon = field(default_factory=geo.MultiPoint)
 
 
 @dataclass

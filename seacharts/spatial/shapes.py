@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import InitVar, dataclass
+from dataclasses import InitVar, dataclass, field
 from typing import List, Tuple
 
 from shapely import affinity
@@ -11,7 +11,7 @@ from . import base
 
 @dataclass
 class Area(base.Shape):
-    geometry: geo.Polygon = geo.Polygon()
+    geometry: geo.Polygon = field(default_factory=geo.Polygon)
 
     @staticmethod
     def new_polygon(exterior, interiors=None):
@@ -51,8 +51,7 @@ class Arrow(base.Shape):
     def body(self, head_size):
         if not head_size >= 0:
             raise ValueError(
-                f"{self.__class__.__name__} "
-                "should have a non-negative head size"
+                f"{self.__class__.__name__} " "should have a non-negative head size"
             )
         length = self.geometry.length
         arrow_head_length = max(length - head_size, 0)
@@ -64,19 +63,24 @@ class Arrow(base.Shape):
         tip_left, tip_right = (x2 + dx2, y2 + dy2), (x2 - dx2, y2 - dy2)
         base_left, base_right = (x2 + dx1, y2 + dy1), (x2 - dx1, y2 - dy1)
         start_left, start_right = (x1 + dx1, y1 + dy1), (x1 - dx1, y1 - dy1)
-        return geo.Polygon((
-            self.end, tip_left, base_left, start_left,
-            start_right, base_right, tip_right
-        ))
+        return geo.Polygon(
+            (
+                self.end,
+                tip_left,
+                base_left,
+                start_left,
+                start_right,
+                base_right,
+                tip_right,
+            )
+        )
 
 
 @dataclass
 class Circle(Area, base.Radial, base.Coordinates):
     def __post_init__(self):
         if self.radius <= 0:
-            raise ValueError(
-                f"{self.__class__.__name__} should have a positive area"
-            )
+            raise ValueError(f"{self.__class__.__name__} should have a positive area")
         self.center = geo.Point(self.x, self.y)
         self.geometry = geo.Polygon(self.center.buffer(self.radius))
 
@@ -92,8 +96,10 @@ class Body(Area, base.Oriented, base.Coordinates):
 
     def rotate(self, polygon):
         return affinity.rotate(
-            polygon, -self.heading, use_radians=not self.in_degrees,
-            origin=(self.center.x, self.center.y)
+            polygon,
+            -self.heading,
+            use_radians=not self.in_degrees,
+            origin=(self.center.x, self.center.y),
         )
 
 
@@ -104,15 +110,15 @@ class Rectangle(Body):
 
     def _body_polygon(self) -> geo.Polygon:
         if not self.width > 0 or not self.height > 0:
-            raise ValueError(
-                f"{self.__class__.__name__} should have a positive area"
+            raise ValueError(f"{self.__class__.__name__} should have a positive area")
+        return geo.Polygon(
+            (
+                (self.x - self.width, self.y - self.height),
+                (self.x + self.width, self.y - self.height),
+                (self.x + self.width, self.y + self.height),
+                (self.x - self.width, self.y + self.height),
             )
-        return geo.Polygon((
-            (self.x - self.width, self.y - self.height),
-            (self.x + self.width, self.y - self.height),
-            (self.x + self.width, self.y + self.height),
-            (self.x - self.width, self.y + self.height),
-        ))
+        )
 
 
 @dataclass
@@ -134,8 +140,14 @@ class Ship(Body):
 
     @property
     def parameters(self):
-        return (self.x, self.y, self.heading,
-                self.scale, self.lon_scale, self.lat_scale)
+        return (
+            self.x,
+            self.y,
+            self.heading,
+            self.scale,
+            self.lon_scale,
+            self.lat_scale,
+        )
 
     @property
     def head(self):
@@ -167,71 +179,103 @@ class Ship(Body):
 
     @property
     def horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.head,
-            self.starboard_bow,
-            self.starboard_side,
-            self.starboard_aft,
-            self.port_aft,
-            self.port_side,
-            self.port_bow,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.head,
+                    self.starboard_bow,
+                    self.starboard_side,
+                    self.starboard_aft,
+                    self.port_aft,
+                    self.port_side,
+                    self.port_bow,
+                ]
+            )
+        )
 
     @property
     def starboard_bow_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.head,
-            self.starboard_bow,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.head,
+                    self.starboard_bow,
+                ]
+            )
+        )
 
     @property
     def starboard_side_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.starboard_bow,
-            self.starboard_side,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.starboard_bow,
+                    self.starboard_side,
+                ]
+            )
+        )
 
     @property
     def starboard_aft_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.starboard_side,
-            self.starboard_aft,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.starboard_side,
+                    self.starboard_aft,
+                ]
+            )
+        )
 
     @property
     def rear_aft_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.starboard_aft,
-            self.port_aft,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.starboard_aft,
+                    self.port_aft,
+                ]
+            )
+        )
 
     @property
     def port_aft_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.port_aft,
-            self.port_side,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.port_aft,
+                    self.port_side,
+                ]
+            )
+        )
 
     @property
     def port_side_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.port_side,
-            self.port_bow,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.port_side,
+                    self.port_bow,
+                ]
+            )
+        )
 
     @property
     def port_bow_horizon(self) -> geo.Polygon:
-        return self.rotate(geo.Polygon([
-            self.center.coords[0],
-            self.port_bow,
-            self.head,
-        ]))
+        return self.rotate(
+            geo.Polygon(
+                [
+                    self.center.coords[0],
+                    self.port_bow,
+                    self.head,
+                ]
+            )
+        )
 
     @property
     def horizon_sectors(self) -> dict:
@@ -267,9 +311,7 @@ class Path:
 
     @property
     def multi_shape(self):
-        return base.Shape.collect(
-            [x.geometry for x in self.waypoints] + self.edges
-        )
+        return base.Shape.collect([x.geometry for x in self.waypoints] + self.edges)
 
     def add_waypoint(self, x, y, index=None, edge=False):
         radius = 30
@@ -313,8 +355,7 @@ class Path:
                 new_edge = self.edge_between(prev_wp, waypoint)
                 self.edges.insert(index, new_edge)
                 if next_wp:
-                    self.edges[index + 1] = self.edge_between(waypoint,
-                                                              next_wp)
+                    self.edges[index + 1] = self.edge_between(waypoint, next_wp)
 
     def remove_waypoint(self, index):
         self.waypoints.pop(index)
