@@ -70,4 +70,4 @@ if __name__ == "__main__":
         thickness=1.5,
     )
 
-    enc.save_image("example1", extension="svg")
+    enc.show_display()  # Show display indefinitely
