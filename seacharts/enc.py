@@ -2,13 +2,11 @@ from pathlib import Path
 from typing import Any, List, Tuple, Union
 
 import matplotlib
+from cartopy.crs import UTM
+
 import seacharts.display as dis
 import seacharts.environment as env
 import seacharts.utils as utils
-from cartopy.crs import UTM
-
-matplotlib.rcParams["pdf.fonttype"] = 42
-matplotlib.rcParams["ps.fonttype"] = 42
 
 
 class ENC:
@@ -36,8 +34,13 @@ class ENC:
         :param verbose: bool for status printing during geometry processing
     """
 
-    def __init__(self, config_file: Path = utils.paths.config, multiprocessing=False, **kwargs):
-        matplotlib.use("TkAgg")
+    def __init__(
+        self,
+        config_file: Path = utils.paths.config,
+        multiprocessing=False,
+        **kwargs
+    ):
+        self._setup_matplotlib_parameters()
         if multiprocessing:
             dis.Display.init_multiprocessing()
             return
@@ -173,7 +176,9 @@ class ENC:
         :param lat_scale: optional float scaling the lateral horizon
         :return: None
         """
-        self._environment.create_ownship(easting, northing, heading, hull_scale, lon_scale, lat_scale)
+        self._environment.create_ownship(
+            easting, northing, heading, hull_scale, lon_scale, lat_scale
+        )
         self._display.update_plot()
 
     def remove_ownship(self) -> None:
@@ -215,7 +220,9 @@ class ENC:
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        self._display.features.add_arrow(start, end, color, width, fill, head_size, thickness, edge_style)
+        self._display.features.add_arrow(
+            start, end, color, width, fill, head_size, thickness, edge_style
+        )
 
     def draw_circle(
         self,
@@ -238,7 +245,9 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_circle(center, radius, color, fill, thickness, edge_style, alpha)
+        self._display.features.add_circle(
+            center, radius, color, fill, thickness, edge_style, alpha
+        )
 
     def draw_line(
         self,
@@ -259,7 +268,9 @@ class ENC:
         :param marker_type: str denoting the Matplotlib marker type
         :return: None
         """
-        self._display.features.add_line(points, color, width, thickness, edge_style, marker_type)
+        self._display.features.add_line(
+            points, color, width, thickness, edge_style, marker_type
+        )
 
     def draw_polygon(
         self,
@@ -282,7 +293,9 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_polygon(geometry, color, interiors, fill, thickness, edge_style, alpha)
+        self._display.features.add_polygon(
+            geometry, color, interiors, fill, thickness, edge_style, alpha
+        )
 
     def draw_rectangle(
         self,
@@ -307,7 +320,9 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style, alpha)
+        self._display.features.add_rectangle(
+            center, size, color, rotation, fill, thickness, edge_style, alpha
+        )
 
     def start_display(self) -> None:
         """
@@ -359,3 +374,13 @@ class ENC:
         :return: None
         """
         self._display.save_figure(name, path, scale, extension)
+
+    @staticmethod
+    def _setup_matplotlib_parameters() -> None:
+        """
+        Set matplotlib parameters used for the entire ENC package.
+        :return: None
+        """
+        matplotlib.rcParams["pdf.fonttype"] = 42
+        matplotlib.rcParams["ps.fonttype"] = 42
+        matplotlib.use("TkAgg")
