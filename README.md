@@ -1,10 +1,10 @@
 # SeaCharts
 Python-based API for Electronic Navigational Charts (ENC)
 
-[![platform](https://img.shields.io/badge/platform-linux-lightgrey)]()
-[![python version](https://img.shields.io/badge/python-3.10-blue)]()
 [![python version](https://img.shields.io/badge/python-3.11-blue)]()
 [![license](https://img.shields.io/badge/license-MIT-green)]()
+[![platform](https://img.shields.io/badge/platform-linux-lightgrey)]()
+[![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
 
 
 ![](https://github.com/simbli/seacharts/blob/master/images/example1.svg?raw=True
@@ -58,7 +58,9 @@ This should preferably be done inside a virtual environment in order to prevent 
 
 Install an edition of the [Anaconda](
 https://www.anaconda.com/products/individual-d) package manager, and then
-create a new _conda environment_ with **Python 3.10** or higher using e.g. the graphical
+create a new _conda environment_
+with [Python 3.11](https://www.python.org/downloads/) or higher using e.g. the
+graphical
 user interface of [PyCharm Professional](
 https://www.jetbrains.com/lp/pycharm-anaconda/) as detailed [here](
 https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html
@@ -74,17 +76,9 @@ conda install -c conda-forge fiona cartopy matplotlib
 
 ### Windows (Pipwin)
 
-First, ensure that [Python 3.10](https://www.python.org/downloads/)
-(or another compatible version) and the required [C++ build tools](
-https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
-are installed. In order to ensure that the correct version of Numpy+mkl linked
-to the [Intel® Math Kernel Library](
-https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html#gs.31vx8p)
-is acquired, download the wheel according to your Python version and Windows
-platform from [here](
-https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel
-file e.g. in the same directory the terminal is run from, and install it. The
-below snippet corresponds to Python 3.10 on Windows 64-bit:
+First, ensure that [Python 3.11](https://www.python.org/downloads/) or higher
+is installed. Next, install all required packages using
+[Pipwin](https://pypi.org/project/pipwin/):
 ```
 python -m pip install --upgrade pip
 pip install wheel
