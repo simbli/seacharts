@@ -152,7 +152,7 @@ if __name__ == '__main__':
     from seacharts.enc import ENC
 
     enc = ENC()
-    enc.start_display()
+    enc.display.start()
 ```
 
 The `config.yaml` file specifies which file paths to open and which area to load.
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     # size = 9000, 5062
     # center = 44300, 6956450
     enc = ENC("seacharts.yaml")
-    enc.start_display()
+    enc.display.start()
 
     print(enc.seabed[10])
     print(enc.shore)
