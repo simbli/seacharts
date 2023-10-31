@@ -244,22 +244,26 @@ class ENC:
         self,
         points: List[Tuple[float, float]],
         color: str,
-        width: float = None,
-        thickness: float = None,
+        buffer: float = None,
+        linewidth: float = None,
         edge_style: Union[str, tuple] = None,
         marker_type: str = None,
+        marker_size: float = None,
+        alpha: float = 1.0,
     ) -> None:
         """
         Add a straight line overlay to the environment plot.
         :param points: list of tuples of coordinate pairs
         :param color: str of line color
-        :param width: float denoting the line buffer width
-        :param thickness: float denoting the Matplotlib linewidth
+        :param buffer: float denoting the line buffer buffer
+        :param linewidth: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :param marker_type: str denoting the Matplotlib marker type
+        :param marker_size: float denoting the Matplotlib marker size
+        :param alpha: float denoting the Matplotlib alpha value
         :return: None
         """
-        self._display.features.add_line(points, color, width, thickness, edge_style, marker_type)
+        self._display.features.add_line(points, color, buffer, linewidth, edge_style, marker_type, marker_size, alpha)
 
     def draw_polygon(
         self,

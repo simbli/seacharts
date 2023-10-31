@@ -90,17 +90,25 @@ class FeaturesManager:
         geometry = spl.Circle(*center, radius).geometry
         self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
-    def add_line(self, points, color_name, buffer, linewidth, linestyle, marker):
+    def add_line(self, points, color_name, buffer, linewidth, linestyle, marker_type, marker_size, alpha):
         if buffer is None:
             buffer = 5
         if buffer == 0:
             x_coordinates, y_coordinates = zip(*points)
             self._display.axes.plot(
-                x_coordinates, y_coordinates, color=color_picker(color_name)[0], linewidth=linewidth, linestyle=linestyle, marker=marker, transform=self._display.crs
+                x_coordinates,
+                y_coordinates,
+                color=color_picker(color_name)[0],
+                linewidth=linewidth,
+                linestyle=linestyle,
+                marker=marker_type,
+                markersize=marker_size,
+                alpha=alpha,
+                transform=self._display.crs,
             )
         else:
             geometry = spl.Line(points=points).geometry.buffer(buffer)
-            self.add_overlay(geometry, color_name, True, linewidth, linestyle)
+            self.add_overlay(geometry, color_name, True, linewidth, linestyle, alpha=alpha)
 
     def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0):
         try:
@@ -324,4 +332,6 @@ class FeaturesManager:
 
     @staticmethod
     def vessels_to_file(vessel_poses: list):
-        utils.files.write_rows_to_csv([("id", "easting", "northing", "heading", "color")] + vessel_poses, utils.files.path.vessels)
+        utils.files.write_rows_to_csv(
+            [("id", "easting", "northing", "heading", "color")] + vessel_poses, utils.files.path.vessels
+        )
