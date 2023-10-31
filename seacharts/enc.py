@@ -6,52 +6,28 @@ from cartopy.crs import UTM
 
 import seacharts.display as dis
 import seacharts.environment as env
-import seacharts.utils as utils
+from seacharts.utils.config import Config
 
 
 class ENC:
-    """Electronic Navigational Charts
+    """
+    Electronic Navigational Charts
 
-    Reads and extracts features from a user-specified region of spatial data
-    given in Cartesian coordinates. Based on Matplotlib, Shapely and Cartopy.
-    An independent visualization window may be spawned and displayed using the
-    multiprocessing option. Geometric shapes may be accessed through the
-    attributes 'land', 'shore', and 'seabed'.
+    Reads and extracts features from a user-specified region of spatial data,
+    based on Matplotlib and Shapely. Geometric shapes may be accessed through
+    the attributes 'land', 'shore', and 'seabed', and 'display' may be used to
+    visualize the data and marine vessels in a dynamic user interface.
 
-    :param config_file: string containing path to configuration file
-    :param multiprocessing: bool for independent visualization display
-    :param kwargs: Includes the following optional parameters:
-        :param size: tuple(width, height) of bounding box size
-        :param origin: tuple(easting, northing) box origin of coordinates
-        :param center: tuple(easting, northing) box center of coordinates
-        :param buffer: int of dilation or erosion distance for geometries
-        :param tolerance: int of maximum tolerance distance for geometries
-        :param layers: list(str...) of feature layers to load or show
-        :param depths: list(int...) of depth bins for feature layers
-        :param files: list(str...) of file names for zipped FGDB files
-        :param new_data: bool indicating if new files should be parsed
-        :param border: bool for showing a border around the environment plot
-        :param verbose: bool for status printing during geometry processing
+    :param config: Config object or a valid path to a .yaml config file
     """
 
-    def __init__(
-        self,
-        config_file: Path = utils.paths.config,
-        multiprocessing=False,
-        **kwargs
-    ):
-        self._setup_matplotlib_parameters()
-        if multiprocessing:
-            dis.Display.init_multiprocessing()
-            return
-
-        self._cfg = utils.config.ENCConfig(config_file, **kwargs)
-
-        self._environment = env.Environment(self._cfg.settings)
+    def __init__(self, config: Config | Path | str = None):
+        self._config = self._init_config_parameters(config)
+        self._environment = env.Environment(self._config.settings)
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore
         self.seabed = self._environment.hydrography.bathymetry
-        self._display = dis.Display(self._cfg.settings, self._environment)
+        self._display = dis.Display(self._config.settings, self._environment)
 
     @property
     def size(self) -> Tuple[int, int]:
@@ -329,7 +305,7 @@ class ENC:
         Start the ENC figure display.
         :return: None
         """
-        self._display.start(self._cfg.settings)
+        self._display.start(self._config.settings)
 
     def show_display(self, duration: float = 0.0) -> None:
         """
@@ -376,11 +352,11 @@ class ENC:
         self._display.save_figure(name, path, scale, extension)
 
     @staticmethod
-    def _setup_matplotlib_parameters() -> None:
-        """
-        Set matplotlib parameters used for the entire ENC package.
-        :return: None
-        """
+    def _init_config_parameters(config: Config | Path | str | None):
         matplotlib.rcParams["pdf.fonttype"] = 42
         matplotlib.rcParams["ps.fonttype"] = 42
         matplotlib.use("TkAgg")
+        if isinstance(config, Config):
+            return config
+        else:
+            return Config(config)
