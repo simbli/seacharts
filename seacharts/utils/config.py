@@ -6,20 +6,21 @@ import yaml
 from cerberus import Validator
 
 from . import files
-from . import paths as dcp  # default configuratin paths
+from . import paths as dcp
 
 
-class ENCConfig:
-    """Class for maintaining Electronic Navigational Charts configuration settings"""
+class Config:
+    """
+    Class for maintaining Electronic Navigational Charts configuration settings
+    """
 
-    def __init__(self, config_file_name: Path = dcp.config, **kwargs):
-
+    def __init__(self, config_path: Path | str = None):
+        if config_path is None:
+            config_path = dcp.config
         self._schema = read_yaml_into_dict(dcp.config_schema)
         self.validator = Validator(self._schema)
         self._valid_sections = self.extract_valid_sections()
-
-        self.parse(config_file_name)
-        self.override(**kwargs)
+        self.parse(config_path)
 
     @property
     def settings(self):
