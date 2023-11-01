@@ -23,7 +23,7 @@ matplotlib.use("TkAgg")
 
 
 class Display:
-    crs = None
+    crs = UTM(33)
     window_anchors = (
         ("top_left", "top", "top_right"),
         ("left", "center", "right"),
@@ -33,13 +33,11 @@ class Display:
     def __init__(self, settings: dict, environment: env.Environment):
         self._settings = settings
         self.environment = environment
-        self._show_figure = settings["display"]["show_figure"]
-        self._utm_zone = settings["enc"]["utm_zone"]
+        self._show_figure = False
         self._setup_figure_parameters(settings)
 
     def _setup_figure_parameters(self, settings: dict) -> None:
         if self._show_figure:
-            self.crs = UTM(settings["enc"]["utm_zone"])
             self._background = None
             self.anchor_index = self._init_anchor_index(settings)
             self.figure, self.sizes, self.spacing, widths = self._init_figure(settings)
@@ -100,8 +98,8 @@ class Display:
         )
 
     def _init_figure(self, settings):
-        self._fullscreen_mode = settings["display"]["fullscreen_mode"]
-        self._colorbar_mode = settings["display"]["colorbar_mode"]
+        self._fullscreen_mode = settings["display"]["fullscreen"]
+        self._colorbar_mode = settings["display"]["colorbar"]
         self._dark_mode = settings["display"]["dark_mode"]
         self._dpi = settings["display"]["dpi"]
         self._resolution = settings["display"]["resolution"]
@@ -315,10 +313,6 @@ class Display:
             )
         except tk.TclError:
             plt.close()
-
-    @property
-    def utm_zone(self):
-        return self._utm_zone
 
     @property
     def is_active(self):

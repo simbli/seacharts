@@ -2,9 +2,6 @@ enc:
   required: True
   type: dict
   schema:
-    utm_zone:
-      required: True
-      type: integer
     size:
       required: True
       type: list
@@ -14,83 +11,51 @@ enc:
         min: 1.0
     origin:
       required: True
+      excludes: center
       type: list
       maxlength: 2
       schema:
         type: float
     center:
-      required: False
+      required: True
+      excludes: origin
       type: list
       maxlength: 2
       schema:
         type: float
-    buffer:
-      required: True
-      type: integer
-      min: 0
-    tolerance:
-      required: True
-      type: float
-      min: 0
-    layers:
-      required: True
-      type: list
-      allowed: ["seabed", "land", "shore"]
-      minlength: 1
-      maxlength: 3
     depths:
-      required: True
+      required: False
       type: list
       minlength: 1
       schema:
         type: integer
         min: 0
     files:
-      required: True
+      required: False
       type: list
       minlength: 1
       schema:
         type: string
-    new_data:
-      required: True
-      type: boolean
-    raw_data:
-      required: True
-      type: boolean
-    border:
-      required: True
-      type: boolean
-    verbose:
-      required: True
-      type: boolean
-    center_lla:
-      required: False
-      type: list
-      maxlength: 2
-      schema:
-        type: float
+
 display:
-  required: True
+  required: False
   type: dict
   schema:
-    show_figure:
-      required: True
-      type: boolean
-    dpi:
-      required: True
-      type: integer
-    anchor:
-      required: True
-      type: string
-    resolution:
-      required: True
-      type: integer
-    fullscreen_mode:
-      required: True
-      type: boolean
-    colorbar_mode:
-      required: True
+    colorbar:
+      required: False
       type: boolean
     dark_mode:
-      required: True
+      required: False
       type: boolean
+    fullscreen:
+      required: False
+      type: boolean
+    resolution:
+      required: False
+      type: integer
+    anchor:
+      required: False
+      type: string
+    dpi:
+      required: False
+      type: integer
