@@ -10,13 +10,11 @@ from .extent import Extent
 class Scope:
     def __init__(self, settings: dict, extent: Extent):
         self.extent: Extent = extent
-        self.depths: list = settings["enc"]["depths"]
-        self.files: list = settings["enc"]["files"]
+        self.depths: list = settings["enc"].get("depths", [])
+        self.files: list = settings["enc"].get("files", [])
         self.new_data = True
         self.layers = ["land", "shore"]
         for depth in self.depths:
             self.layers.append(f"seabed{depth}m")
         utils.files.build_directory_structure(self.layers)
-        self.parser: utils.parser.ShapefileParser = utils.ShapefileParser(
-            self.extent.bbox, self.files
-        )
+        self.parser = utils.ShapefileParser(self.extent.bbox, self.files)

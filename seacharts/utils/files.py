@@ -1,31 +1,37 @@
-"""Contains file/directory related utility functions, such as functions for writing to csv files."""
+"""
+Contains file/directory related utility functions, such as functions for
+writing to csv files.
+"""
 import csv
+from pathlib import Path
 
-from . import paths as path
+from . import paths
 
 
-def verify_directory_exists(dir_path) -> None:
-    if not (path.external / dir_path).is_dir():
-        raise FileNotFoundError(f"Folder {dir_path} not found at:\r\n{path.external}.")
+def verify_directory_exists(path_string: str) -> None:
+    path = Path(path_string)
+    if not path.is_dir():
+        path_type = "Absolute" if path.is_absolute() else "Relative"
+        print(f"WARNING: {path_type} database path '{path}' not found.\n")
 
 
 def build_directory_structure(features) -> None:
-    path.data.mkdir(exist_ok=True)
-    path.reports.mkdir(exist_ok=True)
+    paths.data.mkdir(exist_ok=True)
+    paths.reports.mkdir(exist_ok=True)
 
-    path.external.mkdir(exist_ok=True)
-    path.hazards.mkdir(exist_ok=True)
-    path.paths.mkdir(exist_ok=True)
-    path.shapefiles.mkdir(exist_ok=True)
+    paths.db.mkdir(exist_ok=True)
+    paths.hazards.mkdir(exist_ok=True)
+    paths.paths.mkdir(exist_ok=True)
+    paths.shapefiles.mkdir(exist_ok=True)
 
-    path.vessels.touch(exist_ok=True)
-    path.dynamic.touch(exist_ok=True)
-    path.static.touch(exist_ok=True)
-    path.path1.touch(exist_ok=True)
-    path.path2.touch(exist_ok=True)
+    paths.vessels.touch(exist_ok=True)
+    paths.dynamic.touch(exist_ok=True)
+    paths.static.touch(exist_ok=True)
+    paths.path1.touch(exist_ok=True)
+    paths.path2.touch(exist_ok=True)
 
     for feature in features:
-        shapefile_dir = path.shapefiles / feature.lower()
+        shapefile_dir = paths.shapefiles / feature.lower()
         shapefile_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -37,7 +43,7 @@ def write_rows_to_csv(rows, file_path) -> None:
 
 def read_ship_poses():
     try:
-        with open(path.vessels) as csv_file:
+        with open(paths.vessels) as csv_file:
             reader = csv.reader(csv_file, delimiter=",")
             _ = next(reader, None)
             rows = tuple(reader)

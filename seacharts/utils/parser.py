@@ -1,19 +1,20 @@
 import warnings
+from collections.abc import Generator
+from pathlib import Path
 
 import fiona
 
-from . import paths as path
+from . import paths
 
 
 class ShapefileParser:
-    def __init__(self, bounding_box, file_names):
+    def __init__(self, bounding_box, path_strings: list[str]):
         self.bounding_box = bounding_box
-        self.file_names = file_names
+        self.paths = set([p.resolve() for p in (map(Path, path_strings))])
 
     def read_fgdb(self, label, external_labels, depth):
-        for file_name in self.file_names:
-            file_path = path.external / file_name
-            records = self._parse_layers(file_path, external_labels, depth)
+        for gdb_path in self.gdb_paths:
+            records = self._parse_layers(gdb_path, external_labels, depth)
             yield from self._parse_records(records, label)
 
     def read_shapefile(self, label):
@@ -21,24 +22,40 @@ class ShapefileParser:
         if file_path.exists():
             yield from self._read_spatial_file(file_path)
 
-    def _parse_layers(self, file_path, external_labels, depth):
+    def _parse_layers(self, path: Path, external_labels, depth):
         for label in external_labels:
             if isinstance(label, dict):
                 layer, depth_label = label["layer"], label["depth"]
-                records = self._read_spatial_file(file_path, layer=layer)
+                records = self._read_spatial_file(path, layer=layer)
                 for record in records:
                     if record["properties"][depth_label] >= depth:
                         yield record
             else:
-                yield from self._read_spatial_file(file_path, layer=label)
+                yield from self._read_spatial_file(path, layer=label)
 
-    def _read_spatial_file(self, file_path, **kwargs):
-        with fiona.open(file_path, "r", **kwargs) as source:
+    def _read_spatial_file(self, path: Path, **kwargs):
+        with fiona.open(path, "r", **kwargs) as source:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
                 for record in source.filter(bbox=self.bounding_box):
                     yield record
         return
+
+    @property
+    def gdb_paths(self) -> Generator[Path]:
+        for path in self.paths:
+            if not path.is_absolute():
+                path = paths.cwd / path
+            if self._is_gdb(path):
+                yield path
+            elif path.is_dir():
+                for p in path.iterdir():
+                    if self._is_gdb(p):
+                        yield p
+
+    @staticmethod
+    def _is_gdb(path: Path) -> bool:
+        return path.is_dir() and path.suffix == ".gdb"
 
     @staticmethod
     def _parse_records(records, label):
@@ -72,4 +89,4 @@ class ShapefileParser:
 
     @staticmethod
     def _shapefile_path(label):
-        return path.shapefiles / label / (label + ".shp")
+        return paths.shapefiles / label / (label + ".shp")
