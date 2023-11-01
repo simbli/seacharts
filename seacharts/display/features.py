@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import seacharts.display as dis
-import seacharts.spatial as spl
-import seacharts.utils as utils
 import shapely.geometry as sgeo
 from cartopy.feature import ShapelyFeature
 
+import seacharts.display as dis
+import seacharts.spatial as spl
+import seacharts.utils as utils
 from .colors import color_picker
 
 
@@ -57,12 +57,13 @@ class FeaturesManager:
         land = self._display.environment.topography.land
         color = color_picker(land.color)
         self._land = self.new_artist(land.geometry, color, land.z_order)
-        if self._display.environment.scope.border:
-            center = self._display.environment.scope.extent.center
-            size = self._display.environment.scope.extent.size
-            geometry = spl.Rectangle(*center, width=size[0] / 2, heading=0, height=size[1] / 2).geometry
-            color = (color_picker("black")[0], "none")
-            self.new_artist(geometry, color, 10000, linewidth=3)
+        center = self._display.environment.scope.extent.center
+        size = self._display.environment.scope.extent.size
+        geometry = spl.Rectangle(
+            *center, width=size[0] / 2, heading=0, height=size[1] / 2
+        ).geometry
+        color = (color_picker("black")[0], "none")
+        self.new_artist(geometry, color, 10000, linewidth=3)
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
         kwargs["crs"] = self._display.crs
@@ -78,7 +79,9 @@ class FeaturesManager:
             artist.set_animated(True)
         return artist
 
-    def add_arrow(self, start, end, color_name, buffer, fill, head_size, linewidth, linestyle):
+    def add_arrow(
+        self, start, end, color_name, buffer, fill, head_size, linewidth, linestyle
+    ):
         if buffer is None:
             buffer = 5
         if head_size is None:
@@ -96,15 +99,25 @@ class FeaturesManager:
         if buffer == 0:
             x_coordinates, y_coordinates = zip(*points)
             self._display.axes.plot(
-                x_coordinates, y_coordinates, color=color_picker(color_name)[0], linewidth=linewidth, linestyle=linestyle, marker=marker, transform=self._display.crs
+                x_coordinates,
+                y_coordinates,
+                color=color_picker(color_name)[0],
+                linewidth=linewidth,
+                linestyle=linestyle,
+                marker=marker,
+                transform=self._display.crs,
             )
         else:
             geometry = spl.Line(points=points).geometry.buffer(buffer)
             self.add_overlay(geometry, color_name, True, linewidth, linestyle)
 
-    def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0):
+    def add_polygon(
+        self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0
+    ):
         try:
-            if isinstance(shape, sgeo.MultiPolygon) or isinstance(shape, sgeo.GeometryCollection):
+            if isinstance(shape, sgeo.MultiPolygon) or isinstance(
+                shape, sgeo.GeometryCollection
+            ):
                 shape = list(shape.geoms)
             else:
                 shape = list(shape)
@@ -116,8 +129,12 @@ class FeaturesManager:
             geometry = spl.Area.new_polygon(geometry, interiors)
             self.add_overlay(geometry, color, fill, linewidth, linestyle, alpha)
 
-    def add_rectangle(self, center, size, color_name, rotation, fill, linewidth, linestyle, alpha):
-        geometry = spl.Rectangle(*center, heading=rotation, width=size[0], height=size[1]).geometry
+    def add_rectangle(
+        self, center, size, color_name, rotation, fill, linewidth, linestyle, alpha
+    ):
+        geometry = spl.Rectangle(
+            *center, heading=rotation, width=size[0], height=size[1]
+        ).geometry
         self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
     def add_overlay(self, geometry, color_name, fill, linewidth, linestyle, alpha=1.0):
@@ -180,11 +197,15 @@ class FeaturesManager:
                     artist = features.pop(color, None)
                     if artist:
                         artist.remove()
-                vessel_horizons = spl.Shape.collect([v["ship"].horizon for v in self._vessels.values()])
+                vessel_horizons = spl.Shape.collect(
+                    [v["ship"].horizon for v in self._vessels.values()]
+                )
                 static = geometry.difference(safe_area.geometry)
                 dynamic = geometry.intersection(vessel_horizons)
                 if not (static.is_empty and dynamic.is_empty):
-                    self._hazards[color] = self.new_artist(static.union(dynamic), color_picker(color))
+                    self._hazards[color] = self.new_artist(
+                        static.union(dynamic), color_picker(color)
+                    )
                     if self.show_arrows:
                         arrow, length1 = None, -1
                         if not static.is_empty:
@@ -196,7 +217,9 @@ class FeaturesManager:
                             dynamic_points[i] = arrow2.exterior.coords[0]
                             if arrow is None or length2 < length1:
                                 arrow = arrow2
-                        self._arrows[color] = self.new_artist(arrow, color_picker("orange"))
+                        self._arrows[color] = self.new_artist(
+                            arrow, color_picker("orange")
+                        )
             utils.files.write_rows_to_csv(static_points, utils.files.path.static)
             utils.files.write_rows_to_csv(dynamic_points, utils.files.path.dynamic)
 
@@ -209,7 +232,9 @@ class FeaturesManager:
             near = ownship.closest_points(polygon.exterior)
             lines.append(spl.Shape.line_between(near, ownship.center))
         shortest = sorted(lines, key=lambda x: x.length)[0]
-        interpolated = shortest.interpolate(min(ownship.dimensions[1] * 0.8, shortest.length * 0.3))
+        interpolated = shortest.interpolate(
+            min(ownship.dimensions[1] * 0.8, shortest.length * 0.3)
+        )
         head, base = shortest.coords[0], interpolated.coords[0]
         (x1, y1), (x2, y2) = head, base
         dx, dy = (x2 - x1) / 3, (y2 - y1) / 3
@@ -324,4 +349,7 @@ class FeaturesManager:
 
     @staticmethod
     def vessels_to_file(vessel_poses: list):
-        utils.files.write_rows_to_csv([("id", "easting", "northing", "heading", "color")] + vessel_poses, utils.files.path.vessels)
+        utils.files.write_rows_to_csv(
+            [("id", "easting", "northing", "heading", "color")] + vessel_poses,
+            utils.files.path.vessels,
+        )

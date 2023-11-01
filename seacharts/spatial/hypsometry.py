@@ -6,7 +6,6 @@ from dataclasses import InitVar, dataclass, field
 from typing import Dict, List
 
 import seacharts.environment.scope as env
-
 from .base import Layer
 from .layers import Land, Seabed, Shore
 
@@ -32,48 +31,41 @@ class _Hypsometry(ABC):
     def load(self, scope: env.Scope):
         layers = [x for x in self.layers if x.label in scope.layers]
         if scope.new_data:
-            if scope.parser.verbose:
-                print(f"Processing {scope.extent.area // 10 ** 6} km^2 of " f"{self.__class__.__name__} features from: " + ", ".join(scope.files))
+            print(
+                f"Processing {scope.extent.area // 10 ** 6} km^2 of "
+                f"{self.__class__.__name__} features from: "
+                f"" + ", ".join(scope.files)
+            )
             for layer in layers:
                 start_time = time.time()
                 records = layer.load_fgdb(scope.parser)
                 info = f"{len(records)} {layer.name} geometries"
 
                 if not records:
-                    if scope.parser.verbose:
-                        print(f"\rFound {info}.\n")
+                    print(f"\rFound {info}.\n")
                     return
-
-                if scope.raw_data:
-                    if scope.parser.verbose:
-                        print(f"\rExtracting raw data from {info}...", end="")
-                    layer.extract_raw(records)
                 else:
-                    if scope.parser.verbose:
-                        print(f"\rMerging {info}...", end="")
+                    print(f"\rMerging {info}...", end="")
                     layer.unify(records)
 
-                    if scope.parser.verbose:
-                        print(f"\rSimplifying {info}...", end="")
-                    layer.simplify(scope.tolerance)
+                    print(f"\rSimplifying {info}...", end="")
+                    layer.simplify(0)
 
-                    if scope.parser.verbose:
-                        print(f"\rBuffering {info}...", end="")
-                    self.add_buffer(layer, scope.buffer)
+                    print(f"\rBuffering {info}...", end="")
+                    self.add_buffer(layer, 0)
 
-                    if scope.parser.verbose:
-                        print(f"\rClipping {info}...", end="")
+                    print(f"\rClipping {info}...", end="")
                     layer.clip(scope.extent.bbox)
 
                 layer.save(scope.parser)
-                if scope.parser.verbose:
-                    end_time = round(time.time() - start_time, 1)
-                    print(f"\rSaved {info} to shapefile in {end_time} seconds.")
-
-            if scope.parser.verbose:
-                print()
+                end_time = round(time.time() - start_time, 1)
+                print(f"\rSaved {info} to shapefile in {end_time} seconds.")
+            print()
         else:
-            print("ENC spatial.hypsometry.load Warning: Using previously loaded data. Use new-data=True to reload.")
+            print(
+                "ENC created using previously loaded data. "
+                "Use new_data=True to reload."
+            )
             for layer in layers:
                 layer.load_shapefile(scope.parser)
 
