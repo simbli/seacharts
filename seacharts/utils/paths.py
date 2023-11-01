@@ -7,8 +7,9 @@ package = root / "seacharts"
 config = package / "config.yaml"
 config_schema = package / "config_schema.yaml"
 
-data = pathlib.Path.cwd() / "data"
-external = data / "external"
+cwd = pathlib.Path.cwd()
+data = cwd / "data"
+db = data / "db"
 shapefiles = data / "shapefiles"
 
 vessels = data / "vessels.csv"

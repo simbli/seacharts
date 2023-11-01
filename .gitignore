@@ -134,7 +134,7 @@ dmypy.json
 # Package main
 main.py
 todo.txt
-data/external/
+data/db/
 data/shapefiles/
 .vscode/
 data/paths/

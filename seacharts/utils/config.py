@@ -1,4 +1,3 @@
-"""Contains functionality for reading, processing and validating seacharts configuration settings"""
 from pathlib import Path
 from typing import List
 
@@ -51,8 +50,9 @@ class Config:
 
         self._settings["enc"]["depths"].sort()
 
-        for file_name in self._settings["enc"]["files"]:
-            files.verify_directory_exists(file_name)
+        if "files" in self._settings["enc"]:
+            for file_name in self._settings["enc"].get("files"):
+                files.verify_directory_exists(file_name)
 
     def parse(self, file_name=dcp.config) -> None:
         self._settings = read_yaml_into_dict(file_name)
@@ -117,12 +117,20 @@ def validate_key(key, value, v_type, sub_type=None, length=None) -> None:
     """
     if isinstance(value, list) or isinstance(value, tuple):
         if not all([isinstance(v, sub_type) for v in value]):
-            raise ValueError("Invalid input format: " f"'{key}' should be a {v_type.__name__} of {sub_type}.")
+            raise ValueError(
+                "Invalid input format: "
+                f"'{key}' should be a {v_type.__name__} of {sub_type}."
+            )
         if length is not None and len(value) != length:
-            raise ValueError("Invalid input format: " f"'{key}' should be a {v_type.__name__} of length {length}.")
+            raise ValueError(
+                "Invalid input format: "
+                f"'{key}' should be a {v_type.__name__} of length {length}."
+            )
     else:
         if not isinstance(value, v_type):
-            raise ValueError("Invalid input format: " f"'{key}' should have type {v_type}.")
+            raise ValueError(
+                "Invalid input format: " f"'{key}' should have type {v_type}."
+            )
 
 
 # def save(kwargs, file_name) -> None:

@@ -2,8 +2,8 @@
 enc:
   size: [ 9000, 5062 ]
   center: [ 44300, 6956450 ]
-  depths: [0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500]                       # list(int...) of depth bins for feature layers
-  files: ["More_og_Romsdal_utm33.gdb"]                                          # seacharts source database name
+  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
+  files: [ "/", "data/", "data/db/" ]
 
 display:
   colorbar: False

@@ -33,8 +33,7 @@ class _Hypsometry(ABC):
         if scope.new_data:
             print(
                 f"Processing {scope.extent.area // 10 ** 6} km^2 of "
-                f"{self.__class__.__name__} features from: "
-                f"" + ", ".join(scope.files)
+                f"{self.__class__.__name__} features:"
             )
             for layer in layers:
                 start_time = time.time()
