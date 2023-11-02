@@ -30,7 +30,7 @@ enc:
       schema:
         type: integer
         min: 0
-    files:
+    resources:
       required: False
       type: list
       minlength: 1
