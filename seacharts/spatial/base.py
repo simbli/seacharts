@@ -92,7 +92,9 @@ class Shape(Drawable, ABC):
 
     @staticmethod
     def is_multi(geometry):
-        return isinstance(geometry, geo.MultiPolygon) or isinstance(geometry, geo.GeometryCollection)
+        return isinstance(geometry, geo.MultiPolygon) or isinstance(
+            geometry, geo.GeometryCollection
+        )
 
     @staticmethod
     def _record_to_geometry(record):
@@ -162,7 +164,10 @@ class Layer(Shape, ABC):
     def extract_raw(self, records):
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = geo.MultiPolygon(
-            [list(g)[0] if isinstance(g, geo.MultiPolygon) else g.buffer(1) for g in geometries]
+            [
+                list(g)[0] if isinstance(g, geo.MultiPolygon) else g.buffer(1)
+                for g in geometries
+            ]
         )
 
 
@@ -188,7 +193,7 @@ class MultiDepthLocations(Locations, MultiDepth, ABC):
 
 @dataclass
 class Regions(Layer, ABC):
-    geometry: geo.MultiPolygon = field(default_factory=geo.MultiPoint)
+    geometry: geo.MultiPolygon = field(default_factory=geo.MultiPolygon)
 
 
 @dataclass
