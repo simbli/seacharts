@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import tkinter as tk
 from pathlib import Path
-from typing import List, Tuple, Union, Any
+from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -30,54 +30,255 @@ class Display:
 
     def __init__(self, settings: dict, environment: env.Environment):
         self._settings = settings
-        self.environment = environment
-        self._show_figure = True
-        self._setup_figure_parameters(settings)
-
-    def _setup_figure_parameters(self, settings: dict) -> None:
+        self._environment = environment
         self._background = None
-        self.anchor_index = self._init_anchor_index(settings)
-        self.figure, self.sizes, self.spacing, widths = self._init_figure(settings)
-        self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
+        self._dark_mode = True
+        self._colorbar_mode = False
+        self._fullscreen_mode = False
+        self._resolution = 720
+        self._dpi = 96
+        self._anchor_index = self._init_anchor_index(settings)
+        self.figure, self.sizes, self.spacing, w = self._init_figure(settings)
+        self.axes, self.grid_spec, self._colorbar = self._init_axes(w)
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
-        self.toggle_colorbar(self._colorbar_mode)
-        self.toggle_dark_mode(self._dark_mode)
-        self.axes.add_artist(
-            ScaleBar(
-                1,
-                units="m",
-                location="lower left",
-                frameon=False,
-                color="white",
-                box_alpha=0.0,
-                pad=0.5,
-                font_properties={"size": 12},
-            )
-        )
-        self.draw_plot()
-
+        self._toggle_colorbar(self._colorbar_mode)
+        self._toggle_dark_mode(self._dark_mode)
+        self._add_scalebar()
+        self.redraw_plot()
         if self._fullscreen_mode:
-            self.toggle_fullscreen(self._fullscreen_mode)
+            self._toggle_fullscreen(self._fullscreen_mode)
         else:
-            self.set_figure_position()
+            self._set_figure_position()
 
     def start(self) -> None:
         """
         Starts the display, if it is not already started.
-        Overrides the show_figure setting if set to false.
         """
-        if self.is_active:
+        if self._is_active:
             return
-
-        if not self._show_figure:
-            self._show_figure = True
-
-        self._setup_figure_parameters(self._settings)
         plt.show(block=False)
 
+    @staticmethod
+    def show(duration: float = 0.0):
+        """
+        Show the display for a duration (0 = indefinitely)
+        """
+        try:
+            plt.show(block=False)
+            plt.pause(duration)
+        except tk.TclError:
+            plt.close()
+
+    def dark_mode(self, arg: bool = True) -> None:
+        """
+        Enable or disable dark mode view of environment figure.
+        :param arg: boolean switching dark mode on or off
+        :return: None
+        """
+        self._toggle_dark_mode(arg)
+
+    def fullscreen(self, arg: bool = True) -> None:
+        """
+        Enable or disable fullscreen mode view of environment figure.
+        :param arg: boolean switching fullscreen mode on or off
+        :return: None
+        """
+        self._toggle_fullscreen(arg)
+
+    def colorbar(self, arg: bool = True) -> None:
+        """
+        Enable or disable the colorbar legend of environment figure.
+        :param arg: boolean switching the colorbar on or off.
+        """
+        self._toggle_colorbar(arg)
+
+    def add_vessels(self, *args: tuple[int, int, int, int, str]) -> None:
+        """
+        Add colored vessel features to the displayed environment plot.
+        :param args: tuples with id, x-coordinate, y-coordinate, heading, color
+        :return: None
+        """
+        self._refresh_vessels(list(args))
+
+    def clear_vessels(self) -> None:
+        """
+        Remove all vessel features from the environment plot.
+        :return: None
+        """
+        self._refresh_vessels([])
+
+    def draw_arrow(
+        self,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        color: str,
+        width: float = None,
+        fill: bool = False,
+        head_size: float = None,
+        thickness: float = None,
+        edge_style: str | tuple = None,
+    ) -> None:
+        """
+        Add a straight arrow overlay to the environment plot.
+        :param start: tuple of start point coordinate pair
+        :param end: tuple of end point coordinate pair
+        :param color: str of line color
+        :param width: float denoting the line buffer width
+        :param fill: bool which toggles the interior arrow color on/off
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param head_size: float of head size (length) in meters
+        :return: None
+        """
+        self.features.add_arrow(
+            start, end, color, width, fill, head_size, thickness, edge_style
+        )
+
+    def draw_circle(
+        self,
+        center: tuple[float, float],
+        radius: float,
+        color: str,
+        fill: bool = True,
+        thickness: float = None,
+        edge_style: str | tuple = None,
+        alpha: float = 1.0,
+    ) -> None:
+        """
+        Add a circle or disk overlay to the environment plot.
+        :param center: tuple of circle center coordinates
+        :param radius: float of circle radius
+        :param color: str of circle color
+        :param fill: bool which toggles the interior disk color
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param alpha: float denoting the Matplotlib alpha value
+        :return: None
+        """
+        self.features.add_circle(
+            center, radius, color, fill, thickness, edge_style, alpha
+        )
+
+    def draw_line(
+        self,
+        points: list[tuple[float, float]],
+        color: str,
+        width: float = None,
+        thickness: float = None,
+        edge_style: str | tuple = None,
+        marker_type: str = None,
+    ) -> None:
+        """
+        Add a straight line overlay to the environment plot.
+        :param points: list of tuples of coordinate pairs
+        :param color: str of line color
+        :param width: float denoting the line buffer width
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param marker_type: str denoting the Matplotlib marker type
+        :return: None
+        """
+        self.features.add_line(points, color, width, thickness, edge_style, marker_type)
+
+    def draw_polygon(
+        self,
+        geometry: Any | list[tuple[float, float]],
+        color: str,
+        interiors: list[list[tuple[float, float]]] = None,
+        fill: bool = True,
+        thickness: float = None,
+        edge_style: str | tuple = None,
+        alpha: float = 1.0,
+    ) -> None:
+        """
+        Add an arbitrary polygon shape overlay to the environment plot.
+        :param geometry: Shapely geometry or list of exterior coordinates
+        :param interiors: list of lists of interior polygon coordinates
+        :param color: str of rectangle color
+        :param fill: bool which toggles the interior shape color
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param alpha: float denoting the Matplotlib alpha value
+        :return: None
+        """
+        self.features.add_polygon(
+            geometry, color, interiors, fill, thickness, edge_style, alpha
+        )
+
+    def draw_rectangle(
+        self,
+        center: tuple[float, float],
+        size: tuple[float, float],
+        color: str,
+        rotation: float = 0.0,
+        fill: bool = True,
+        thickness: float = None,
+        edge_style: str | tuple = None,
+        alpha: float = 1.0,
+    ) -> None:
+        """
+        Add a rectangle or box overlay to the environment plot.
+        :param center: tuple of rectangle center coordinates
+        :param size: tuple of rectangle (width, height)
+        :param color: str of rectangle color
+        :param rotation: float denoting the rectangle rotation in degrees
+        :param fill: bool which toggles the interior rectangle color
+        :param thickness: float denoting the Matplotlib linewidth
+        :param edge_style: str or tuple denoting the Matplotlib linestyle
+        :param alpha: float denoting the Matplotlib alpha value
+        :return: None
+        """
+        self.features.add_rectangle(
+            center, size, color, rotation, fill, thickness, edge_style, alpha
+        )
+
+    def save_image(
+        self,
+        name: str = None,
+        path: Path | None = None,
+        scale: float = 1.0,
+        extension: str = "png",
+    ) -> None:
+        """
+        Save the environment plot as a .png image.
+        :param name: optional str of file name
+        :param path: optional Path of file path
+        :param scale: optional float scaling the image resolution
+        :param extension: optional str of file extension name
+        :return: None
+        """
+        self._save_figure(name, path, scale, extension)
+
+    def close(self) -> None:
+        """
+        Close the environment display window and clear all vessels.
+        :return: None
+        """
+        self._terminate()
+        self.clear_vessels()
+
+    def redraw_plot(self):
+        """
+        Redraw the full environment plot as well as animated artists
+        """
+        plt.show(block=False)
+        try:
+            self.figure.canvas.draw()
+        except tk.TclError:
+            plt.close()
+        self._draw_animated_artists()
+
+    def update_plot(self):
+        """
+        Update only the animated artists of the plot
+        """
+        self._draw_animated_artists()
+
     def _init_anchor_index(self, settings):
-        option = settings["display"]["anchor"]
+        option = "center"
+        if "display" in settings:
+            option = settings["display"].get("anchor", option)
         for j, window_anchor in enumerate(self.window_anchors):
             if option in window_anchor:
                 return j, window_anchor.index(option)
@@ -88,16 +289,23 @@ class Display:
         )
 
     def _init_figure(self, settings):
-        self._fullscreen_mode = settings["display"]["fullscreen"]
-        self._colorbar_mode = settings["display"]["colorbar"]
-        self._dark_mode = settings["display"]["dark_mode"]
-        self._dpi = settings["display"]["dpi"]
-        self._resolution = settings["display"]["resolution"]
+        if "display" in settings:
+            d = settings["display"]
+            if "colorbar" in d:
+                self._colorbar_mode = d["colorbar"]
+            if "dark_mode" in d:
+                self._dark_mode = d["dark_mode"]
+            if "fullscreen" in d:
+                self._fullscreen_mode = d["fullscreen"]
+            if "resolution" in d:
+                self._resolution = d["resolution"]
+            if "dpi" in d:
+                self._dpi = d["dpi"]
 
         if self._fullscreen_mode:
             plt.rcParams["toolbar"] = "None"
 
-        width, height = self.environment.scope.extent.size
+        width, height = self._environment.scope.extent.size
         window_height, ratio = self._resolution / self._dpi, width / height
         figure_width1, figure_height1 = ratio * window_height, window_height
         axes1_width, axes2_width, width_space = figure_width1, 1.1, 0.3
@@ -132,42 +340,32 @@ class Display:
             hspace=0.0,
         )
         axes1 = self.figure.add_subplot(gs[0, 0], projection=self.crs)
-        x_min, y_min, x_max, y_max = self.environment.scope.extent.bbox
+        x_min, y_min, x_max, y_max = self._environment.scope.extent.bbox
         axes1.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
         axes2 = self.figure.add_subplot(gs[0, 1])
-        cb = colorbar(axes2, self.environment.scope.depths)
+        cb = colorbar(axes2, self._environment.scope.depths)
         return axes1, gs, cb
 
-    def refresh_vessels(self, poses: List[Tuple]):
-        if not self._show_figure:
-            return
+    def _add_scalebar(self):
+        self.axes.add_artist(
+            ScaleBar(
+                1,
+                units="m",
+                location="lower left",
+                frameon=False,
+                color="white",
+                box_alpha=0.0,
+                pad=0.5,
+                font_properties={"size": 12},
+            )
+        )
 
+    def _refresh_vessels(self, poses: list[tuple]):
         self.features.vessels_to_file(poses)
         self.features.update_vessels()
         self.update_plot()
 
-    def update_plot(self):
-        if not self._show_figure:
-            return
-
-        # self.figure.canvas.restore_region(self._background)
-        self.draw_animated_artists()
-
-    def draw_plot(self):
-        if not self._show_figure:
-            return
-        plt.show(block=False)
-        try:
-            self.figure.canvas.draw()
-        except tk.TclError:
-            plt.close()
-        self._background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
-        self.draw_animated_artists()
-
-    def draw_animated_artists(self):
-        if not self._show_figure:
-            return
-
+    def _draw_animated_artists(self):
         for artist in self.features.animated:
             self.axes.draw_artist(artist)
         try:
@@ -176,48 +374,8 @@ class Display:
         except tk.TclError:
             plt.close()
 
-    def toggle_dark_mode(self, state=None):
-        if not self._show_figure:
-            return
-        state = state if state is not None else not self._dark_mode
-        color = "#142c38" if state else "#ffffff"
-        self.figure.set_facecolor(color)
-        self.figure.axes[0].set_facecolor(color)
-        self._colorbar.ax.set_facecolor(color)
-        self.features.toggle_topography_visibility(not state)
-        self._dark_mode = state
-        self.draw_plot()
-
-    def toggle_colorbar(self, state=None):
-        if not self._show_figure:
-            return
-        if state is not None:
-            self._colorbar_mode = state
-        else:
-            self._colorbar_mode = not self._colorbar_mode
-        self.grid_spec.update(**self.spacing[int(self._colorbar_mode)])
-        if not self._fullscreen_mode:
-            self.figure.set_size_inches(self.sizes[int(self._colorbar_mode)])
-            self.set_figure_position()
-        self.draw_plot()
-
-    def toggle_fullscreen(self, state=None):
-        if not self._show_figure:
-            return
-        if state is not None:
-            self._fullscreen_mode = state
-        else:
-            self._fullscreen_mode = not self._fullscreen_mode
-        plt.get_current_fig_manager().full_screen_toggle()
-        if not self._fullscreen_mode:
-            self.figure.set_size_inches(self.sizes[int(self._colorbar_mode)])
-            self.set_figure_position()
-        self.draw_plot()
-
-    def set_figure_position(self):
-        if not self._show_figure:
-            return
-        j, i = self.anchor_index
+    def _set_figure_position(self):
+        j, i = self._anchor_index
         option = self.window_anchors[j][i]
         if option != "default":
             root = tk.Tk()
@@ -251,27 +409,59 @@ class Display:
             else:
                 x, y = 4, 2
             manager = plt.get_current_fig_manager()
+            # noinspection PyUnresolvedReferences
             manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
-    def save_figure(
+    def _toggle_dark_mode(self, state=None):
+        state = state if state is not None else not self._dark_mode
+        color = "#142c38" if state else "#ffffff"
+        self.figure.set_facecolor(color)
+        self.figure.axes[0].set_facecolor(color)
+        self._colorbar.ax.set_facecolor(color)
+        self.features.toggle_topography_visibility(not state)
+        self._dark_mode = state
+        self.redraw_plot()
+
+    def _toggle_colorbar(self, state=None):
+        if state is not None:
+            self._colorbar_mode = state
+        else:
+            self._colorbar_mode = not self._colorbar_mode
+        self.grid_spec.update(**self.spacing[int(self._colorbar_mode)])
+        if not self._fullscreen_mode:
+            self.figure.set_size_inches(self.sizes[int(self._colorbar_mode)])
+            self._set_figure_position()
+        self.redraw_plot()
+
+    def _toggle_fullscreen(self, state=None):
+        if state is not None:
+            self._fullscreen_mode = state
+        else:
+            self._fullscreen_mode = not self._fullscreen_mode
+        plt.get_current_fig_manager().full_screen_toggle()
+        if not self._fullscreen_mode:
+            self.figure.set_size_inches(self.sizes[int(self._colorbar_mode)])
+            self._set_figure_position()
+        self.redraw_plot()
+
+    def get_handles(self):
+        """Returns figure and axes handles to the seacharts display."""
+        return self.figure, self.axes
+
+    def _save_figure(
         self,
         name: str | None = None,
         path: Path | None = None,
         scale: float = 1.0,
         extension: str = "png",
     ):
-        if not self._show_figure:
-            return
-
         try:
             if name is None:
                 name = self.figure.canvas.manager.get_window_title()
-
             if path is None:
                 path_str = f"reports/{name}.{extension}"
             else:
                 path_str = str(path / f"{name}.{extension}")
-
             self.figure.savefig(
                 path_str,
                 dpi=self.figure.dpi * scale,
@@ -282,221 +472,9 @@ class Display:
             plt.close()
 
     @property
-    def is_active(self):
-        if not self._show_figure:
-            return
-
+    def _is_active(self):
+        # noinspection PyUnresolvedReferences
         return plt.fignum_exists(self.figure.number)
 
-    def show(self, duration=0.0):
-        if not self._show_figure:
-            return
-        try:
-            plt.pause(duration)
-        except tk.TclError:
-            plt.close()
-
-    def terminate(self):
-        if not self._show_figure:
-            return
+    def _terminate(self):
         plt.close(self.figure)
-        self._show_figure = False
-
-    def dark_mode(self, arg: bool = True) -> None:
-        """
-        Enable or disable dark mode view of environment figure.
-        :param arg: boolean switching dark mode on or off
-        :return: None
-        """
-        self.toggle_dark_mode(arg)
-
-    def fullscreen_mode(self, arg: bool = True) -> None:
-        """
-        Enable or disable fullscreen mode view of environment figure.
-        :param arg: boolean switching fullscreen mode on or off
-        :return: None
-        """
-        self.toggle_fullscreen(arg)
-
-    def colorbar(self, arg: bool = True) -> None:
-        """
-        Enable or disable the colorbar legend of environment figure.
-        :param arg: boolean switching the colorbar on or off.
-        """
-        self.toggle_colorbar(arg)
-
-    def add_vessels(self, *args: Tuple[int, int, int, int, str]) -> None:
-        """
-        Add colored vessel features to the displayed environment plot.
-        :param args: tuples with id, easting, northing, heading, color
-        :return: None
-        """
-        self.refresh_vessels(list(args))
-
-    def clear_vessels(self) -> None:
-        """
-        Remove all vessel features from the environment plot.
-        :return: None
-        """
-        self.refresh_vessels([])
-
-    def draw_arrow(
-        self,
-        start: Tuple[float, float],
-        end: Tuple[float, float],
-        color: str,
-        width: float = None,
-        fill: bool = False,
-        head_size: float = None,
-        thickness: float = None,
-        edge_style: Union[str, tuple] = None,
-    ) -> None:
-        """
-        Add a straight arrow overlay to the environment plot.
-        :param start: tuple of start point coordinate pair
-        :param end: tuple of end point coordinate pair
-        :param color: str of line color
-        :param width: float denoting the line buffer width
-        :param fill: bool which toggles the interior arrow color on/off
-        :param thickness: float denoting the Matplotlib linewidth
-        :param edge_style: str or tuple denoting the Matplotlib linestyle
-        :param head_size: float of head size (length) in meters
-        :return: None
-        """
-        self.features.add_arrow(
-            start, end, color, width, fill, head_size, thickness, edge_style
-        )
-
-    def draw_circle(
-        self,
-        center: Tuple[float, float],
-        radius: float,
-        color: str,
-        fill: bool = True,
-        thickness: float = None,
-        edge_style: Union[str, tuple] = None,
-        alpha: float = 1.0,
-    ) -> None:
-        """
-        Add a circle or disk overlay to the environment plot.
-        :param center: tuple of circle center coordinates
-        :param radius: float of circle radius
-        :param color: str of circle color
-        :param fill: bool which toggles the interior disk color
-        :param thickness: float denoting the Matplotlib linewidth
-        :param edge_style: str or tuple denoting the Matplotlib linestyle
-        :param alpha: float denoting the Matplotlib alpha value
-        :return: None
-        """
-        self.features.add_circle(
-            center, radius, color, fill, thickness, edge_style, alpha
-        )
-
-    def draw_line(
-        self,
-        points: List[Tuple[float, float]],
-        color: str,
-        width: float = None,
-        thickness: float = None,
-        edge_style: Union[str, tuple] = None,
-        marker_type: str = None,
-    ) -> None:
-        """
-        Add a straight line overlay to the environment plot.
-        :param points: list of tuples of coordinate pairs
-        :param color: str of line color
-        :param width: float denoting the line buffer width
-        :param thickness: float denoting the Matplotlib linewidth
-        :param edge_style: str or tuple denoting the Matplotlib linestyle
-        :param marker_type: str denoting the Matplotlib marker type
-        :return: None
-        """
-        self.features.add_line(points, color, width, thickness, edge_style, marker_type)
-
-    def draw_polygon(
-        self,
-        geometry: Union[Any, List[Tuple[float, float]]],
-        color: str,
-        interiors: List[List[Tuple[float, float]]] = None,
-        fill: bool = True,
-        thickness: float = None,
-        edge_style: Union[str, tuple] = None,
-        alpha: float = 1.0,
-    ) -> None:
-        """
-        Add an arbitrary polygon shape overlay to the environment plot.
-        :param geometry: Shapely geometry or list of exterior coordinates
-        :param interiors: list of lists of interior polygon coordinates
-        :param color: str of rectangle color
-        :param fill: bool which toggles the interior shape color
-        :param thickness: float denoting the Matplotlib linewidth
-        :param edge_style: str or tuple denoting the Matplotlib linestyle
-        :param alpha: float denoting the Matplotlib alpha value
-        :return: None
-        """
-        self.features.add_polygon(
-            geometry, color, interiors, fill, thickness, edge_style, alpha
-        )
-
-    def draw_rectangle(
-        self,
-        center: Tuple[float, float],
-        size: Tuple[float, float],
-        color: str,
-        rotation: float = 0.0,
-        fill: bool = True,
-        thickness: float = None,
-        edge_style: Union[str, tuple] = None,
-        alpha: float = 1.0,
-    ) -> None:
-        """
-        Add a rectangle or box overlay to the environment plot.
-        :param center: tuple of rectangle center coordinates
-        :param size: tuple of rectangle (width, height)
-        :param color: str of rectangle color
-        :param rotation: float denoting the rectangle rotation in degrees
-        :param fill: bool which toggles the interior rectangle color
-        :param thickness: float denoting the Matplotlib linewidth
-        :param edge_style: str or tuple denoting the Matplotlib linestyle
-        :param alpha: float denoting the Matplotlib alpha value
-        :return: None
-        """
-        self.features.add_rectangle(
-            center, size, color, rotation, fill, thickness, edge_style, alpha
-        )
-
-    def get_handles(self):
-        """Returns figure and axes handles to the seacharts display."""
-        return self.figure, self.axes
-
-    def refresh(self) -> None:
-        """
-        Manually redraw the environment display window.
-        :return: None
-        """
-        self.draw_plot()
-
-    def close(self) -> None:
-        """
-        Close the environment display window and clear all vessels.
-        :return: None
-        """
-        self.terminate()
-        self.clear_vessels()
-
-    def save_image(
-        self,
-        name: str = None,
-        path: Path | None = None,
-        scale: float = 1.0,
-        extension: str = "png",
-    ) -> None:
-        """
-        Save the environment plot as a .png image.
-        :param name: optional str of file name
-        :param path: optional Path of file path
-        :param scale: optional float scaling the image resolution
-        :param extension: optional str of file extension name
-        :return: None
-        """
-        self.save_figure(name, path, scale, extension)

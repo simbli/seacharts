@@ -137,5 +137,5 @@ todo.txt
 data/db/
 data/shapefiles/
 data/vessels.csv
-reports/
+output/
 .vscode/

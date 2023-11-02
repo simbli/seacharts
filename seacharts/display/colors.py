@@ -1,16 +1,16 @@
 import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
+from matplotlib.colorbar import Colorbar
 
 
-def _blues(bins=9):
-    # noinspection PyUnresolvedReferences
+def _blues(bins: int = 9) -> np.ndarray:
     return plt.get_cmap("Blues")(np.linspace(0.6, 1.0, bins))
 
 
-def _greens(bins=9):
-    # noinspection PyUnresolvedReferences
+def _greens(bins: int = 9) -> np.ndarray:
     return plt.get_cmap("Greens")(np.linspace(0.3, 0.9, bins))
 
 
@@ -51,7 +51,7 @@ _layer_colors = dict(
 )
 
 
-def color_picker(name, bins=None):
+def color_picker(name: str, bins: int = None) -> tuple:
     if isinstance(name, int):
         return _blues(bins)[name]
     elif name in _ship_colors:
@@ -66,7 +66,7 @@ def color_picker(name, bins=None):
         raise ValueError(f"{name} is not a valid color")
 
 
-def colorbar(axes, depths):
+def colorbar(axes: Axes, depths: list[int]) -> Colorbar:
     depths = list(depths)
     ocean = list(_blues(len(depths)))
     colors = [_layer_colors["shore"]] + ocean[:-1]
