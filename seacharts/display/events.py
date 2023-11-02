@@ -78,8 +78,6 @@ class EventsManager:
             self._display.features.toggle_topography_visibility()
         elif event.key == "c":
             self._display.toggle_colorbar()
-        elif event.key == "f":
-            self._display.toggle_fullscreen()
         elif event.key == "ctrl+s":
             self._display.save_figure("svg", extension="svg")
         elif event.key == "s":

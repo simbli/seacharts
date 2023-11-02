@@ -139,7 +139,8 @@ format. Finally, select your appropriate user group and purpose, and click
 
 Unpack the downloaded file(s) and place the extracted `.gdb` in a suitable location,
 in which the SeaCharts setup may be configured to search. The current
-working directory as well as the relative `data/db` folder are included by default.
+working directory as well as the relative `data/` and `data/db/` folders are
+included by default.
 
 The minimal example below imports the `ENC` class from `seacharts.enc` with the
 default configuration found in `seacharts/config.yaml`, and shows the interactive
@@ -195,10 +196,10 @@ The `ENC.start_display` method is used to show a Matplotlib figure plot of the
 loaded sea charts features. Zoom and pan the environment view using the mouse
 scroll button, and holding and dragging the plot with left click, respectively.
 
-Fullscreen mode may be toggled using the `f` key, and dark mode may be toggled
-using the `d` key. An optional colorbar showing the various depth legends may
-be toggled using the `c` key. Images of the currently shown display may be
-saved in various resolutions by pressing Control + `s`, Shift + `s` or `s`.
+Dark mode may be toggled using the `d` key, and an optional colorbar showing
+the various depth legends may be toggled using the `c` key. Images of the
+currently shown display may be saved in various resolutions by pressing
+Control + `s`, Shift + `s` or `s`.
 
 ## License
 

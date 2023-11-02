@@ -179,7 +179,6 @@ class Display:
     def toggle_dark_mode(self, state=None):
         if not self._show_figure:
             return
-
         state = state if state is not None else not self._dark_mode
         color = "#142c38" if state else "#ffffff"
         self.figure.set_facecolor(color)
@@ -192,7 +191,6 @@ class Display:
     def toggle_colorbar(self, state=None):
         if not self._show_figure:
             return
-
         if state is not None:
             self._colorbar_mode = state
         else:
