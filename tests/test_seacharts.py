@@ -4,8 +4,8 @@ if __name__ == "__main__":
 
     size = 9000, 5062
     center = 44300, 6956450
-    enc = ENC(new_data=True, size=size, center=center)
-    enc.start_display()
+    enc = ENC()
+    enc.display.start()
 
     # (id, easting, northing, heading, color)
     ships = [
@@ -16,7 +16,7 @@ if __name__ == "__main__":
         (5, 44000, 6955500, 68, "pink"),
     ]
 
-    enc.add_vessels(*ships)
+    enc.display.add_vessels(*ships)
 
     x, y = center
     width, height = 1900, 1900
@@ -29,16 +29,18 @@ if __name__ == "__main__":
         )
     )
     areas = list(box.difference(enc.seabed[10].geometry).geoms)
-    enc.draw_circle(center, 1000, "yellow", thickness=2, edge_style="--", alpha=0.5)
-    enc.draw_rectangle(center, (600, 1200), "blue", rotation=20, alpha=0.5)
-    enc.draw_circle(
+    enc.display.draw_circle(
+        center, 1000, "yellow", thickness=2, edge_style="--", alpha=0.5
+    )
+    enc.display.draw_rectangle(center, (600, 1200), "blue", rotation=20, alpha=0.5)
+    enc.display.draw_circle(
         center, 700, "green", edge_style=(0, (5, 8)), thickness=3, fill=False
     )
-    enc.draw_line(
+    enc.display.draw_line(
         [(center[0], center[1] + 800), center, (center[0] - 300, center[1] - 400)],
         "white",
     )
-    enc.draw_line(
+    enc.display.draw_line(
         [
             (center[0] - 300, center[1] + 400),
             center,
@@ -49,7 +51,7 @@ if __name__ == "__main__":
         thickness=5.0,
         edge_style=(0, (1, 4)),
     )
-    enc.draw_arrow(
+    enc.display.draw_arrow(
         center,
         (center[0] + 700, center[1] + 600),
         "orange",
@@ -57,11 +59,12 @@ if __name__ == "__main__":
         width=50,
         thickness=5,
     )
-    enc.draw_polygon(enc.seabed[100].geometry.geoms[-3], "cyan", alpha=0.5)
-    enc.draw_polygon(enc.shore.geometry.geoms[56], "highlight", alpha=0.5)
+    enc.display.draw_polygon(enc.seabed[100].geometry.geoms[-3], "cyan", alpha=0.5)
+    island = sorted(enc.shore.geometry.geoms, key=lambda x: x.area, reverse=True)[3]
+    enc.display.draw_polygon(island, "highlight", alpha=0.3)
     for area in areas[3:8] + [areas[14], areas[17]] + areas[18:21]:
-        enc.draw_polygon(area, "red", alpha=0.5)
-    enc.draw_rectangle(
+        enc.display.draw_polygon(area, "red", alpha=0.5)
+    enc.display.draw_rectangle(
         center,
         (width, height),
         "pink",
@@ -70,4 +73,4 @@ if __name__ == "__main__":
         thickness=1.5,
     )
 
-    enc.show_display()  # Show display indefinitely
+    enc.display.show()  # Show display indefinitely
