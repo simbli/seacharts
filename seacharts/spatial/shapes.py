@@ -1,7 +1,4 @@
-from __future__ import annotations
-
-from dataclasses import InitVar, dataclass, field
-from typing import List, Tuple
+from dataclasses import dataclass, field
 
 from shapely import affinity
 from shapely import geometry as geo
@@ -14,13 +11,13 @@ class Area(base.Shape):
     geometry: geo.Polygon = field(default_factory=geo.Polygon)
 
     @staticmethod
-    def new_polygon(exterior, interiors=None):
+    def new_polygon(exterior: list, interiors=None) -> geo.Polygon:
         return geo.Polygon(exterior, interiors)
 
 
 @dataclass
 class Line(base.Shape):
-    points: List[Tuple[float, float]] = None
+    points: list[tuple[float, float]] = None
 
     def __post_init__(self):
         if self.points is None or len(self.points) < 2:
@@ -33,8 +30,8 @@ class Line(base.Shape):
 
 @dataclass
 class Arrow(base.Shape):
-    start: Tuple[float, float] = None
-    end: Tuple[float, float] = None
+    start: tuple[float, float] = None
+    end: tuple[float, float] = None
     width: float = None
 
     def __post_init__(self):
@@ -45,10 +42,10 @@ class Arrow(base.Shape):
         self.geometry = geo.LineString((self.start, self.end))
 
     @property
-    def vector(self) -> Tuple[float, float]:
+    def vector(self) -> tuple[float, float]:
         return self.end[0] - self.start[0], self.end[1] - self.start[1]
 
-    def body(self, head_size):
+    def body(self, head_size: int) -> geo.Polygon:
         if not head_size >= 0:
             raise ValueError(
                 f"{self.__class__.__name__} should have non-negative head size"
@@ -80,7 +77,9 @@ class Arrow(base.Shape):
 class Circle(Area, base.Radial, base.Coordinates):
     def __post_init__(self):
         if self.radius <= 0:
-            raise ValueError(f"{self.__class__.__name__} should have a positive area")
+            raise ValueError(
+                f"{self.__class__.__name__} " f"should have a positive area"
+            )
         self.center = geo.Point(self.x, self.y)
         self.geometry = geo.Polygon(self.center.buffer(self.radius))
 
@@ -94,7 +93,7 @@ class Body(Area, base.Oriented, base.Coordinates):
     def _body_polygon(self) -> geo.Polygon:
         raise NotImplementedError
 
-    def rotate(self, polygon):
+    def rotate(self, polygon: geo.Polygon) -> geo.Polygon:
         return affinity.rotate(
             polygon,
             -self.heading,
@@ -110,7 +109,9 @@ class Rectangle(Body):
 
     def _body_polygon(self) -> geo.Polygon:
         if not self.width > 0 or not self.height > 0:
-            raise ValueError(f"{self.__class__.__name__} should have a positive area")
+            raise ValueError(
+                f"{self.__class__.__name__} " f"should have a positive area"
+            )
         return geo.Polygon(
             (
                 (self.x - self.width, self.y - self.height),
@@ -137,101 +138,3 @@ class Ship(Body):
         left_bow, right_bow = (x_min, y_max), (x_max, y_max)
         coords = [left_aft, left_bow, (x, y + h / 2), right_bow, right_aft]
         return geo.Polygon(coords)
-
-
-@dataclass
-class Waypoint(Area, base.Radial, base.Coordinates):
-    resolution: InitVar[int] = 0
-
-    def __post_init__(self, resolution):
-        self.center = geo.Point(self.x, self.y)
-        self.geometry = self.center.buffer(self.radius, resolution=resolution)
-
-    def contains(self, x, y):
-        return self.geometry.contains(geo.Point(x, y))
-
-
-class Path:
-    def __init__(self, color):
-        self.color = color
-        self.waypoints = []
-        self.edges = []
-        self.artist = None
-
-    @property
-    def multi_shape(self):
-        return base.Shape.collect([x.geometry for x in self.waypoints] + self.edges)
-
-    def add_waypoint(self, x, y, index=None, edge=False):
-        radius = 30
-        if index is None:
-            prev_wp = self.waypoints[-1] if self.waypoints else None
-            waypoint = Waypoint(x, y, radius, resolution=2)
-            if prev_wp:
-                prev_wp.next = waypoint
-                edge = self.edge_between(prev_wp, waypoint)
-                self.edges.append(edge)
-            self.waypoints.append(waypoint)
-        else:
-            if not edge:
-                if index > 0:
-                    prev_wp = self.waypoints[index - 1]
-                else:
-                    prev_wp = None
-                if index < len(self.waypoints) - 1:
-                    next_wp = self.waypoints[index + 1]
-                else:
-                    next_wp = None
-                waypoint = Waypoint(x, y, radius, resolution=2)
-                self.waypoints.pop(index)
-                self.waypoints.insert(index, waypoint)
-                if prev_wp:
-                    edge1 = self.edge_between(prev_wp, waypoint)
-                    self.edges.pop(index - 1)
-                    self.edges.insert(index - 1, edge1)
-                if next_wp:
-                    edge2 = self.edge_between(waypoint, next_wp)
-                    self.edges.pop(index)
-                    self.edges.insert(index, edge2)
-            else:
-                prev_wp = self.waypoints[index]
-                if index < len(self.waypoints) - 1:
-                    next_wp = self.waypoints[index + 1]
-                else:
-                    next_wp = None
-                waypoint = Waypoint(x, y, radius, resolution=2)
-                self.waypoints.insert(index + 1, waypoint)
-                new_edge = self.edge_between(prev_wp, waypoint)
-                self.edges.insert(index, new_edge)
-                if next_wp:
-                    self.edges[index + 1] = self.edge_between(waypoint, next_wp)
-
-    def remove_waypoint(self, index):
-        self.waypoints.pop(index)
-        if index == 0:
-            if self.edges:
-                self.edges.pop(0)
-        elif index < len(self.waypoints):
-            self.edges.pop(index)
-            previous_wp = self.waypoints[index - 1]
-            next_wp = self.waypoints[index]
-            self.edges[index - 1] = self.edge_between(previous_wp, next_wp)
-        else:
-            self.edges.pop(-1)
-
-    def locate_waypoint(self, x, y):
-        for i, waypoint in enumerate(self.waypoints):
-            if waypoint.contains(x, y):
-                return i
-        return None
-
-    def locate_edge(self, x, y):
-        for i, edge in enumerate(self.edges):
-            if edge.contains(base.geo.Point(x, y)):
-                return i
-        return None
-
-    @staticmethod
-    def edge_between(wp1, wp2):
-        line = wp1.line_between(wp1.center, wp2.center)
-        return line.buffer(7, cap_style=2, join_style=3)

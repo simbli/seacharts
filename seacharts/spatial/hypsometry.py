@@ -1,38 +1,32 @@
-from __future__ import annotations
-
 import time
 from abc import ABC
 from dataclasses import InitVar, dataclass, field
-from typing import Dict, List
 
-import seacharts.environment.scope as env
 from .base import Layer
 from .layers import Land, Seabed, Shore
+from ..environment.scope import Scope
 
 
 @dataclass
 class _Hypsometry(ABC):
-    scope: InitVar[env.Scope]
+    scope: InitVar[Scope]
 
-    def __post_init__(self, scope: env.Scope):
+    def __post_init__(self, scope: Scope):
         raise NotImplementedError
 
     @property
-    def layers(self) -> List[Layer]:
-        raise NotImplementedError
-
-    def add_buffer(self, layer, distance):
+    def layers(self) -> list[Layer]:
         raise NotImplementedError
 
     @property
-    def loaded_layers(self) -> List[Layer]:
+    def loaded_layers(self) -> list[Layer]:
         return [layer for layer in self.layers if not layer.geometry.is_empty]
 
     @property
     def loaded(self) -> bool:
         return any(self.loaded_layers)
 
-    def parse(self, scope: env.Scope):
+    def parse(self, scope: Scope) -> None:
         layers = [x for x in self.layers if x.label in scope.features]
         if not list(scope.parser.gdb_paths):
             return
@@ -56,7 +50,7 @@ class _Hypsometry(ABC):
                 layer.simplify(0)
 
                 print(f"\rBuffering {info}...", end="")
-                self.add_buffer(layer, 0)
+                layer.buffer(0)
 
                 print(f"\rClipping {info}...", end="")
                 layer.clip(scope.extent.bbox)
@@ -65,7 +59,7 @@ class _Hypsometry(ABC):
             end_time = round(time.time() - start_time, 1)
             print(f"\rSaved {info} to shapefile in {end_time} s.")
 
-    def load(self, scope: env.Scope):
+    def load(self, scope: Scope) -> None:
         layers = [x for x in self.layers if x.label in scope.features]
         for layer in layers:
             layer.load_shapefile(scope.parser)
@@ -73,18 +67,14 @@ class _Hypsometry(ABC):
 
 @dataclass
 class Hydrography(_Hypsometry):
-    bathymetry: Dict[int, Layer] = field(init=False)
+    bathymetry: dict[int, Layer] = field(init=False)
 
     @property
-    def layers(self):
+    def layers(self) -> list[Layer]:
         return [*self.bathymetry.values()]
 
-    def __post_init__(self, scope: env.Scope):
+    def __post_init__(self, scope: Scope):
         self.bathymetry = {d: Seabed(d) for d in scope.depths}
-        self.load(scope)
-
-    def add_buffer(self, layer, distance):
-        layer.erode(distance)
 
 
 @dataclass
@@ -93,13 +83,9 @@ class Topography(_Hypsometry):
     shore: Shore = field(init=False)
 
     @property
-    def layers(self):
+    def layers(self) -> list[Layer]:
         return [self.land, self.shore]
 
-    def __post_init__(self, scope: env.Scope):
+    def __post_init__(self, scope: Scope):
         self.land = Land()
         self.shore = Shore()
-        self.load(scope)
-
-    def add_buffer(self, layer, distance):
-        layer.dilate(distance)

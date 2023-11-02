@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 from shapely import geometry as geo
 from shapely import ops
+
+from seacharts.utils import ShapefileParser
 
 
 @dataclass
@@ -51,7 +53,7 @@ class SingleDepth:
 @dataclass
 class MultiDepth:
     @property
-    def depth(self):
+    def depth(self) -> None:
         raise AttributeError("Multi-depth shapes have no single depth.")
 
 
@@ -59,23 +61,20 @@ class MultiDepth:
 class Shape(Drawable, ABC):
     geometry: geo.base.BaseGeometry = None
 
-    def simplify(self, tolerance, preserve_topology=True):
+    def simplify(self, tolerance: int, preserve_topology: bool = True) -> None:
         self.geometry = self.geometry.simplify(tolerance, preserve_topology)
 
-    def clip(self, bbox):
+    def clip(self, bbox: tuple[int, int, int, int]) -> None:
         bounding_box = geo.box(*bbox)
         self.geometry = bounding_box.intersection(self.geometry)
 
-    def dilate(self, distance):
-        self.geometry = self.geometry.buffer(distance, cap_style=2, join_style=3)
+    def buffer(self, distance: int) -> None:
+        self.geometry = self.geometry.buffer(distance)
 
-    def erode(self, distance):
-        self.dilate(-distance)
-
-    def merge(self, other: Shape):
+    def merge(self, other: Shape) -> None:
         self.geometry = self.geometry.union(other.geometry)
 
-    def closest_points(self, geometry):
+    def closest_points(self, geometry: Any) -> geo.Point:
         return ops.nearest_points(self.geometry, geometry)[1]
 
     @property
@@ -86,22 +85,12 @@ class Shape(Drawable, ABC):
     def name(self) -> str:
         return self.__class__.__name__
 
-    @property
-    def invalid(self):
-        return not self.geometry.is_valid
-
     @staticmethod
-    def is_multi(geometry):
-        return isinstance(geometry, geo.MultiPolygon) or isinstance(
-            geometry, geo.GeometryCollection
-        )
-
-    @staticmethod
-    def _record_to_geometry(record):
+    def _record_to_geometry(record: dict) -> Any:
         return geo.shape(record["geometry"])
 
     @staticmethod
-    def as_multi(geometry):
+    def as_multi(geometry: Any) -> Any:
         if isinstance(geometry, geo.Point):
             return geo.MultiPoint([geometry])
         elif isinstance(geometry, geo.Polygon):
@@ -112,7 +101,7 @@ class Shape(Drawable, ABC):
             raise NotImplementedError(type(geometry))
 
     @staticmethod
-    def collect(geometries):
+    def collect(geometries: list[Any]) -> Any:
         if any(not g.is_valid for g in geometries):
             geometries = [g.buffer(0) if not g.is_valid else g for g in geometries]
         geometry = ops.unary_union(geometries)
@@ -120,19 +109,11 @@ class Shape(Drawable, ABC):
             geometry = geometry.buffer(0)
         return geometry
 
-    @staticmethod
-    def line_between(point1, point2):
-        return geo.LineString([point1, point2])
-
-    @staticmethod
-    def arrow_head(points):
-        return geo.Polygon(points)
-
 
 @dataclass
 class Layer(Shape, ABC):
     @property
-    def _external_labels(self) -> List[str]:
+    def _external_labels(self) -> list[str]:
         raise NotImplementedError
 
     @property
@@ -143,32 +124,23 @@ class Layer(Shape, ABC):
     def label(self) -> str:
         return self.name.lower()
 
-    def save(self, parser):
+    def save(self, parser: ShapefileParser) -> None:
         parser.write(self)
 
-    def load_shapefile(self, parser):
+    def load_shapefile(self, parser: ShapefileParser) -> None:
         records = list(parser.read_shapefile(self.label))
         if len(records) > 0:
             self.geometry = self._record_to_geometry(records[0])
             if isinstance(self.geometry, geo.Polygon):
                 self.geometry = self.as_multi(self.geometry)
 
-    def load_fgdb(self, parser):
+    def load_fgdb(self, parser: ShapefileParser) -> list[dict]:
         depth = self.depth if hasattr(self, "depth") else 0
         return list(parser.read_fgdb(self.label, self._external_labels, depth))
 
-    def unify(self, records):
+    def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = self.collect(geometries)
-
-    def extract_raw(self, records):
-        geometries = [self._record_to_geometry(r) for r in records]
-        self.geometry = geo.MultiPolygon(
-            [
-                list(g)[0] if isinstance(g, geo.MultiPolygon) else g.buffer(1)
-                for g in geometries
-            ]
-        )
 
 
 @dataclass
@@ -204,7 +176,7 @@ class ZeroDepthRegions(Regions, ZeroDepth, ABC):
 @dataclass
 class SingleDepthRegions(Regions, SingleDepth, ABC):
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__ + f"{self.depth}m"
 
 

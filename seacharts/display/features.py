@@ -1,69 +1,47 @@
-from __future__ import annotations
-
-import shapely.geometry as sgeo
+import shapely.geometry as geo
 from cartopy.feature import ShapelyFeature
 
-import seacharts.display as dis
 import seacharts.spatial as spl
 import seacharts.utils as utils
 from .colors import color_picker
 
 
+# noinspection PyProtectedMember
 class FeaturesManager:
-    def __init__(self, display: dis.Display):
+    def __init__(self, display):
         self._display = display
-        self.show_ownship = False
-        self.show_hazards = False
         self.show_vessels = True
-        self.show_arrows = True
-        self._paths = [spl.Path("yellow"), spl.Path("pink")]
-        self._ownship = None
-        self._horizon = None
         self._vessels = {}
-        self._hazards = {}
-        self._arrows = {}
         self._seabeds = {}
         self._land = None
         self._shore = None
         self._init_layers()
 
-    @property
-    def animated(self):
-        return [
-            a
-            for a in [
-                self._horizon,
-                *self._hazards.values(),
-                *self._arrows.values(),
-                self._paths[0].artist,
-                self._paths[1].artist,
-                *[v["artist"] for v in self._vessels.values()],
-                self._ownship,
-            ]
-            if a
-        ]
-
     def _init_layers(self):
-        layers = self._display.environment.hydrography.loaded_layers
+        layers = self._display._environment.hydrography.loaded_layers
         for i, layer in enumerate(layers):
             rank = layer.z_order + i
-            bins = len(self._display.environment.scope.depths)
+            bins = len(self._display._environment.scope.depths)
             color = color_picker(i, bins)
             artist = self.new_artist(layer.geometry, color, rank)
             self._seabeds[rank] = artist
-        shore = self._display.environment.topography.shore
+        shore = self._display._environment.topography.shore
         color = color_picker(shore.color)
         self._shore = self.new_artist(shore.geometry, color, shore.z_order)
-        land = self._display.environment.topography.land
+        land = self._display._environment.topography.land
         color = color_picker(land.color)
         self._land = self.new_artist(land.geometry, color, land.z_order)
-        center = self._display.environment.scope.extent.center
-        size = self._display.environment.scope.extent.size
+        center = self._display._environment.scope.extent.center
+        size = self._display._environment.scope.extent.size
         geometry = spl.Rectangle(
             *center, width=size[0] / 2, heading=0, height=size[1] / 2
         ).geometry
         color = (color_picker("black")[0], "none")
         self.new_artist(geometry, color, 10000, linewidth=3)
+
+    @property
+    def animated(self):
+        return [a for a in [v["artist"] for v in self._vessels.values()] if a]
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
         kwargs["crs"] = self._display.crs
@@ -115,8 +93,8 @@ class FeaturesManager:
         self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0
     ):
         try:
-            if isinstance(shape, sgeo.MultiPolygon) or isinstance(
-                shape, sgeo.GeometryCollection
+            if isinstance(shape, geo.MultiPolygon) or isinstance(
+                shape, geo.GeometryCollection
             ):
                 shape = list(shape.geoms)
             else:
@@ -194,7 +172,7 @@ class FeaturesManager:
             new_state = not self._land.get_visible()
         self._land.set_visible(new_state)
         self._shore.set_visible(new_state)
-        self._display.draw_plot()
+        self._display.redraw_plot()
 
     def show_top_hidden_layer(self):
         artists = self._z_sorted_seabeds(descending=False)
@@ -216,7 +194,7 @@ class FeaturesManager:
         if self._any_toggleable_layer(artists, not visibility):
             artist = self._next_visibility_layer(artists, not visibility)
             artist.set_visible(visibility)
-            self._display.draw_plot()
+            self._display.redraw_plot()
 
     def _z_sorted_seabeds(self, descending=False):
         artist_keys = sorted(self._seabeds, reverse=descending)
@@ -231,8 +209,8 @@ class FeaturesManager:
         return next(a for a in artists if a.get_visible() is visibility)
 
     @staticmethod
-    def vessels_to_file(vessel_poses: list):
+    def vessels_to_file(vessel_poses: list[tuple]) -> None:
         utils.files.write_rows_to_csv(
-            [("id", "easting", "northing", "heading", "color")] + vessel_poses,
+            [("id", "x", "y", "heading", "color")] + vessel_poses,
             utils.paths.vessels,
         )

@@ -8,22 +8,26 @@ from . import paths
 
 
 class ShapefileParser:
-    def __init__(self, bounding_box, path_strings: list[str]):
+    def __init__(self, bounding_box: tuple, path_strings: list[str]):
         self.bounding_box = bounding_box
         self.paths = set([p.resolve() for p in (map(Path, path_strings))])
         self.paths.update(paths.default_resources)
 
-    def read_fgdb(self, label, external_labels, depth):
+    def read_fgdb(
+        self, label: str, external_labels: list[str], depth: int
+    ) -> Generator[dict]:
         for gdb_path in self.gdb_paths:
             records = self._parse_layers(gdb_path, external_labels, depth)
             yield from self._parse_records(records, label)
 
-    def read_shapefile(self, label):
+    def read_shapefile(self, label: str) -> Generator[dict]:
         file_path = self._shapefile_path(label)
         if file_path.exists():
             yield from self._read_spatial_file(file_path)
 
-    def _parse_layers(self, path: Path, external_labels, depth):
+    def _parse_layers(
+        self, path: Path, external_labels: list[str], depth: int
+    ) -> Generator[dict]:
         for label in external_labels:
             if isinstance(label, dict):
                 layer, depth_label = label["layer"], label["depth"]
@@ -34,7 +38,7 @@ class ShapefileParser:
             else:
                 yield from self._read_spatial_file(path, layer=label)
 
-    def _read_spatial_file(self, path: Path, **kwargs):
+    def _read_spatial_file(self, path: Path, **kwargs) -> Generator[dict]:
         with fiona.open(path, "r", **kwargs) as source:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -79,10 +83,6 @@ class ShapefileParser:
             driver="ESRI Shapefile",
             crs={"init": "epsg:25833"},
         )
-
-    @staticmethod
-    def _depth_filter(depth_label, minimum_depth):
-        return lambda r: r["properties"][depth_label] >= minimum_depth
 
     @staticmethod
     def _as_record(depth, geometry):

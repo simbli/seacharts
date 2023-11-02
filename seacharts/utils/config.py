@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import yaml
 from cerberus import Validator
@@ -30,7 +29,7 @@ class Config:
     def settings(self, new_settings: dict) -> None:
         self._settings = new_settings
 
-    def _extract_valid_sections(self) -> List[str]:
+    def _extract_valid_sections(self) -> list[str]:
         if self._schema is None:
             raise ValueError("No configuration schema provided!")
         sections = []
@@ -46,7 +45,7 @@ class Config:
             raise ValueError("Empty schema!")
 
         if not self.validator.validate(settings):
-            raise ValueError(f"Cerberus validation Error: {self.validator.errors}")
+            raise ValueError(f"Cerberus validation Error: " f"{self.validator.errors}")
 
         self._settings["enc"].get("depths", []).sort()
         for file_name in self._settings["enc"].get("files", []):
