@@ -136,6 +136,5 @@ main.py
 todo.txt
 data/db/
 data/shapefiles/
-.vscode/
-data/paths/
 data/vessels.csv
+.vscode/

@@ -8,13 +8,12 @@ from .extent import Extent
 
 @dataclass
 class Scope:
-    def __init__(self, settings: dict, extent: Extent):
-        self.extent: Extent = extent
-        self.depths: list = settings["enc"].get("depths", [])
-        self.files: list = settings["enc"].get("files", [])
-        self.new_data = True
-        self.layers = ["land", "shore"]
+    def __init__(self, settings: dict):
+        self.extent = Extent(settings)
+        self.depths = settings["enc"].get("depths", [])
+        self.resources = settings["enc"].get("resources", [])
+        self.parser = utils.ShapefileParser(self.extent.bbox, self.resources)
+        self.features = ["land", "shore"]
         for depth in self.depths:
-            self.layers.append(f"seabed{depth}m")
-        utils.files.build_directory_structure(self.layers)
-        self.parser = utils.ShapefileParser(self.extent.bbox, self.files)
+            self.features.append(f"seabed{depth}m")
+        utils.files.build_directory_structure(self.features, self.resources)

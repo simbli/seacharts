@@ -23,6 +23,13 @@ class ENC:
         self._environment = Environment(self._config.settings)
         self._display = None
 
+    def update(self) -> None:
+        """
+        Update ENC with spatial data parsed from user-specified resources
+        :return: None
+        """
+        self._environment.parse_data_into_shapefiles()
+
     @property
     def display(self) -> Display:
         """

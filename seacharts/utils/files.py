@@ -15,24 +15,15 @@ def verify_directory_exists(path_string: str) -> None:
         print(f"WARNING: {path_type} database path '{path}' not found.\n")
 
 
-def build_directory_structure(features) -> None:
-    paths.data.mkdir(exist_ok=True)
-    paths.reports.mkdir(exist_ok=True)
-
-    paths.db.mkdir(exist_ok=True)
-    paths.hazards.mkdir(exist_ok=True)
-    paths.paths.mkdir(exist_ok=True)
+def build_directory_structure(features, resources) -> None:
     paths.shapefiles.mkdir(exist_ok=True)
-
-    paths.vessels.touch(exist_ok=True)
-    paths.dynamic.touch(exist_ok=True)
-    paths.static.touch(exist_ok=True)
-    paths.path1.touch(exist_ok=True)
-    paths.path2.touch(exist_ok=True)
-
     for feature in features:
         shapefile_dir = paths.shapefiles / feature.lower()
         shapefile_dir.mkdir(parents=True, exist_ok=True)
+    for resource in resources:
+        path = Path(resource).resolve()
+        if not path.suffix == ".gdb":
+            path.mkdir(exist_ok=True)
 
 
 def write_rows_to_csv(rows, file_path) -> None:
