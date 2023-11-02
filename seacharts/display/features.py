@@ -149,98 +149,6 @@ class FeaturesManager:
         kwargs["alpha"] = alpha
         self.new_artist(geometry, color, 0, **kwargs)
 
-    def update_waypoints(self, number, pick, coords=None):
-        path = self._paths[number - 1]
-        index = path.locate_waypoint(*pick)
-        if coords is not None:
-            path.add_waypoint(*coords, index)
-        else:
-            if index is None:
-                index = path.locate_edge(*pick)
-                if index is None:
-                    return
-                else:
-                    path.add_waypoint(*pick, index, edge=True)
-            else:
-                path.remove_waypoint(index)
-        if path.artist:
-            path.artist.remove()
-        color = color_picker(path.color)
-        path.artist = self.new_artist(path.multi_shape, color)
-        points = [(wp.x, wp.y) for wp in path.waypoints]
-        file_path = [utils.paths.path1, utils.paths.path2][number - 1]
-        utils.files.write_rows_to_csv(points, file_path)
-
-    def update_ownship(self):
-        if self.show_ownship:
-            ownship = self._display.environment.ownship
-            bc = color_picker("cyan")
-            hc = color_picker("full_horizon")
-            if self._ownship:
-                self._ownship.remove()
-            if self._horizon:
-                self._horizon.remove()
-            self._ownship = self.new_artist(ownship.geometry, bc)
-            self._horizon = self.new_artist(ownship.horizon, hc)
-            if not self.show_hazards:
-                self._horizon.set_visible(False)
-
-    def update_hazards(self):
-        if self.show_hazards:
-            ownship = self._display.environment.ownship
-            safe_area = self._display.environment.safe_area
-            sectors = self._display.environment.ownship.horizon_sectors
-            static_points = [() for _ in range(len(sectors))]
-            dynamic_points = [() for _ in range(len(sectors))]
-            for i, (color, geometry) in enumerate(sectors.items()):
-                for features in [self._hazards, self._arrows]:
-                    artist = features.pop(color, None)
-                    if artist:
-                        artist.remove()
-                vessel_horizons = spl.Shape.collect(
-                    [v["ship"].horizon for v in self._vessels.values()]
-                )
-                static = geometry.difference(safe_area.geometry)
-                dynamic = geometry.intersection(vessel_horizons)
-                if not (static.is_empty and dynamic.is_empty):
-                    self._hazards[color] = self.new_artist(
-                        static.union(dynamic), color_picker(color)
-                    )
-                    if self.show_arrows:
-                        arrow, length1 = None, -1
-                        if not static.is_empty:
-                            arrow1, length1 = self.closest(ownship, static)
-                            static_points[i] = arrow1.exterior.coords[0]
-                            arrow = arrow1
-                        if not dynamic.is_empty:
-                            arrow2, length2 = self.closest(ownship, dynamic)
-                            dynamic_points[i] = arrow2.exterior.coords[0]
-                            if arrow is None or length2 < length1:
-                                arrow = arrow2
-                        self._arrows[color] = self.new_artist(
-                            arrow, color_picker("orange")
-                        )
-            utils.files.write_rows_to_csv(static_points, utils.paths.static)
-            utils.files.write_rows_to_csv(dynamic_points, utils.paths.dynamic)
-
-    @staticmethod
-    def closest(ownship, hazards):
-        if not spl.Shape.is_multi(hazards):
-            hazards = spl.Shape.as_multi(hazards)
-        lines = []
-        for polygon in list(hazards):
-            near = ownship.closest_points(polygon.exterior)
-            lines.append(spl.Shape.line_between(near, ownship.center))
-        shortest = sorted(lines, key=lambda x: x.length)[0]
-        interpolated = shortest.interpolate(
-            min(ownship.dimensions[1] * 0.8, shortest.length * 0.3)
-        )
-        head, base = shortest.coords[0], interpolated.coords[0]
-        (x1, y1), (x2, y2) = head, base
-        dx, dy = (x2 - x1) / 3, (y2 - y1) / 3
-        left, right = (x2 - dy, y2 + dx), (x2 + dy, y2 - dx)
-        return spl.Shape.arrow_head([(x1, y1), right, left]), shortest.length
-
     def update_vessels(self):
         if self.show_vessels:
             entries = list(utils.files.read_ship_poses())
@@ -279,7 +187,6 @@ class FeaturesManager:
             artist = vessel["artist"]
             artist.set_visible(not artist.get_visible())
         self.update_vessels()
-        self.update_hazards()
         self._display.update_plot()
 
     def toggle_topography_visibility(self, new_state: bool = None):
@@ -288,30 +195,6 @@ class FeaturesManager:
         self._land.set_visible(new_state)
         self._shore.set_visible(new_state)
         self._display.draw_plot()
-
-    def toggle_ownship_visibility(self):
-        self.show_ownship = not self.show_ownship
-        if self.show_ownship:
-            self.update_ownship()
-        self._ownship.set_visible(self.show_ownship)
-        self.toggle_hazards_visibility()
-        self._display.update_plot()
-
-    def toggle_hazards_visibility(self):
-        self.show_hazards = not self.show_hazards
-        self._horizon.set_visible(self.show_hazards)
-        for artist in self._hazards.values():
-            artist.set_visible(self.show_hazards)
-        self.toggle_arrows_visibility(self.show_hazards)
-
-    def toggle_arrows_visibility(self, new_state: bool = None):
-        if new_state is None:
-            new_state = not self.show_arrows
-            self.show_arrows = new_state
-        for artist in self._arrows.values():
-            artist.set_visible(new_state)
-        self.update_hazards()
-        self._display.update_plot()
 
     def show_top_hidden_layer(self):
         artists = self._z_sorted_seabeds(descending=False)

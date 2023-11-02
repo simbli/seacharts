@@ -11,6 +11,7 @@ class ShapefileParser:
     def __init__(self, bounding_box, path_strings: list[str]):
         self.bounding_box = bounding_box
         self.paths = set([p.resolve() for p in (map(Path, path_strings))])
+        self.paths.update(paths.default_resources)
 
     def read_fgdb(self, label, external_labels, depth):
         for gdb_path in self.gdb_paths:
