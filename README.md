@@ -6,9 +6,8 @@ Python-based API for Electronic Navigational Charts (ENC)
 [![platform](https://img.shields.io/badge/platform-linux-lightgrey)]()
 [![platform](https://img.shields.io/badge/platform-windows-lightgrey)]()
 
-
-![](https://github.com/simbli/seacharts/blob/master/images/example1.svg?raw=True
-"Example visualization with demonstration shapes")
+![](images/example1.svg
+"Example visualization with vessels and geometric shapes in dark mode.")
 
 ## Features
 
@@ -188,8 +187,8 @@ Note how custom settings may be set in a user-defined .yaml-file, if its path is
 provided to the ENC during initialization. One may also import and create an
 instance of the `seacharts.Config` dataclass, and provide it directly to the ENC.
 
-![](https://github.com/simbli/seacharts/blob/master/images/example2.svg?raw=True
-"Example visualization with default settings")
+![](images/example2.svg "Example visualization of vessels and a
+colorbar with depth values in light mode.")
 
 ### Environment visualization
 The `ENC.start_display` method is used to show a Matplotlib figure plot of the
