@@ -1,4 +1,3 @@
-
 enc:
   size: [ 9000, 5062 ]
   center: [ 44300, 6956450 ]
@@ -9,6 +8,6 @@ display:
   colorbar: False
   dark_mode: True
   fullscreen: False
-  resolution: 1080
+  resolution: 720
   anchor: "center"
   dpi: 96

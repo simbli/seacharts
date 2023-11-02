@@ -29,10 +29,3 @@ class Shore(base.ZeroDepthRegions):
     _external_labels = [
         'skjer', 'torrfall', 'landareal', 'ikkekartlagtsjomaltomr'
     ]
-
-
-supported_layers = [cls.__name__ for cls in [
-    Seabed,
-    Land,
-    Shore,
-]]

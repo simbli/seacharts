@@ -10,9 +10,6 @@ class Environment:
         self.hydrography = spl.Hydrography(self.scope)
         self.topography = spl.Topography(self.scope)
         self.load_existing_shapefiles()
-        self.safe_area = None
-        self.ownship = None
-        self.depth = None
 
     def load_existing_shapefiles(self):
         self.hydrography.load(self.scope)

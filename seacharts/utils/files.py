@@ -1,5 +1,5 @@
 """
-Contains file/directory related utility functions, such as functions for
+Contains file/directory-related utility functions, such as functions for
 writing to csv files.
 """
 import csv
@@ -16,6 +16,7 @@ def verify_directory_exists(path_string: str) -> None:
 
 
 def build_directory_structure(features, resources) -> None:
+    paths.reports.mkdir(exist_ok=True)
     paths.shapefiles.mkdir(exist_ok=True)
     for feature in features:
         shapefile_dir = paths.shapefiles / feature.lower()

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import datetime
-import time
 import tkinter as tk
 from pathlib import Path
 from typing import List, Tuple, Union, Any
@@ -33,44 +31,36 @@ class Display:
     def __init__(self, settings: dict, environment: env.Environment):
         self._settings = settings
         self.environment = environment
-        self._show_figure = False
+        self._show_figure = True
         self._setup_figure_parameters(settings)
 
     def _setup_figure_parameters(self, settings: dict) -> None:
-        if self._show_figure:
-            self._background = None
-            self.anchor_index = self._init_anchor_index(settings)
-            self.figure, self.sizes, self.spacing, widths = self._init_figure(settings)
-            self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
-            self.events = EventsManager(self)
-            self.features = FeaturesManager(self)
-            self.axes.add_artist(
-                ScaleBar(
-                    1,
-                    units="m",
-                    location="lower left",
-                    frameon=False,
-                    color="white",
-                    box_alpha=0.0,
-                    pad=0.5,
-                    font_properties={"size": 12},
-                )
+        self._background = None
+        self.anchor_index = self._init_anchor_index(settings)
+        self.figure, self.sizes, self.spacing, widths = self._init_figure(settings)
+        self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
+        self.events = EventsManager(self)
+        self.features = FeaturesManager(self)
+        self.toggle_colorbar(self._colorbar_mode)
+        self.toggle_dark_mode(self._dark_mode)
+        self.axes.add_artist(
+            ScaleBar(
+                1,
+                units="m",
+                location="lower left",
+                frameon=False,
+                color="white",
+                box_alpha=0.0,
+                pad=0.5,
+                font_properties={"size": 12},
             )
+        )
+        self.draw_plot()
 
-            self.draw_plot()
-
-            if self._fullscreen_mode:
-                self.toggle_fullscreen()
-            else:
-                self.set_figure_position()
-
-            # if self._colorbar_mode:
-            #     self.toggle_colorbar()
-
-            self.toggle_dark_mode(self._dark_mode)
-
-            if self.environment is None:
-                self.start_visualization_loop()
+        if self._fullscreen_mode:
+            self.toggle_fullscreen(self._fullscreen_mode)
+        else:
+            self.set_figure_position()
 
     def start(self) -> None:
         """
@@ -148,25 +138,6 @@ class Display:
         cb = colorbar(axes2, self.environment.scope.depths)
         return axes1, gs, cb
 
-    def start_visualization_loop(self):
-        if not self._show_figure:
-            return
-
-        print()
-        self.show(0.1)
-        start_time = time.time()
-        while True:
-            delta = datetime.timedelta(seconds=time.time() - start_time)
-            now = str(delta).split(".")[0]
-            print(f"\rVisualizing multiprocessing environment | {now}", end="")
-            if not self.is_active:
-                self.terminate()
-                print()
-                return
-            self.features.update_vessels()
-            self.update_plot()
-            time.sleep(0.1)
-
     def refresh_vessels(self, poses: List[Tuple]):
         if not self._show_figure:
             return
@@ -179,7 +150,7 @@ class Display:
         if not self._show_figure:
             return
 
-        self.figure.canvas.restore_region(self._background)
+        # self.figure.canvas.restore_region(self._background)
         self.draw_animated_artists()
 
     def draw_plot(self):
@@ -235,7 +206,6 @@ class Display:
     def toggle_fullscreen(self, state=None):
         if not self._show_figure:
             return
-
         if state is not None:
             self._fullscreen_mode = state
         else:
@@ -249,7 +219,6 @@ class Display:
     def set_figure_position(self):
         if not self._show_figure:
             return
-
         j, i = self.anchor_index
         option = self.window_anchors[j][i]
         if option != "default":
@@ -324,11 +293,6 @@ class Display:
     def show(self, duration=0.0):
         if not self._show_figure:
             return
-
-        if self.environment.ownship:
-            self.features.update_ownship()
-            if self.environment.safe_area:
-                self.features.update_hazards()
         try:
             plt.pause(duration)
         except tk.TclError:
