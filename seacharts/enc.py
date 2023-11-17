@@ -351,15 +351,15 @@ class ENC:
         self,
         name: str = None,
         path: Path | None = None,
-        scale: float = 1.0,
+        dpi: int = None,
         extension: str = "png",
     ) -> None:
         """
         Save the environment plot as a .png image.
         :param name: optional str of file name
         :param path: optional Path of file path
-        :param scale: optional float scaling the image resolution
+        :param dpi: optional int of image resolution in dots per inch
         :param extension: optional str of file extension name
         :return: None
         """
-        self._display.save_figure(name, path, scale, extension)
+        self._display.save_figure(name, path, dpi, extension)

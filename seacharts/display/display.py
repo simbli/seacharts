@@ -37,6 +37,7 @@ class Display:
         self._setup_figure_stuff(settings)
 
     def _setup_figure_stuff(self, settings: dict) -> None:
+        self.figure = None
         if self._show_figure:
             self.crs = UTM(settings["enc"]["utm_zone"])
             self._background = None
@@ -45,7 +46,18 @@ class Display:
             self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
             self.events = EventsManager(self)
             self.features = FeaturesManager(self)
-            self.axes.add_artist(ScaleBar(1, units="m", location="lower left", frameon=False, color="white", box_alpha=0.0, pad=0.5, font_properties={"size": 12}))
+            self.axes.add_artist(
+                ScaleBar(
+                    1,
+                    units="m",
+                    location="lower left",
+                    frameon=False,
+                    color="white",
+                    box_alpha=0.0,
+                    pad=0.5,
+                    font_properties={"size": 12},
+                )
+            )
 
             self.draw_plot()
 
@@ -69,11 +81,11 @@ class Display:
         Args:
             settings (dict): The ENC settings dictionary.
         """
-        if self.is_active:
-            return
-
         if not self._show_figure:
             self._show_figure = True
+
+        if self.is_active:
+            return
 
         self._setup_figure_stuff(settings)
         plt.show(block=False)
@@ -83,7 +95,11 @@ class Display:
         for j, window_anchor in enumerate(self.window_anchors):
             if option in window_anchor:
                 return j, window_anchor.index(option)
-        raise ValueError(f"Invalid window anchor option '{option}', " f"possible candidates are: \n" f"{[o for options in self.window_anchors for o in options]}")
+        raise ValueError(
+            f"Invalid window anchor option '{option}', "
+            f"possible candidates are: \n"
+            f"{[o for options in self.window_anchors for o in options]}"
+        )
 
     def _init_figure(self, settings):
         self._fullscreen_mode = settings["display"]["fullscreen_mode"]
@@ -264,7 +280,7 @@ class Display:
             manager = plt.get_current_fig_manager()
             manager.window.wm_geometry(f"+{x + x_margin}+{y}")
 
-    def save_figure(self, name: str | None = None, path: Path | None = None, scale: float = 1.0, extension: str = "png"):
+    def save_figure(self, name: str | None = None, path: Path | None = None, dpi: int = 100, extension: str = "png"):
         if not self._show_figure:
             return
 
@@ -279,7 +295,7 @@ class Display:
 
             self.figure.savefig(
                 path_str,
-                dpi=self.figure.dpi * scale,
+                dpi=dpi,
                 bbox_inches=self.figure.bbox_inches,
                 pad_inches=0.0,
             )
@@ -291,11 +307,10 @@ class Display:
         return self._utm_zone
 
     @property
-    def is_active(self):
-        if not self._show_figure:
-            return
-
-        return plt.fignum_exists(self.figure.number)
+    def is_active(self) -> bool:
+        if self.figure is None or not self._show_figure:
+            return False
+        return True
 
     def show(self, duration=0.0):
         if not self._show_figure:
