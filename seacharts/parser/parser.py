@@ -1,10 +1,10 @@
 import warnings
-from collections.abc import Generator
 from pathlib import Path
+from typing import Generator
 
 import fiona
 
-from . import paths
+from seacharts.utils import paths
 
 
 class ShapefileParser:
@@ -15,19 +15,19 @@ class ShapefileParser:
 
     def read_fgdb(
         self, label: str, external_labels: list[str], depth: int
-    ) -> Generator[dict]:
+    ) -> Generator:
         for gdb_path in self.gdb_paths:
             records = self._parse_layers(gdb_path, external_labels, depth)
             yield from self._parse_records(records, label)
 
-    def read_shapefile(self, label: str) -> Generator[dict]:
+    def read_shapefile(self, label: str) -> Generator:
         file_path = self._shapefile_path(label)
         if file_path.exists():
             yield from self._read_spatial_file(file_path)
 
     def _parse_layers(
         self, path: Path, external_labels: list[str], depth: int
-    ) -> Generator[dict]:
+    ) -> Generator:
         for label in external_labels:
             if isinstance(label, dict):
                 layer, depth_label = label["layer"], label["depth"]
@@ -38,7 +38,7 @@ class ShapefileParser:
             else:
                 yield from self._read_spatial_file(path, layer=label)
 
-    def _read_spatial_file(self, path: Path, **kwargs) -> Generator[dict]:
+    def _read_spatial_file(self, path: Path, **kwargs) -> Generator:
         with fiona.open(path, "r", **kwargs) as source:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -47,7 +47,7 @@ class ShapefileParser:
         return
 
     @property
-    def gdb_paths(self) -> Generator[Path]:
+    def gdb_paths(self) -> Generator[Path, None, None]:
         for path in self.paths:
             if not path.is_absolute():
                 path = paths.cwd / path

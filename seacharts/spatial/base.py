@@ -7,7 +7,7 @@ from typing import Any
 from shapely import geometry as geo
 from shapely import ops
 
-from seacharts.utils import ShapefileParser
+from seacharts.parser import ShapefileParser
 
 
 @dataclass
