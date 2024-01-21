@@ -1,1 +1,1 @@
-from .parser import ShapefileParser
+from .parser import DataParser
