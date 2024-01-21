@@ -36,7 +36,7 @@ class _Hypsometry(ABC):
         )
         for layer in layers:
             start_time = time.time()
-            records = layer.load_fgdb(scope.parser)
+            records = scope.parser.load_fgdb(layer)
             info = f"{len(records)} {layer.name} geometries"
 
             if not records:
@@ -55,14 +55,15 @@ class _Hypsometry(ABC):
                 print(f"\rClipping {info}...", end="")
                 layer.clip(scope.extent.bbox)
 
-            layer.save(scope.parser)
+            scope.parser.save(layer)
             end_time = round(time.time() - start_time, 1)
             print(f"\rSaved {info} to shapefile in {end_time} s.")
 
     def load(self, scope: Scope) -> None:
         layers = [x for x in self.layers if x.label in scope.features]
         for layer in layers:
-            layer.load_shapefile(scope.parser)
+            records = scope.parser.load_shapefile(layer)
+            layer.records_as_geometry(records)
 
 
 @dataclass

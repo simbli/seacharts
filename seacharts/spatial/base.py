@@ -7,8 +7,6 @@ from typing import Any
 from shapely import geometry as geo
 from shapely import ops
 
-from seacharts.parser import ShapefileParser
-
 
 @dataclass
 class Drawable:
@@ -124,19 +122,11 @@ class Layer(Shape, ABC):
     def label(self) -> str:
         return self.name.lower()
 
-    def save(self, parser: ShapefileParser) -> None:
-        parser.write(self)
-
-    def load_shapefile(self, parser: ShapefileParser) -> None:
-        records = list(parser.read_shapefile(self.label))
+    def records_as_geometry(self, records: list[dict]) -> None:
         if len(records) > 0:
             self.geometry = self._record_to_geometry(records[0])
             if isinstance(self.geometry, geo.Polygon):
                 self.geometry = self.as_multi(self.geometry)
-
-    def load_fgdb(self, parser: ShapefileParser) -> list[dict]:
-        depth = self.depth if hasattr(self, "depth") else 0
-        return list(parser.read_fgdb(self.label, self._external_labels, depth))
 
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]
