@@ -13,12 +13,22 @@ class ShapefileParser:
         self.paths = set([p.resolve() for p in (map(Path, path_strings))])
         self.paths.update(paths.default_resources)
 
-    def read_fgdb(
-        self, label: str, external_labels: list[str], depth: int
+    def save(self, layer) -> None:
+        self.write(layer)
+
+    def load_fgdb(self, layer) -> list[dict]:
+        depth = layer.depth if hasattr(layer, "depth") else 0
+        return list(self._read_fgdb(layer.label, layer._external_labels, depth))
+
+    def load_shapefile(self, layer) -> list[dict]:
+        return list(self.read_shapefile(layer.label))
+
+    def _read_fgdb(
+        self, name: str, external_labels: list[str], depth: int
     ) -> Generator:
         for gdb_path in self.gdb_paths:
             records = self._parse_layers(gdb_path, external_labels, depth)
-            yield from self._parse_records(records, label)
+            yield from self._parse_records(records, name)
 
     def read_shapefile(self, label: str) -> Generator:
         file_path = self._shapefile_path(label)
@@ -63,9 +73,9 @@ class ShapefileParser:
         return path.is_dir() and path.suffix == ".gdb"
 
     @staticmethod
-    def _parse_records(records, label):
+    def _parse_records(records, name):
         for i, record in enumerate(records):
-            print(f"\rNumber of {label} records read: {i + 1}", end="")
+            print(f"\rNumber of {name} records read: {i + 1}", end="")
             yield record
         return
 
