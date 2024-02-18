@@ -32,17 +32,14 @@ class MultiDepthRegions(Regions, MultiDepth, ABC):
 
 @dataclass
 class Seabed(SingleDepthRegions):
-    color = "seabed"
     z_order = -300
 
 
 @dataclass
 class Land(ZeroDepthRegions):
-    color = "land"
     z_order = -100
 
 
 @dataclass
 class Shore(ZeroDepthRegions):
-    color = "shore"
     z_order = -200

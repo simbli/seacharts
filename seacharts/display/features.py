@@ -26,10 +26,10 @@ class FeaturesManager:
             artist = self.new_artist(layer.geometry, color, rank)
             self._seabeds[rank] = artist
         shore = self._display._environment.topography.shore
-        color = color_picker(shore.color)
+        color = color_picker(shore.__class__.__name__)
         self._shore = self.new_artist(shore.geometry, color, shore.z_order)
         land = self._display._environment.topography.land
-        color = color_picker(land.color)
+        color = color_picker(land.__class__.__name__)
         self._land = self.new_artist(land.geometry, color, land.z_order)
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
