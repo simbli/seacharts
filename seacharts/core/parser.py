@@ -9,7 +9,7 @@ from typing import Generator
 import fiona
 
 from seacharts.core import paths
-from seacharts.layers import Layer, labels, Regions
+from seacharts.layers import labels, Layer
 
 
 class DataParser:
@@ -29,7 +29,7 @@ class DataParser:
 
     def parse_resources(
         self,
-        regions_list: list[Regions],
+        regions_list: list[Layer],
         resources: list[str],
         area: float
     ) -> None:
@@ -138,7 +138,7 @@ class DataParser:
             crs={"init": "epsg:25833"},
         )
 
-    def _write_to_shapefile(self, regions: Regions):
+    def _write_to_shapefile(self, regions: Layer):
         geometry = regions.mapping
         file_path = self._shapefile_path(regions.label)
         with self._shapefile_writer(file_path, geometry["type"]) as sink:
