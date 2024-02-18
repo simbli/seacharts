@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from seacharts.core import files
-from seacharts.parser import DataParser
 from .extent import Extent
 
 
@@ -13,7 +12,6 @@ class Scope:
         self.extent = Extent(settings)
         self.depths = settings["enc"].get("depths", self.default_depths)
         self.resources = settings["enc"].get("resources", [])
-        self.parser = DataParser(self.extent.bbox, self.resources)
         self.features = ["land", "shore"]
         for depth in self.depths:
             self.features.append(f"seabed{depth}m")
