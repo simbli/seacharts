@@ -1,6 +1,9 @@
+"""
+Contains the Extent class for defining details related to files of spatial data.
+"""
 from dataclasses import dataclass
 
-import seacharts.utils as utils
+from seacharts.core import files
 from .extent import Extent
 
 
@@ -12,8 +15,7 @@ class Scope:
         self.extent = Extent(settings)
         self.depths = settings["enc"].get("depths", self.default_depths)
         self.resources = settings["enc"].get("resources", [])
-        self.parser = utils.ShapefileParser(self.extent.bbox, self.resources)
         self.features = ["land", "shore"]
         for depth in self.depths:
             self.features.append(f"seabed{depth}m")
-        utils.files.build_directory_structure(self.features, self.resources)
+        files.build_directory_structure(self.features, self.resources)

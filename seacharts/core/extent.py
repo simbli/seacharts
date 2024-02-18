@@ -1,7 +1,8 @@
-from dataclasses import dataclass
+"""
+Contains the Extent class for defining the span of spatial data.
+"""
 
 
-@dataclass
 class Extent:
     def __init__(self, settings: dict):
         self.size = tuple(settings["enc"].get("size", (0, 0)))

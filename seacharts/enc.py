@@ -1,9 +1,12 @@
+"""
+Contains the ENC class for reading, storing and plotting maritime spatial data.
+"""
 from pathlib import Path
 
+from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
-from seacharts.spatial.base import Layer
-from seacharts.utils.config import Config
+from seacharts.layers import Layer
 
 
 class ENC:
@@ -28,7 +31,7 @@ class ENC:
         Update ENC with spatial data parsed from user-specified resources
         :return: None
         """
-        self._environment.parse_data_into_shapefiles()
+        self._environment.map.parse_resources_into_shapefiles()
 
     @property
     def display(self) -> Display:
@@ -44,21 +47,21 @@ class ENC:
         """
         :return: land layer container of Shapely geometries
         """
-        return self._environment.topography.land
+        return self._environment.map.land
 
     @property
     def shore(self) -> Layer:
         """
         :return: shore layer container of Shapely geometries
         """
-        return self._environment.topography.shore
+        return self._environment.map.shore
 
     @property
     def seabed(self) -> dict[int, Layer]:
         """
         :return: seabed dict of Shapely geometries for each depth bin
         """
-        return self._environment.hydrography.bathymetry
+        return self._environment.map.bathymetry
 
     @property
     def size(self) -> tuple[int, int]:

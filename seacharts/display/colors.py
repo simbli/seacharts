@@ -1,3 +1,6 @@
+"""
+Contains functions and structures for color management.
+"""
 import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,9 +46,9 @@ _horizon_colors = dict(
 )
 
 _layer_colors = dict(
-    seabed=_blues()[0],
-    land=_greens()[4],
-    shore=_greens()[3],
+    Seabed=_blues()[0],
+    Land=_greens()[4],
+    Shore=_greens()[3],
     highlight=("#ffffff44", "#ffffff44"),
     blank=("#ffffffff", "#ffffffff"),
 )
@@ -69,10 +72,10 @@ def color_picker(name: str, bins: int = None) -> tuple:
 def colorbar(axes: Axes, depths: list[int]) -> Colorbar:
     depths = list(depths)
     ocean = list(_blues(len(depths)))
-    colors = [_layer_colors["shore"]] + ocean[:-1]
+    colors = [_layer_colors["Shore"]] + ocean[:-1]
     c_map = clr.LinearSegmentedColormap.from_list("Custom terrain", colors, len(colors))
     c_map.set_over(ocean[-1])
-    c_map.set_under(_layer_colors["land"])
+    c_map.set_under(_layer_colors["Land"])
     norm = clr.BoundaryNorm([0] + depths[1:], c_map.N)
     kwargs = dict(
         extend="both",
