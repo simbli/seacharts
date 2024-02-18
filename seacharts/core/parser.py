@@ -116,11 +116,17 @@ class DataParser:
             yield from self._read_spatial_file(file_path)
 
     def _read_spatial_file(self, path: Path, **kwargs) -> Generator:
-        with fiona.open(path, "r", **kwargs) as source:
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=RuntimeWarning)
-                for record in source.filter(bbox=self.bounding_box):
-                    yield record
+        try:
+            with fiona.open(path, "r", **kwargs) as source:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=RuntimeWarning)
+                    for record in source.filter(bbox=self.bounding_box):
+                        yield record
+        except ValueError as e:
+            message = str(e)
+            if "Null layer: " in message:
+                message = f"Warning: {message[12:]} not found in data set."
+            print(message)
         return
 
     def _shapefile_writer(self, file_path, geometry_type):
