@@ -4,7 +4,7 @@ Contains the MapData class for containing parsed map (charts) data.
 from dataclasses import dataclass
 
 from seacharts.core import DataParser
-from seacharts.layers import Regions, Land, Shore, Seabed
+from seacharts.layers import Layer, Land, Shore, Seabed
 from .collection import DataCollection
 
 
@@ -33,7 +33,7 @@ class MapData(DataCollection):
             print("WARNING: Given spatial data source(s) seem empty.\n")
 
     @property
-    def layers(self) -> list[Regions]:
+    def layers(self) -> list[Layer]:
         return [self.land, self.shore, *self.bathymetry.values()]
 
     @property
@@ -41,9 +41,9 @@ class MapData(DataCollection):
         return any(self.loaded_regions)
 
     @property
-    def loaded_regions(self) -> list[Regions]:
+    def loaded_regions(self) -> list[Layer]:
         return [layer for layer in self.layers if not layer.geometry.is_empty]
 
     @property
-    def featured_regions(self) -> list[Regions]:
+    def featured_regions(self) -> list[Layer]:
         return [x for x in self.layers if x.label in self.scope.features]
