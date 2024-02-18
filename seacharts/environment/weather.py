@@ -1,8 +1,8 @@
 from seacharts.layers import Layer
-from .spatial import SpatialData
+from .collection import DataCollection
 
 
-class WeatherData(SpatialData):
+class WeatherData(DataCollection):
     def __post_init__(self):
         ...
 

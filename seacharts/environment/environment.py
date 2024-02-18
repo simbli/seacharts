@@ -1,13 +1,15 @@
-from seacharts import spatial
-from .scope import Scope
+from seacharts.core import Scope
+from .map import MapData
+from .user import UserData
+from .weather import WeatherData
 
 
 class Environment:
     def __init__(self, settings: dict):
         self.scope = Scope(settings)
-        self.map = spatial.MapData(self.scope)
-        self.user = spatial.UserData(self.scope)
-        self.weather = spatial.WeatherData(self.scope)
+        self.map = MapData(self.scope)
+        self.user = UserData(self.scope)
+        self.weather = WeatherData(self.scope)
 
         self.map.load_existing_shapefiles()
         if not self.map.loaded:

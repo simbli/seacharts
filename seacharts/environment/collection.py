@@ -1,13 +1,14 @@
 from abc import abstractmethod, ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from seacharts.environment.scope import Scope
+from seacharts.core import Scope, DataParser
 from seacharts.layers import Layer
 
 
 @dataclass
-class SpatialData(ABC):
+class DataCollection(ABC):
     scope: Scope
+    parser: DataParser = field(init=False)
 
     @property
     @abstractmethod

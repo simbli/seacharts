@@ -1,7 +1,5 @@
-from dataclasses import dataclass
 
 
-@dataclass
 class Extent:
     def __init__(self, settings: dict):
         self.size = tuple(settings["enc"].get("size", (0, 0)))
