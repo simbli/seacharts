@@ -23,20 +23,6 @@ Python-based API for Electronic Navigational Charts (ENC)
 This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
-## Roadmap
-
-- 1: Add better compatibility for all operating systems (Windows, Linux++). Right
-  now, GDAL and Cartopy are problematic to install on most platforms.
-  Consider finding other packages for map loading and charts projections.
-- 2: Add support for multiple map data formats (.gis, .gdb, .json) from any region in
-  the world, in all UTM zones or lat/lon coordinates.
-- 3: Use another plotting framework that has higher refresh rate or is feasible for
-  real-time (Qt?, React?).
-- 4: Add options for plotting trajectories, ships, traffic information/AIS data etc.
-  on the frontend display.
-- 5: Add support for reading and loading in weather data (wind and current
-  maps++) from a separate module.
-
 
 ## Prerequisites
 
