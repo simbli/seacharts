@@ -45,18 +45,3 @@ class SingleDepthLayer(Layer, SingleDepth, ABC):
 @dataclass
 class MultiDepthLayer(Layer, MultiDepth, ABC):
     ...
-
-
-@dataclass
-class Seabed(SingleDepthLayer):
-    ...
-
-
-@dataclass
-class Land(ZeroDepthLayer):
-    ...
-
-
-@dataclass
-class Shore(ZeroDepthLayer):
-    ...
