@@ -4,30 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Any
 
-from shapely import geometry as geo
-from shapely import ops
-
-
-@dataclass
-class Coordinates:
-    x: float
-    y: float
-
-
-@dataclass
-class Vector(Coordinates):
-    pass
-
-
-@dataclass
-class Radial:
-    radius: float
-
-
-@dataclass
-class Oriented:
-    heading: float
-    in_degrees: bool = True
+from shapely import geometry as geo, ops
 
 
 @dataclass

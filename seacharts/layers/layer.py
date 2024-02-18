@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from shapely import geometry as geo
 
-from seacharts.spatial.base import Shape
+from seacharts.shapes import Shape
 
 
 @dataclass

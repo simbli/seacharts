@@ -1,8 +1,7 @@
 import shapely.geometry as geo
 from cartopy.feature import ShapelyFeature
 
-import seacharts.spatial as spl
-import seacharts.utils as utils
+from seacharts import shapes, utils
 from .colors import color_picker
 
 
@@ -33,7 +32,7 @@ class FeaturesManager:
         self._land = self.new_artist(land.geometry, color, -100)
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
-        geometry = spl.Rectangle(
+        geometry = shapes.Rectangle(
             *center, width=size[0] / 2, heading=0, height=size[1] / 2
         ).geometry
         color = (color_picker("black")[0], "none")
@@ -64,11 +63,11 @@ class FeaturesManager:
             buffer = 5
         if head_size is None:
             head_size = 50
-        body = spl.Arrow(start=start, end=end, width=buffer).body(head_size)
+        body = shapes.Arrow(start=start, end=end, width=buffer).body(head_size)
         self.add_overlay(body, color_name, fill, linewidth, linestyle)
 
     def add_circle(self, center, radius, color_name, fill, linewidth, linestyle, alpha):
-        geometry = spl.Circle(*center, radius).geometry
+        geometry = shapes.Circle(*center, radius).geometry
         self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
     def add_line(self, points, color_name, buffer, linewidth, linestyle, marker):
@@ -86,7 +85,7 @@ class FeaturesManager:
                 transform=self._display.crs,
             )
         else:
-            geometry = spl.Line(points=points).geometry.buffer(buffer)
+            geometry = shapes.Line(points=points).geometry.buffer(buffer)
             self.add_overlay(geometry, color_name, True, linewidth, linestyle)
 
     def add_polygon(
@@ -104,13 +103,13 @@ class FeaturesManager:
         if isinstance(shape[0], tuple) or isinstance(shape[0], list):
             shape = [shape]
         for geometry in shape:
-            geometry = spl.Area.new_polygon(geometry, interiors)
+            geometry = shapes.Area.new_polygon(geometry, interiors)
             self.add_overlay(geometry, color, fill, linewidth, linestyle, alpha)
 
     def add_rectangle(
         self, center, size, color_name, rotation, fill, linewidth, linestyle, alpha
     ):
-        geometry = spl.Rectangle(
+        geometry = shapes.Rectangle(
             *center, heading=rotation, width=size[0], height=size[1]
         ).geometry
         self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
@@ -145,7 +144,7 @@ class FeaturesManager:
                         lon_scale=float(other[2]) if len(other) > 2 else 2.0,
                         lat_scale=float(other[3]) if len(other) > 3 else 1.0,
                     )
-                    ship = spl.Ship(*pose, **kwargs)
+                    ship = shapes.Ship(*pose, **kwargs)
                     artist = self.new_artist(ship.geometry, color)
                     if self._vessels.get(ship_id, None):
                         self._vessels.pop(ship_id)["artist"].remove()
