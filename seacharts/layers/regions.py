@@ -15,7 +15,7 @@ class Regions(Layer, ABC):
 
 @dataclass
 class ZeroDepthRegions(Regions, ZeroDepth, ABC):
-    pass
+    ...
 
 
 @dataclass
@@ -27,19 +27,19 @@ class SingleDepthRegions(Regions, SingleDepth, ABC):
 
 @dataclass
 class MultiDepthRegions(Regions, MultiDepth, ABC):
-    pass
+    ...
 
 
 @dataclass
 class Seabed(SingleDepthRegions):
-    z_order = -300
+    ...
 
 
 @dataclass
 class Land(ZeroDepthRegions):
-    z_order = -100
+    ...
 
 
 @dataclass
 class Shore(ZeroDepthRegions):
-    z_order = -200
+    ...
