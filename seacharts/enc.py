@@ -28,7 +28,7 @@ class ENC:
         Update ENC with spatial data parsed from user-specified resources
         :return: None
         """
-        self._environment.data.parse_resources_into_shapefiles()
+        self._environment.map.parse_resources_into_shapefiles()
 
     @property
     def display(self) -> Display:
@@ -44,21 +44,21 @@ class ENC:
         """
         :return: land layer container of Shapely geometries
         """
-        return self._environment.data.land
+        return self._environment.map.land
 
     @property
     def shore(self) -> Layer:
         """
         :return: shore layer container of Shapely geometries
         """
-        return self._environment.data.shore
+        return self._environment.map.shore
 
     @property
     def seabed(self) -> dict[int, Layer]:
         """
         :return: seabed dict of Shapely geometries for each depth bin
         """
-        return self._environment.data.bathymetry
+        return self._environment.map.bathymetry
 
     @property
     def size(self) -> tuple[int, int]:
