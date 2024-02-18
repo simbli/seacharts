@@ -3,11 +3,11 @@ from dataclasses import dataclass, field
 from shapely import affinity
 from shapely import geometry as geo
 
-from . import base
+from . import Shape, types
 
 
 @dataclass
-class Area(base.Shape):
+class Area(Shape):
     geometry: geo.Polygon = field(default_factory=geo.Polygon)
 
     @staticmethod
@@ -16,7 +16,7 @@ class Area(base.Shape):
 
 
 @dataclass
-class Line(base.Shape):
+class Line(Shape):
     points: list[tuple[float, float]] = None
 
     def __post_init__(self):
@@ -29,7 +29,7 @@ class Line(base.Shape):
 
 
 @dataclass
-class Arrow(base.Shape):
+class Arrow(Shape):
     start: tuple[float, float] = None
     end: tuple[float, float] = None
     width: float = None
@@ -74,7 +74,7 @@ class Arrow(base.Shape):
 
 
 @dataclass
-class Circle(Area, base.Radial, base.Coordinates):
+class Circle(Area, types.Radial, types.Coordinates):
     def __post_init__(self):
         if self.radius <= 0:
             raise ValueError(
@@ -85,7 +85,7 @@ class Circle(Area, base.Radial, base.Coordinates):
 
 
 @dataclass
-class Body(Area, base.Oriented, base.Coordinates):
+class Body(Area, types.Oriented, types.Coordinates):
     scale: float = 1.0
 
     def __post_init__(self):
