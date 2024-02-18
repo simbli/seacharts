@@ -1,2 +1,4 @@
+from .areas import Area, Circle
+from .bodies import Rectangle, Ship
+from .lines import Arrow, Line
 from .shape import Shape
-from .shapes import Area, Arrow, Circle, Line, Rectangle, Ship
