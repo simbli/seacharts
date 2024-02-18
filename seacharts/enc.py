@@ -1,9 +1,9 @@
 from pathlib import Path
 
+from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
 from seacharts.layers import Layer
-from seacharts.utils.config import Config
 
 
 class ENC:
