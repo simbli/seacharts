@@ -86,6 +86,8 @@ class Circle(Area, base.Radial, base.Coordinates):
 
 @dataclass
 class Body(Area, base.Oriented, base.Coordinates):
+    scale: float = 1.0
+
     def __post_init__(self):
         self.center = geo.Point(self.x, self.y)
         self.geometry = self.rotate(self._body_polygon())
@@ -125,7 +127,6 @@ class Rectangle(Body):
 @dataclass
 class Ship(Body):
     dimensions = 16, 80
-    scale: float = 1.0
     lon_scale: float = 10.0
     lat_scale: float = 10.0
 
