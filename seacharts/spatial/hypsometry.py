@@ -2,9 +2,8 @@ import time
 from abc import ABC
 from dataclasses import InitVar, dataclass, field
 
-from .base import Layer
-from .layers import Land, Seabed, Shore
 from ..environment.scope import Scope
+from ..layers import Layer, Seabed, Land, Shore
 
 
 @dataclass

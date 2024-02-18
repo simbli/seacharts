@@ -2,7 +2,7 @@ from pathlib import Path
 
 from seacharts.display import Display
 from seacharts.environment import Environment
-from seacharts.spatial.base import Layer
+from seacharts.layers import Layer
 from seacharts.utils.config import Config
 
 

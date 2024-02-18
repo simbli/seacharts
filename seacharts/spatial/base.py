@@ -39,23 +39,6 @@ class Oriented:
 
 
 @dataclass
-class ZeroDepth:
-    depth = 0
-
-
-@dataclass
-class SingleDepth:
-    depth: int
-
-
-@dataclass
-class MultiDepth:
-    @property
-    def depth(self) -> None:
-        raise AttributeError("Multi-depth shapes have no single depth.")
-
-
-@dataclass
 class Shape(Drawable, ABC):
     geometry: geo.base.BaseGeometry = None
 
@@ -106,70 +89,3 @@ class Shape(Drawable, ABC):
         if not geometry.is_valid:
             geometry = geometry.buffer(0)
         return geometry
-
-
-@dataclass
-class Layer(Shape, ABC):
-    @property
-    def _external_labels(self) -> list[str]:
-        raise NotImplementedError
-
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
-
-    @property
-    def label(self) -> str:
-        return self.name.lower()
-
-    def records_as_geometry(self, records: list[dict]) -> None:
-        if len(records) > 0:
-            self.geometry = self._record_to_geometry(records[0])
-            if isinstance(self.geometry, geo.Polygon):
-                self.geometry = self.as_multi(self.geometry)
-
-    def unify(self, records: list[dict]) -> None:
-        geometries = [self._record_to_geometry(r) for r in records]
-        self.geometry = self.collect(geometries)
-
-
-@dataclass
-class Locations(Layer, ABC):
-    geometry: geo.MultiPoint = field(default_factory=geo.MultiPoint)
-
-
-@dataclass
-class ZeroDepthLocations(Locations, ZeroDepth, ABC):
-    pass
-
-
-@dataclass
-class SingleDepthLocations(Locations, SingleDepth, ABC):
-    pass
-
-
-@dataclass
-class MultiDepthLocations(Locations, MultiDepth, ABC):
-    pass
-
-
-@dataclass
-class Regions(Layer, ABC):
-    geometry: geo.MultiPolygon = field(default_factory=geo.MultiPolygon)
-
-
-@dataclass
-class ZeroDepthRegions(Regions, ZeroDepth, ABC):
-    pass
-
-
-@dataclass
-class SingleDepthRegions(Regions, SingleDepth, ABC):
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__ + f"{self.depth}m"
-
-
-@dataclass
-class MultiDepthRegions(Regions, MultiDepth, ABC):
-    pass
