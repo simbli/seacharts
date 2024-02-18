@@ -17,7 +17,7 @@ class FeaturesManager:
         self._init_layers()
 
     def _init_layers(self):
-        seabeds = list(self._display._environment.data.bathymetry.values())
+        seabeds = list(self._display._environment.map.bathymetry.values())
         for i, seabed in enumerate(seabeds):
             if not seabed.geometry.is_empty:
                 rank = -300 + i
@@ -25,10 +25,10 @@ class FeaturesManager:
                 color = color_picker(i, bins)
                 artist = self.new_artist(seabed.geometry, color, rank)
                 self._seabeds[rank] = artist
-        shore = self._display._environment.data.shore
+        shore = self._display._environment.map.shore
         color = color_picker(shore.__class__.__name__)
         self._shore = self.new_artist(shore.geometry, color, -200)
-        land = self._display._environment.data.land
+        land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
         self._land = self.new_artist(land.geometry, color, -100)
         center = self._display._environment.scope.extent.center
