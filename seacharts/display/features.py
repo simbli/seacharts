@@ -20,17 +20,17 @@ class FeaturesManager:
     def _init_layers(self):
         layers = self._display._environment.hydrography.loaded_layers
         for i, layer in enumerate(layers):
-            rank = layer.z_order + i
+            rank = -300 + i
             bins = len(self._display._environment.scope.depths)
             color = color_picker(i, bins)
             artist = self.new_artist(layer.geometry, color, rank)
             self._seabeds[rank] = artist
         shore = self._display._environment.topography.shore
         color = color_picker(shore.__class__.__name__)
-        self._shore = self.new_artist(shore.geometry, color, shore.z_order)
+        self._shore = self.new_artist(shore.geometry, color, -200)
         land = self._display._environment.topography.land
         color = color_picker(land.__class__.__name__)
-        self._land = self.new_artist(land.geometry, color, land.z_order)
+        self._land = self.new_artist(land.geometry, color, -100)
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
         geometry = spl.Rectangle(
