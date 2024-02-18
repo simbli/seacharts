@@ -1,17 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from shapely import geometry as geo
 from shapely import ops
-
-
-@dataclass
-class Drawable:
-    scale: float = field(init=False, repr=False)
-    artist: Any = field(init=False, repr=False)
 
 
 @dataclass
@@ -37,7 +31,7 @@ class Oriented:
 
 
 @dataclass
-class Shape(Drawable, ABC):
+class Shape(ABC):
     geometry: geo.base.BaseGeometry = None
 
     def simplify(self, tolerance: int, preserve_topology: bool = True) -> None:
