@@ -24,20 +24,3 @@ class Layer(Shape, ABC):
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = self.collect(geometries)
-
-
-@dataclass
-class ZeroDepth:
-    depth = 0
-
-
-@dataclass
-class SingleDepth:
-    depth: int
-
-
-@dataclass
-class MultiDepth:
-    @property
-    def depth(self) -> None:
-        raise AttributeError("Multi-depth shapes have no single depth.")
