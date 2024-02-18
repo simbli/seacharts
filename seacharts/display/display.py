@@ -1,5 +1,6 @@
-from __future__ import annotations
-
+"""
+Contains the Display class for displaying and plotting maritime spatial data.
+"""
 import tkinter as tk
 from pathlib import Path
 from typing import Any

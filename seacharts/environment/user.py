@@ -1,3 +1,6 @@
+"""
+Contains the UserData class for containing user-specified spatial data.
+"""
 from seacharts.layers import Layer
 from .collection import DataCollection
 

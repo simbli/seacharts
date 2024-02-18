@@ -1,3 +1,6 @@
+"""
+Contains the DataCollection abstract class for containing parsed spatial data.
+"""
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
 

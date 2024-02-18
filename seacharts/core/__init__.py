@@ -1,3 +1,6 @@
+"""
+Contains core classes and functions used throughout the SeaCharts package.
+"""
 from . import files
 from . import paths
 from .config import Config

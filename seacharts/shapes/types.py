@@ -1,3 +1,6 @@
+"""
+Contains attribute-specific subtypes for inheritance usage with the Shape class.
+"""
 from dataclasses import dataclass
 
 

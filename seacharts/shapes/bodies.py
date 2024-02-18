@@ -1,3 +1,6 @@
+"""
+Contains convenience classes for creating and manipulating spatial bodies.
+"""
 from dataclasses import dataclass
 
 from shapely import geometry as geo, affinity

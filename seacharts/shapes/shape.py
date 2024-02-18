@@ -1,5 +1,6 @@
-from __future__ import annotations
-
+"""
+Contains the Shape base class for creating and manipulating shapes.
+"""
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
@@ -21,7 +22,7 @@ class Shape(ABC):
     def buffer(self, distance: int) -> None:
         self.geometry = self.geometry.buffer(distance)
 
-    def merge(self, other: Shape) -> None:
+    def merge(self, other: "Shape") -> None:
         self.geometry = self.geometry.union(other.geometry)
 
     def closest_points(self, geometry: Any) -> geo.Point:

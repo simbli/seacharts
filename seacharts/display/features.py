@@ -1,3 +1,6 @@
+"""
+Contains the FeaturesManager class for plotting spatial features on a display.
+"""
 import shapely.geometry as geo
 from cartopy.feature import ShapelyFeature
 

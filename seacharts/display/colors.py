@@ -1,3 +1,6 @@
+"""
+Contains functions and structures for color management.
+"""
 import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np

@@ -1,3 +1,6 @@
+"""
+Contains the Config class for ENC configuration settings.
+"""
 from pathlib import Path
 
 import yaml
@@ -9,7 +12,7 @@ from . import paths as dcp
 
 class Config:
     """
-    Class for maintaining Electronic Navigational Charts configuration settings
+    Class for maintaining Electronic Navigational Charts configuration settings.
     """
 
     def __init__(self, config_path: Path | str = None):

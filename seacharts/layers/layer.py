@@ -1,5 +1,6 @@
-from __future__ import annotations
-
+"""
+Contains the Layer class and depth-specific types for layered spatial data.
+"""
 from abc import ABC
 from dataclasses import dataclass
 

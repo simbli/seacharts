@@ -1,3 +1,6 @@
+"""
+Contains the Extent class for defining details related to files of spatial data.
+"""
 from dataclasses import dataclass
 
 from seacharts.core import files

@@ -1,3 +1,6 @@
+"""
+Contains the Environment class for collecting and manipulating loaded spatial data.
+"""
 from seacharts.core import Scope
 from .map import MapData
 from .user import UserData

@@ -1,3 +1,6 @@
+"""
+Contains convenience classes for creating and manipulating area-based shapes.
+"""
 from dataclasses import dataclass, field
 
 from shapely import geometry as geo

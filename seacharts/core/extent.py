@@ -1,3 +1,6 @@
+"""
+Contains the Extent class for defining the span of spatial data.
+"""
 
 
 class Extent:
