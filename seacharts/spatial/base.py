@@ -11,7 +11,6 @@ from shapely import ops
 @dataclass
 class Drawable:
     scale: float = field(init=False, repr=False)
-    color: str = field(init=False, repr=False)
     z_order: int = field(init=False, repr=False)
     artist: Any = field(init=False, repr=False)
 
