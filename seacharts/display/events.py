@@ -1,3 +1,6 @@
+"""
+Contains the EventsManager class for managing display interaction events.
+"""
 from typing import Any
 
 import matplotlib.pyplot as plt

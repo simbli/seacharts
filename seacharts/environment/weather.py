@@ -1,3 +1,6 @@
+"""
+Contains the WeatherData class for containing parsed weather data.
+"""
 from seacharts.layers import Layer
 from .collection import DataCollection
 

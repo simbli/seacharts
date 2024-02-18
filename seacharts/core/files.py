@@ -1,6 +1,5 @@
 """
-Contains file/directory-related utility functions, such as functions for
-writing to csv files.
+Contains utility functions related to system files and directories.
 """
 import csv
 from collections.abc import Generator

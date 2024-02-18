@@ -1,3 +1,6 @@
+"""
+Contains dictionaries of supported regional database labels.
+"""
 NORWEGIAN_LABELS = dict(
     Seabed=[
         dict(

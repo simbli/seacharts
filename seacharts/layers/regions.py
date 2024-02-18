@@ -1,5 +1,6 @@
-from __future__ import annotations
-
+"""
+Contains the Regions class and depth-specific types for regional spatial data.
+"""
 from abc import ABC
 from dataclasses import dataclass, field
 

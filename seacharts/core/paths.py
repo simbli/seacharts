@@ -1,5 +1,5 @@
 """
-Contains hard-coded paths to relevant files and directories
+Contains hard-coded paths to relevant files and directories.
 """
 from pathlib import Path
 

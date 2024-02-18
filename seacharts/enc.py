@@ -1,3 +1,6 @@
+"""
+Contains the ENC class for reading, storing and plotting maritime spatial data.
+"""
 from pathlib import Path
 
 from seacharts.core import Config

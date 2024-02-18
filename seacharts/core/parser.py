@@ -1,3 +1,6 @@
+"""
+Contains the DataParser class for spatial data parsing.
+"""
 import time
 import warnings
 from pathlib import Path
