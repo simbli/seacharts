@@ -5,8 +5,8 @@ from typing import Generator
 
 import fiona
 
+from seacharts.core import paths
 from seacharts.layers import Layer, labels, Regions
-from seacharts.utils import paths
 
 
 class DataParser:

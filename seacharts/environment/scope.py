@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import seacharts.utils as utils
+from seacharts.core import files
 from seacharts.parser import DataParser
 from .extent import Extent
 
@@ -17,4 +17,4 @@ class Scope:
         self.features = ["land", "shore"]
         for depth in self.depths:
             self.features.append(f"seabed{depth}m")
-        utils.files.build_directory_structure(self.features, self.resources)
+        files.build_directory_structure(self.features, self.resources)

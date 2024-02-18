@@ -1,7 +1,7 @@
 import shapely.geometry as geo
 from cartopy.feature import ShapelyFeature
 
-from seacharts import shapes, utils
+from seacharts import shapes, core
 from .colors import color_picker
 
 
@@ -129,7 +129,7 @@ class FeaturesManager:
 
     def update_vessels(self):
         if self.show_vessels:
-            entries = list(utils.files.read_ship_poses())
+            entries = list(core.files.read_ship_poses())
             if entries is not None:
                 new_vessels = {}
                 for ship_details in entries:
@@ -210,7 +210,7 @@ class FeaturesManager:
 
     @staticmethod
     def vessels_to_file(vessel_poses: list[tuple]) -> None:
-        utils.files.write_rows_to_csv(
+        core.files.write_rows_to_csv(
             [("id", "x", "y", "heading", "color")] + vessel_poses,
-            utils.paths.vessels,
+            core.paths.vessels,
         )
