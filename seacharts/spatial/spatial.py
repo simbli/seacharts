@@ -1,21 +1,22 @@
 import time
-from abc import ABC
-from dataclasses import InitVar, dataclass, field
+from dataclasses import dataclass, InitVar
 
-from ..environment.scope import Scope
-from ..layers import Layer, Seabed, Land, Shore
+from seacharts.environment.scope import Scope
+from seacharts.layers import Layer, Land, Shore, Seabed
 
 
 @dataclass
-class _Hypsometry(ABC):
+class SpatialData:
     scope: InitVar[Scope]
 
     def __post_init__(self, scope: Scope):
-        raise NotImplementedError
+        self.bathymetry = {d: Seabed(d) for d in scope.depths}
+        self.land = Land()
+        self.shore = Shore()
 
     @property
     def layers(self) -> list[Layer]:
-        raise NotImplementedError
+        return [self.land, self.shore, *self.bathymetry.values()]
 
     @property
     def loaded_layers(self) -> list[Layer]:
@@ -30,8 +31,7 @@ class _Hypsometry(ABC):
         if not list(scope.parser.gdb_paths):
             return
         print(
-            f"\nProcessing {scope.extent.area // 10 ** 6} km^2 of "
-            f"{self.__class__.__name__} features:"
+            f"\nProcessing {scope.extent.area // 10 ** 6} km^2 of ENC features:"
         )
         for layer in layers:
             start_time = time.time()
@@ -63,29 +63,3 @@ class _Hypsometry(ABC):
         for layer in layers:
             records = scope.parser.load_shapefile(layer)
             layer.records_as_geometry(records)
-
-
-@dataclass
-class Hydrography(_Hypsometry):
-    bathymetry: dict[int, Layer] = field(init=False)
-
-    @property
-    def layers(self) -> list[Layer]:
-        return [*self.bathymetry.values()]
-
-    def __post_init__(self, scope: Scope):
-        self.bathymetry = {d: Seabed(d) for d in scope.depths}
-
-
-@dataclass
-class Topography(_Hypsometry):
-    land: Land = field(init=False)
-    shore: Shore = field(init=False)
-
-    @property
-    def layers(self) -> list[Layer]:
-        return [self.land, self.shore]
-
-    def __post_init__(self, scope: Scope):
-        self.land = Land()
-        self.shore = Shore()

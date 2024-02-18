@@ -44,21 +44,21 @@ class ENC:
         """
         :return: land layer container of Shapely geometries
         """
-        return self._environment.topography.land
+        return self._environment.data.land
 
     @property
     def shore(self) -> Layer:
         """
         :return: shore layer container of Shapely geometries
         """
-        return self._environment.topography.shore
+        return self._environment.data.shore
 
     @property
     def seabed(self) -> dict[int, Layer]:
         """
         :return: seabed dict of Shapely geometries for each depth bin
         """
-        return self._environment.hydrography.bathymetry
+        return self._environment.data.bathymetry
 
     @property
     def size(self) -> tuple[int, int]:

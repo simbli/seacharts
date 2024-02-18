@@ -1,18 +1,16 @@
-import seacharts.spatial as spl
+from seacharts.spatial import SpatialData
 from .scope import Scope
 
 
 class Environment:
     def __init__(self, settings: dict):
         self.scope = Scope(settings)
-        self.hydrography = spl.Hydrography(self.scope)
-        self.topography = spl.Topography(self.scope)
+        self.data = SpatialData(self.scope)
         self.load_existing_shapefiles()
 
     def load_existing_shapefiles(self) -> None:
-        self.hydrography.load(self.scope)
-        self.topography.load(self.scope)
-        if self.hydrography.loaded or self.topography.loaded:
+        self.data.load(self.scope)
+        if self.data.loaded:
             print("INFO: ENC created using data from existing shapefiles.\n")
         else:
             print("INFO: No existing spatial data was found.")
@@ -33,9 +31,8 @@ class Environment:
                 print(message + ".")
             return
         print("INFO: Updating ENC with data from available resources...")
-        self.hydrography.parse(self.scope)
-        self.topography.parse(self.scope)
-        if self.hydrography.loaded or self.topography.loaded:
+        self.data.parse(self.scope)
+        if self.data.loaded:
             print("\nENC update complete.\n")
         else:
             print("WARNING: Given spatial data source(s) seem empty.\n")

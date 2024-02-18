@@ -17,17 +17,18 @@ class FeaturesManager:
         self._init_layers()
 
     def _init_layers(self):
-        layers = self._display._environment.hydrography.loaded_layers
-        for i, layer in enumerate(layers):
-            rank = -300 + i
-            bins = len(self._display._environment.scope.depths)
-            color = color_picker(i, bins)
-            artist = self.new_artist(layer.geometry, color, rank)
-            self._seabeds[rank] = artist
-        shore = self._display._environment.topography.shore
+        seabeds = list(self._display._environment.data.bathymetry.values())
+        for i, seabed in enumerate(seabeds):
+            if not seabed.geometry.is_empty:
+                rank = -300 + i
+                bins = len(self._display._environment.scope.depths)
+                color = color_picker(i, bins)
+                artist = self.new_artist(seabed.geometry, color, rank)
+                self._seabeds[rank] = artist
+        shore = self._display._environment.data.shore
         color = color_picker(shore.__class__.__name__)
         self._shore = self.new_artist(shore.geometry, color, -200)
-        land = self._display._environment.topography.land
+        land = self._display._environment.data.land
         color = color_picker(land.__class__.__name__)
         self._land = self.new_artist(land.geometry, color, -100)
         center = self._display._environment.scope.extent.center
