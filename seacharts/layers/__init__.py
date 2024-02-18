@@ -1,2 +1,2 @@
 from .layer import Layer
-from .regions import Seabed, Land, Shore
+from .regions import Regions, Seabed, Land, Shore

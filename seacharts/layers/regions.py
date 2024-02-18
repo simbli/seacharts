@@ -11,6 +11,7 @@ from seacharts.layers.layer import Layer, ZeroDepth, SingleDepth, MultiDepth
 @dataclass
 class Regions(Layer, ABC):
     geometry: geo.MultiPolygon = field(default_factory=geo.MultiPolygon)
+    depth: int = None
 
 
 @dataclass

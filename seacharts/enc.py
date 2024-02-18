@@ -28,7 +28,7 @@ class ENC:
         Update ENC with spatial data parsed from user-specified resources
         :return: None
         """
-        self._environment.parse_data_into_shapefiles()
+        self._environment.data.parse_resources_into_shapefiles()
 
     @property
     def display(self) -> Display:
