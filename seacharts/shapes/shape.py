@@ -11,6 +11,9 @@ from shapely import geometry as geo, ops
 @dataclass
 class Shape(ABC):
     geometry: geo.base.BaseGeometry = None
+    color: str = None
+    z_order: int = None
+    artist: Any = None
 
     def simplify(self, tolerance: int, preserve_topology: bool = True) -> None:
         self.geometry = self.geometry.simplify(tolerance, preserve_topology)
