@@ -34,21 +34,15 @@ class MultiDepthRegions(Regions, MultiDepth, ABC):
 class Seabed(SingleDepthRegions):
     color = "seabed"
     z_order = -300
-    _external_labels = [
-        dict(layer="dybdeareal", depth="minimumsdybde"),
-        dict(layer="grunne", depth="dybde"),
-    ]
 
 
 @dataclass
 class Land(ZeroDepthRegions):
     color = "land"
     z_order = -100
-    _external_labels = ["landareal"]
 
 
 @dataclass
 class Shore(ZeroDepthRegions):
     color = "shore"
     z_order = -200
-    _external_labels = ["skjer", "torrfall", "landareal", "ikkekartlagtsjomaltomr"]
