@@ -4,6 +4,7 @@ from typing import Generator
 
 import fiona
 
+from seacharts.layers import Layer, labels
 from seacharts.utils import paths
 
 
@@ -25,9 +26,10 @@ class DataParser:
                     if self._is_gdb(p):
                         yield p
 
-    def load_fgdb(self, layer) -> list[dict]:
+    def load_fgdb(self, layer: Layer) -> list[dict]:
         depth = layer.depth if hasattr(layer, "depth") else 0
-        return list(self._read_fgdb(layer.label, layer._external_labels, depth))
+        external_labels = labels.NORWEGIAN_LABELS[layer.__class__.__name__]
+        return list(self._read_fgdb(layer.label, external_labels, depth))
 
     def load_shapefile(self, layer) -> list[dict]:
         return list(self._read_shapefile(layer.label))

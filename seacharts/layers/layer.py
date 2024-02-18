@@ -11,14 +11,6 @@ from seacharts.spatial.base import Shape
 @dataclass
 class Layer(Shape, ABC):
     @property
-    def _external_labels(self) -> list[str]:
-        raise NotImplementedError
-
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
-
-    @property
     def label(self) -> str:
         return self.name.lower()
 
