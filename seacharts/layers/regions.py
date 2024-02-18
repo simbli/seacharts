@@ -6,7 +6,8 @@ from dataclasses import dataclass, field
 
 from shapely import geometry as geo
 
-from seacharts.layers.layer import Layer, ZeroDepth, SingleDepth, MultiDepth
+from seacharts.layers.layer import Layer
+from seacharts.layers.types import ZeroDepth, SingleDepth, MultiDepth
 
 
 @dataclass
