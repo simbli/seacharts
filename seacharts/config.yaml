@@ -1,13 +1,16 @@
 enc:
+  autosize: True
   size: [ 9000, 5062 ]
   center: [ 44300, 6956450 ]
-  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
-  resources: [ "/", "data/", "data/db/" ]
+  #Only one of these attributes allowed TODO: check if yaml offers single choice structure
+  #FGDB_depths: [ 0, 1 , 5, 20]
+  S57_layers: ["DEPARE", "LNDARE", "TSSLS"]
+  resources: [ "data/", "data/db/" ]
 
 display:
   colorbar: False
   dark_mode: True
   fullscreen: False
-  resolution: 720
+  resolution: 640
   anchor: "center"
   dpi: 96

@@ -2,6 +2,9 @@ enc:
   required: True
   type: dict
   schema:
+    autosize:
+      required: False
+      type: boolean
     size:
       required: True
       type: list
@@ -9,6 +12,7 @@ enc:
       schema:
         type: float
         min: 1.0
+
     origin:
       required: True
       excludes: center
@@ -16,6 +20,7 @@ enc:
       maxlength: 2
       schema:
         type: float
+
     center:
       required: True
       excludes: origin
@@ -23,13 +28,22 @@ enc:
       maxlength: 2
       schema:
         type: float
-    depths:
+
+    FGDB_depths:
       required: False
       type: list
       minlength: 1
       schema:
         type: integer
         min: 0
+
+    S57_layers:
+      required: False
+      type: list
+      minlength: 1
+      schema:
+        type: string
+
     resources:
       required: False
       type: list
@@ -44,18 +58,23 @@ display:
     colorbar:
       required: False
       type: boolean
+
     dark_mode:
       required: False
       type: boolean
+
     fullscreen:
       required: False
       type: boolean
+
     resolution:
       required: False
       type: integer
+
     anchor:
       required: False
       type: string
+
     dpi:
       required: False
       type: integer

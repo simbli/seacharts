@@ -14,7 +14,7 @@ class MapData(DataCollection):
         self.bathymetry = {d: Seabed(d) for d in self.scope.depths}
         self.land = Land()
         self.shore = Shore()
-        self.parser = DataParser(self.scope.extent.bbox, self.scope.resources)
+
 
     def load_existing_shapefiles(self) -> None:
         self.parser.load_shapefiles(self.featured_regions)
