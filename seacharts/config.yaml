@@ -3,8 +3,8 @@ enc:
   size: [ 9000, 5062 ]
   center: [ 44300, 6956450 ]
   #Only one of these attributes allowed TODO: check if yaml offers single choice structure
-  #FGDB_depths: [ 0, 1 , 5, 20]
-  S57_layers: ["DEPARE", "LNDARE", "TSSLS"]
+  FGDB_depths: [ 0, 1 , 5, 20]
+#  S57_layers: ["DEPARE", "LNDARE", "TSSLS"]
   resources: [ "data/", "data/db/" ]
 
 display:

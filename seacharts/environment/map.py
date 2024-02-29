@@ -3,7 +3,6 @@ Contains the MapData class for containing parsed map (charts) data.
 """
 from dataclasses import dataclass
 
-from seacharts.core import DataParser
 from seacharts.layers import Layer, Land, Shore, Seabed
 from .collection import DataCollection
 
@@ -14,7 +13,6 @@ class MapData(DataCollection):
         self.bathymetry = {d: Seabed(d) for d in self.scope.depths}
         self.land = Land()
         self.shore = Shore()
-
 
     def load_existing_shapefiles(self) -> None:
         self.parser.load_shapefiles(self.featured_regions)

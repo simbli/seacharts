@@ -11,7 +11,7 @@ from seacharts.layers import Layer
 @dataclass
 class DataCollection(ABC):
     scope: Scope
-    parser: DataParser = field(init=False)
+    parser: DataParser #= field(init=False)
 
     @property
     @abstractmethod
