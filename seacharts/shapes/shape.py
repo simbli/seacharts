@@ -14,6 +14,7 @@ class Shape(ABC):
     color: str = None
     z_order: int = None
     artist: Any = None
+    name: str= None
 
     def simplify(self, tolerance: int, preserve_topology: bool = True) -> None:
         self.geometry = self.geometry.simplify(tolerance, preserve_topology)
@@ -35,9 +36,7 @@ class Shape(ABC):
     def mapping(self) -> dict:
         return geo.mapping(self.geometry)
 
-    @property
-    def name(self) -> str:
-        return self.__class__.__name__
+
 
     @staticmethod
     def _record_to_geometry(record: dict) -> Any:

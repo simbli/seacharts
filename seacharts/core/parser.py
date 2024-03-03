@@ -29,6 +29,10 @@ class DataParser:
     def _shapefile_path(label):
         return paths.shapefiles / label / (label + ".shp")
 
+    @staticmethod
+    def _shapefile_dir_path(label):
+        return paths.shapefiles / label
+
     ######LOADING SHAPEFILES#####
     def _read_spatial_file(self, path: Path, **kwargs) -> Generator:
         try:

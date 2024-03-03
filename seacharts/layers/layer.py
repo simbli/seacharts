@@ -17,7 +17,7 @@ class Layer(Shape, ABC):
 
     @property
     def label(self) -> str:
-        return self.name.lower()
+        return self.name
 
     def records_as_geometry(self, records: list[dict]) -> None:
         if len(records) > 0:
