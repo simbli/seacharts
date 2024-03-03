@@ -46,6 +46,7 @@ class S57Parser(DataParser):
         print("INFO: Updating ENC with data from available resources...\n")
         print(f"Processing {area // 10 ** 6} km^2 of ENC features:")  # TODO: return when fixing coords
         for regions in regions_list:
+            ...
             #TODO: for each region,
             # generate appropriate destination path with shapefile_path() func
             # get source S-57 path from file_paths() func
