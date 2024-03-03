@@ -10,9 +10,10 @@ from .collection import DataCollection
 @dataclass
 class MapData(DataCollection):
     def __post_init__(self):
-        self.bathymetry = {d: Seabed(d) for d in self.scope.depths}
-        self.land = Land()
-        self.shore = Shore()
+        ...
+        #self.bathymetry = {d: Seabed(d) for d in self.scope.depths}
+        #self.land = Land()
+        #self.shore = Shore()
 
     def load_existing_shapefiles(self) -> None:
         self.parser.load_shapefiles(self.featured_regions)
