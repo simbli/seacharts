@@ -18,10 +18,12 @@ class DataParser:
         self,
         bounding_box: tuple[int, int, int, int],
         path_strings: list[str],
+        autosize: bool
     ):
         self.bounding_box = bounding_box
         self.paths = set([p.resolve() for p in (map(Path, path_strings))])
         self.paths.update(paths.default_resources)
+        self.autosize = autosize
 
     @staticmethod
     def _shapefile_path(label):
@@ -33,8 +35,12 @@ class DataParser:
             with fiona.open(path, "r", **kwargs) as source:
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=RuntimeWarning)
-                    for record in source.filter(bbox=self.bounding_box): #TODO: auto coordinates
-                        yield record
+                    if self.autosize is True: #TODO: Extend in Scope needs to be updated according to record sizes when using autosize
+                        for record in source:
+                            yield record
+                    else:
+                        for record in source.filter(bbox=self.bounding_box):
+                            yield record
         except ValueError as e:
             message = str(e)
             if "Null layer: " in message:

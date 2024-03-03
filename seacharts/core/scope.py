@@ -18,8 +18,8 @@ class Scope:
     def __init__(self, settings: dict):
         self.extent = Extent(settings)
         self.resources = settings["enc"].get("resources", [])
-
-        if settings["enc"].get("FGDB_depths",[]):
+        self.autosize = settings["enc"].get("autosize")
+        if settings["enc"].get("FGDB_depths", []):
             self.__fgdb_init(settings)
         elif settings["enc"].get("S57_layers", []):
             self.__s57_init(settings)
