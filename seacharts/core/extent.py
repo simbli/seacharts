@@ -25,7 +25,8 @@ class Extent:
 
     def convert_lat_lon_to_utm(self, latitude, longitude):
         in_proj = Proj(init='epsg:4326')  # WGS84
-        out_proj = Proj(init='epsg:32633')  # UTM zone 33N (change if needed)
+        zone=str(math.ceil(longitude/6+31))
+        out_proj = Proj(init='epsg:326'+zone)
 
         utm_east, utm_north = transform(in_proj, out_proj, longitude, latitude)
         return utm_east, utm_north

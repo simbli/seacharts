@@ -74,7 +74,7 @@ class DataParser:
 
     @abstractmethod
     def _is_map_type(self, path) -> bool:
-        pass    #method for detecting files/directories containing corresponding map format
+        pass
 
     @property
     def _file_paths(self) -> Generator[Path, None, None]:
