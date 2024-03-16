@@ -7,6 +7,8 @@ from seacharts.layers import Layer
 
 
 class S57Parser(DataParser):
+
+
     @staticmethod
     def convert_s57_to_shapefile(s57_file_path, shapefile_output_path, layer):
         ogr2ogr_cmd = [
@@ -63,3 +65,5 @@ class S57Parser(DataParser):
             for p in path.iterdir():
                 if p.suffix == ".000":
                     return True
+
+
