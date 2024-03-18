@@ -23,9 +23,8 @@ class Extent:
             self.bbox=self._bounding_box_from_origin_size_lat_long()
         self.area: int = self.size[0] * self.size[1]
 
-    def convert_lat_lon_to_utm(self, latitude, longitude):
+    def convert_lat_lon_to_utm(self, latitude, longitude, zone):
         in_proj = Proj(init='epsg:4326')  # WGS84
-        zone = str(math.floor(longitude/6+31))
         out_proj = Proj(init='epsg:326'+zone)
 
         utm_east, utm_north = transform(in_proj, out_proj, longitude, latitude)
@@ -54,7 +53,7 @@ class Extent:
     def _bounding_box_from_origin_size_lat_long(self) -> tuple[int, int, int, int]:
         x_min, y_min = self.origin
         x_max, y_max = x_min + self.size[0], y_min + self.size[1]
-
-        converted_x_min, converted_y_min= self.convert_lat_lon_to_utm(y_min, x_min)
-        converted_x_max, converted_y_max= self.convert_lat_lon_to_utm(y_max, x_max)
+        zone = str(math.floor(self.center[0] / 6 + 31))
+        converted_x_min, converted_y_min= self.convert_lat_lon_to_utm(y_min, x_min, zone)
+        converted_x_max, converted_y_max= self.convert_lat_lon_to_utm(y_max, x_max, zone)
         return converted_x_min, converted_y_min, converted_x_max, converted_y_max
