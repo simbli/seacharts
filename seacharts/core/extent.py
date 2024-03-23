@@ -5,7 +5,6 @@ import math
 
 from pyproj import Proj, transform
 
-
 class Extent:
     def __init__(self, settings: dict):
         self.size = tuple(settings["enc"].get("size", (0, 0)))
@@ -19,23 +18,19 @@ class Extent:
             self.origin = self._origin_from_center()
 
         utm_east, utm_north = self.convert_lat_lon_to_utm(62.457464, 6.146678)
+        utm_east=math.ceil(utm_east)
+        utm_north=math.ceil(utm_north)
         self.bbox = self._bounding_box_from_origin_size()
         self.area: int = self.size[0] * self.size[1]
 
-    # @overload
-    # def __init__(self, x_min, y_min, x_max, y_max):
-    #     self.size = x_max - x_min, y_max - y_min
-    #     self.bbox = x_min, y_min, x_max, y_max
-    #     self.center = x_min + self.size[0]/2, y_min + self.size[1]/2
-    #     self.origin = x_min, y_min
-
-    @staticmethod
-    def convert_lat_lon_to_utm(latitude, longitude):
+    def convert_lat_lon_to_utm(self, latitude, longitude):
         in_proj = Proj(init='epsg:4326')  # WGS84
-        zone = str(math.ceil(longitude / 6 + 31))
-        out_proj = Proj(init='epsg:326' + zone)
+        zone=str(math.ceil(longitude/6+31))
+        out_proj = Proj(init='epsg:326'+zone)
+
         utm_east, utm_north = transform(in_proj, out_proj, longitude, latitude)
-        return math.ceil(utm_east), math.ceil(utm_north)
+        return utm_east, utm_north
+
 
     def _origin_from_center(self) -> tuple[int, int]:
         return (
