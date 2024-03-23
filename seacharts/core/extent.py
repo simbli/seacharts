@@ -2,7 +2,7 @@
 Contains the Extent class for defining the span of spatial data.
 """
 import math
-
+from pyproj import Transformer, CRS
 from pyproj import Proj, transform
 
 class Extent:
@@ -17,18 +17,19 @@ class Extent:
             self.center = tuple(settings["enc"].get("center", (0, 0)))
             self.origin = self._origin_from_center()
 
-        utm_east, utm_north = self.convert_lat_lon_to_utm(62.457464, 6.146678)
-        utm_east=math.ceil(utm_east)
-        utm_north=math.ceil(utm_north)
-        self.bbox = self._bounding_box_from_origin_size()
+        if settings["enc"].get("FGDB_depths", []):
+            self.bbox = self._bounding_box_from_origin_size()
+        elif settings["enc"].get("S57_layers", []):
+            self.bbox=self._bounding_box_from_origin_size_lat_long()
         self.area: int = self.size[0] * self.size[1]
 
-    def convert_lat_lon_to_utm(self, latitude, longitude):
+    def convert_lat_lon_to_utm(self, latitude, longitude, zone):
         in_proj = Proj(init='epsg:4326')  # WGS84
-        zone=str(math.ceil(longitude/6+31))
         out_proj = Proj(init='epsg:326'+zone)
 
         utm_east, utm_north = transform(in_proj, out_proj, longitude, latitude)
+        utm_east=math.ceil(utm_east)
+        utm_north=math.ceil(utm_north)
         return utm_east, utm_north
 
 
@@ -48,3 +49,11 @@ class Extent:
         x_min, y_min = self.origin
         x_max, y_max = x_min + self.size[0], y_min + self.size[1]
         return x_min, y_min, x_max, y_max
+
+    def _bounding_box_from_origin_size_lat_long(self) -> tuple[int, int, int, int]:
+        x_min, y_min = self.origin
+        x_max, y_max = x_min + self.size[0], y_min + self.size[1]
+        zone = str(math.floor(self.center[0] / 6 + 31))
+        converted_x_min, converted_y_min= self.convert_lat_lon_to_utm(y_min, x_min, zone)
+        converted_x_max, converted_y_max= self.convert_lat_lon_to_utm(y_max, x_max, zone)
+        return converted_x_min, converted_y_min, converted_x_max, converted_y_max
