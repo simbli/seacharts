@@ -2,23 +2,19 @@
 Contains the Extent class for defining details related to files of spatial data.
 """
 from dataclasses import dataclass
-from enum import Enum, auto
-
 from seacharts.core import files
 from .extent import Extent
-
-
-class MapFormat(Enum):
-    FGDB = auto()
-    S57 = auto()
+from .mapFormat import MapFormat
 
 
 @dataclass
 class Scope:
     def __init__(self, settings: dict):
         self.extent = Extent(settings)
+        self.settings = settings
         self.resources = settings["enc"].get("resources", [])
         self.autosize = settings["enc"].get("autosize")
+
         if settings["enc"].get("FGDB_depths", []):
             self.__fgdb_init(settings)
         elif settings["enc"].get("S57_layers", []):
@@ -35,7 +31,7 @@ class Scope:
         self.type = MapFormat.FGDB
 
     def __s57_init(self, settings: dict):
-        default_layers = ["LNDARE", "DEPARE"] #TODO: double-check desired default layers
+        default_layers = ["LNDARE", "DEPARE"] #TODO: decide on default layers
         self.features = settings["enc"].get("S57_layers", default_layers)
         self.type = MapFormat.S57
 

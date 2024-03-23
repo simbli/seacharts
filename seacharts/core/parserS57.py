@@ -42,13 +42,9 @@ class S57Parser(DataParser):
         print(f"Processing {area // 10 ** 6} km^2 of ENC features:")
         for regions in regions_list:
             for s57_path in self._file_paths:
-                self.convert_s57_to_shapefile(self.get_s57_file(s57_path).__str__(), self._shapefile_dir_path(regions.name.lower()).__str__(), regions.name)
-
-        print("test")
-            #TODO: for each region,
-            # generate appropriate destination path with shapefile_path() func
-            # get source S-57 path from file_paths() func
-
+                self.convert_s57_to_shapefile(self.get_s57_file(s57_path).__str__(),
+                                              self._shapefile_dir_path(regions.name.lower()).__str__(),
+                                              regions.name)
             # start_time = time.time()
             # records = self._load_from_file(regions)
             # info = f"{len(records)} {regions.name} geometries"

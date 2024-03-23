@@ -14,7 +14,7 @@ class Shape(ABC):
     color: str = None
     z_order: int = None
     artist: Any = None
-    name: str= None
+    # name: str = None
 
     def simplify(self, tolerance: int, preserve_topology: bool = True) -> None:
         self.geometry = self.geometry.simplify(tolerance, preserve_topology)
@@ -33,10 +33,11 @@ class Shape(ABC):
         return ops.nearest_points(self.geometry, geometry)[1]
 
     @property
+    def name(self) -> str:
+        return self.__class__.__name__
+    @property
     def mapping(self) -> dict:
         return geo.mapping(self.geometry)
-
-
 
     @staticmethod
     def _record_to_geometry(record: dict) -> Any:

@@ -39,7 +39,7 @@ class DataParser:
             with fiona.open(path, "r", **kwargs) as source:
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=RuntimeWarning)
-                    if self.autosize is True: #TODO: Extend in Scope needs to be updated according to record sizes when using autosize
+                    if self.autosize is True:
                         for record in source:
                             yield record
                     else:
