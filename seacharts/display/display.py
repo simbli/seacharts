@@ -22,7 +22,6 @@ matplotlib.use("TkAgg")
 
 
 class Display:
-    crs = UTM(33)
     window_anchors = (
         ("top_left", "top", "top_right"),
         ("left", "center", "right"),
@@ -31,9 +30,10 @@ class Display:
 
     def __init__(self, settings: dict, environment: env.Environment):
         self._settings = settings
+        self.crs = UTM(environment.scope.extent.UTM_zone)
         self._environment = environment
         self._background = None
-        self._dark_mode = True
+        self._dark_mode = False
         self._colorbar_mode = False
         self._fullscreen_mode = False
         self._resolution = 720

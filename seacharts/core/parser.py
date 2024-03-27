@@ -33,7 +33,6 @@ class DataParser:
     def _shapefile_dir_path(label):
         return paths.shapefiles / label
 
-    ######LOADING SHAPEFILES#####
     def _read_spatial_file(self, path: Path, **kwargs) -> Generator:
         try:
             with fiona.open(path, "r", **kwargs) as source:
@@ -62,7 +61,7 @@ class DataParser:
             records = list(self._read_shapefile(layer.label))
             layer.records_as_geometry(records)
 
-    ######LOADING SHAPEFILES#####
+    # main method for parsing corresponding map format
     @abstractmethod
     def parse_resources(
             self,
@@ -70,7 +69,7 @@ class DataParser:
             resources: list[str],
             area: float
     ) -> None:
-        pass  #main method for parsing corresponding map format
+        pass
 
     @abstractmethod
     def _is_map_type(self, path) -> bool:
@@ -87,8 +86,3 @@ class DataParser:
                 for p in path.iterdir():
                     if self._is_map_type(p):
                         yield p
-
-
-
-
-

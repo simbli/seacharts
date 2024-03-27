@@ -3,7 +3,8 @@ import time
 from pathlib import Path
 
 from seacharts.core import DataParser
-from seacharts.layers import Layer
+from seacharts.layers import Layer, Land, Shore, Seabed
+from seacharts.layers.layer import SingleDepthLayer
 
 
 class S57Parser(DataParser):
@@ -15,9 +16,28 @@ class S57Parser(DataParser):
             'ogr2ogr',
             '-f', 'ESRI Shapefile',  # Output format
             # '-update',
+            '-t_srs', 'EPSG:32616',  # TODO fixit to take calculated utm zone
             shapefile_output_path,  # Output shapefile
             s57_file_path,  # Input S57 file
             layer,
+            '-skipfailures'
+        ]
+        try:
+            subprocess.run(ogr2ogr_cmd, check=True)
+            print(f"Conversion successful: {s57_file_path} -> {shapefile_output_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error during conversion: {e}")
+
+    @staticmethod
+    def convert_s57_depth_to_shapefile(s57_file_path, shapefile_output_path, depth):
+        ogr2ogr_cmd = [
+            'ogr2ogr',
+            '-f', 'ESRI Shapefile',  # Output format
+            # '-update',
+            '-t_srs', 'EPSG:32616',  # TODO fixit to take calculated utm zone
+            shapefile_output_path,  # Output shapefile
+            s57_file_path,  # Input S57 file
+            '-sql', 'SELECT * FROM DEPARE WHERE DRVAL1 >= ' + depth.__str__(),
             '-skipfailures'
         ]
         try:
@@ -42,14 +62,31 @@ class S57Parser(DataParser):
             return
         print("INFO: Updating ENC with data from available resources...\n")
         print(f"Processing {area // 10 ** 6} km^2 of ENC features:")
-        for regions in regions_list:
-            for s57_path in self._file_paths:
-                self.convert_s57_to_shapefile(self.get_s57_file(s57_path).__str__(),
-                                              self._shapefile_dir_path(regions.name.lower()).__str__(),
-                                              regions.name)
-            # start_time = time.time()
-            # records = self._load_from_file(regions)
-            # info = f"{len(records)} {regions.name} geometries"
+
+        # ogr2ogr was crashing for backslashes, temporary fix
+        s57_path = None
+        for path in self._file_paths:
+            s57_path = self.get_s57_file(path)
+        s57_path = s57_path.__str__().replace("\\", "/")
+        # end
+
+        for region in regions_list:
+            if isinstance(region, Seabed):
+                self.convert_s57_depth_to_shapefile(s57_path,
+                                                    self._shapefile_dir_path(region.label).__str__() +
+                                                    "\\" + region.label + ".shp",
+                                                    region.depth)
+            elif isinstance(region, Land):
+                self.convert_s57_to_shapefile(s57_path,
+                                              self._shapefile_dir_path(region.label).__str__() + "\\" +
+                                              region.label + ".shp",
+                                              "LNDARE")
+            elif isinstance(region, Shore):
+                self.convert_s57_to_shapefile(s57_path,
+                                              self._shapefile_dir_path(region.label).__str__() + "\\" +
+                                              region.label + ".shp",
+                                              "LNDARE")
+
     @staticmethod
     def get_s57_file(path) -> Path:
         for p in path.iterdir():

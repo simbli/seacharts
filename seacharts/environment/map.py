@@ -10,8 +10,6 @@ from .collection import DataCollection
 @dataclass
 class MapData(DataCollection):
     def __post_init__(self):
-        # self.map_layers = {d: Layer(name=d) for d in self.scope.features}
-
         self.bathymetry = {d: Seabed(depth=d) for d in self.scope.depths}
         self.land = Land()
         self.shore = Shore()
@@ -35,7 +33,6 @@ class MapData(DataCollection):
     @property
     def layers(self) -> list[Layer]:
         return [self.land, self.shore, *self.bathymetry.values()]
-        # return [*self.map_layers.values()]
 
     @property
     def loaded(self) -> bool:

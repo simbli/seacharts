@@ -44,13 +44,13 @@ class Shape(ABC):
         return geo.shape(record["geometry"])
 
     @staticmethod
-    def as_multi(geometry: Any) -> Any:
-        if isinstance(geometry, geo.Point):
-            return geo.MultiPoint([geometry])
-        elif isinstance(geometry, geo.Polygon):
-            return geo.MultiPolygon([geometry])
-        elif isinstance(geometry, geo.LineString):
-            return geo.MultiLineString([geometry])
+    def as_multi(geometry: [Any]) -> Any:
+        if isinstance(geometry[0], geo.Point):
+            return geo.MultiPoint(geometry)
+        elif isinstance(geometry[0], geo.Polygon):
+            return geo.MultiPolygon(geometry)
+        elif isinstance(geometry[0], geo.LineString):
+            return geo.MultiLineString(geometry)
         else:
             raise NotImplementedError(type(geometry))
 

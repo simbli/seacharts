@@ -35,7 +35,7 @@ class FGDBParser(DataParser):
                 print(message + ".")
             return
         print("INFO: Updating ENC with data from available resources...\n")
-        print(f"Processing {area // 10 ** 6} km^2 of ENC features:") #TODO: return when fixing coords
+        print(f"Processing {area // 10 ** 6} km^2 of ENC features:")
         for regions in regions_list:
             start_time = time.time()
             records = self._load_from_file(regions)
