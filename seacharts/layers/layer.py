@@ -18,12 +18,17 @@ class Layer(Shape, ABC):
     @property
     def label(self) -> str:
         return self.name.lower()
+        # return self.name
 
     def records_as_geometry(self, records: list[dict]) -> None:
+        geometries = []
+
         if len(records) > 0:
-            self.geometry = self._record_to_geometry(records[0])
-            if isinstance(self.geometry, geo.Polygon):
-                self.geometry = self.as_multi(self.geometry)
+            for record in records:
+                geom_tmp = self._record_to_geometry(record)
+                if isinstance(geom_tmp, geo.Polygon):
+                    geometries.append(geom_tmp)
+            self.geometry = self.as_multi(geometries)
 
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]

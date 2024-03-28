@@ -18,23 +18,32 @@ class DataParser:
         self,
         bounding_box: tuple[int, int, int, int],
         path_strings: list[str],
+        autosize: bool
     ):
         self.bounding_box = bounding_box
         self.paths = set([p.resolve() for p in (map(Path, path_strings))])
         self.paths.update(paths.default_resources)
+        self.autosize = autosize
 
     @staticmethod
     def _shapefile_path(label):
         return paths.shapefiles / label / (label + ".shp")
 
-    ######LOADING SHAPEFILES#####
+    @staticmethod
+    def _shapefile_dir_path(label):
+        return paths.shapefiles / label
+
     def _read_spatial_file(self, path: Path, **kwargs) -> Generator:
         try:
             with fiona.open(path, "r", **kwargs) as source:
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=RuntimeWarning)
-                    for record in source.filter(bbox=self.bounding_box): #TODO: auto coordinates
-                        yield record
+                    if self.autosize is True:
+                        for record in source:
+                            yield record
+                    else:
+                        for record in source.filter(bbox=self.bounding_box):
+                            yield record
         except ValueError as e:
             message = str(e)
             if "Null layer: " in message:
@@ -52,7 +61,7 @@ class DataParser:
             records = list(self._read_shapefile(layer.label))
             layer.records_as_geometry(records)
 
-    ######LOADING SHAPEFILES#####
+    # main method for parsing corresponding map format
     @abstractmethod
     def parse_resources(
             self,
@@ -60,11 +69,11 @@ class DataParser:
             resources: list[str],
             area: float
     ) -> None:
-        pass  #main method for parsing corresponding map format
+        pass
 
     @abstractmethod
     def _is_map_type(self, path) -> bool:
-        pass    #method for detecting files/directories containing corresponding map format
+        pass
 
     @property
     def _file_paths(self) -> Generator[Path, None, None]:
@@ -77,8 +86,3 @@ class DataParser:
                 for p in path.iterdir():
                     if self._is_map_type(p):
                         yield p
-
-
-
-
-

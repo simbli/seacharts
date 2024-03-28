@@ -10,7 +10,7 @@ from .collection import DataCollection
 @dataclass
 class MapData(DataCollection):
     def __post_init__(self):
-        self.bathymetry = {d: Seabed(d) for d in self.scope.depths}
+        self.bathymetry = {d: Seabed(depth=d) for d in self.scope.depths}
         self.land = Land()
         self.shore = Shore()
 
