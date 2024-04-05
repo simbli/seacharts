@@ -34,6 +34,7 @@ class ENC:
         :param new_data: bool indicating if new files should be parsed
         :param border: bool for showing a border around the environment plot
         :param verbose: bool for status printing during geometry processing
+        :param figname: string of figure name for saving the environment plot
     """
 
     def __init__(self, config_file: Path = utils.paths.config, multiprocessing=False, **kwargs):
@@ -48,7 +49,7 @@ class ENC:
         self.land = self._environment.topography.land
         self.shore = self._environment.topography.shore
         self.seabed = self._environment.hydrography.bathymetry
-        self._display = dis.Display(self._cfg.settings, self._environment)
+        self._display = dis.Display(self._cfg.settings, self._environment, **kwargs)
 
     @property
     def size(self) -> Tuple[int, int]:

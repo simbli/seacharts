@@ -94,3 +94,6 @@ display:
     dark_mode:
       required: True
       type: boolean
+    figname:
+      required: False
+      type: string
