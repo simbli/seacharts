@@ -5,6 +5,7 @@ import seacharts.spatial as spl
 import seacharts.utils as utils
 import shapely.geometry as sgeo
 from cartopy.feature import ShapelyFeature
+from matplotlib.text import Text
 
 from .colors import color_picker
 
@@ -62,7 +63,7 @@ class FeaturesManager:
             size = self._display.environment.scope.extent.size
             geometry = spl.Rectangle(*center, width=size[0] / 2, heading=0, height=size[1] / 2).geometry
             color = (color_picker("black")[0], "none")
-            self.new_artist(geometry, color, 10000, linewidth=3)
+            return self.new_artist(geometry, color, 10000, linewidth=3)
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
         kwargs["crs"] = self._display.crs
@@ -84,18 +85,18 @@ class FeaturesManager:
         if head_size is None:
             head_size = 50
         body = spl.Arrow(start=start, end=end, width=buffer).body(head_size)
-        self.add_overlay(body, color_name, fill, linewidth, linestyle)
+        return self.add_overlay(body, color_name, fill, linewidth, linestyle)
 
     def add_circle(self, center, radius, color_name, fill, linewidth, linestyle, alpha):
         geometry = spl.Circle(*center, radius).geometry
-        self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
+        return self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
     def add_line(self, points, color_name, buffer, linewidth, linestyle, marker_type, marker_size, alpha):
         if buffer is None:
             buffer = 5
         if buffer == 0:
             x_coordinates, y_coordinates = zip(*points)
-            self._display.axes.plot(
+            return self._display.axes.plot(
                 x_coordinates,
                 y_coordinates,
                 color=color_picker(color_name)[0],
@@ -108,7 +109,12 @@ class FeaturesManager:
             )
         else:
             geometry = spl.Line(points=points).geometry.buffer(buffer)
-            self.add_overlay(geometry, color_name, True, linewidth, linestyle, alpha=alpha)
+            return self.add_overlay(geometry, color_name, True, linewidth, linestyle, alpha=alpha)
+
+    def add_text(self, text, position, color, size, rotation):
+        return self._display.axes.add_artist(
+            Text(position[0], position[1], text, color=color, size=size, rotation=rotation)
+        )
 
     def add_polygon(self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0):
         try:
@@ -122,11 +128,11 @@ class FeaturesManager:
             shape = [shape]
         for geometry in shape:
             geometry = spl.Area.new_polygon(geometry, interiors)
-            self.add_overlay(geometry, color, fill, linewidth, linestyle, alpha)
+            return self.add_overlay(geometry, color, fill, linewidth, linestyle, alpha)
 
     def add_rectangle(self, center, size, color_name, rotation, fill, linewidth, linestyle, alpha):
         geometry = spl.Rectangle(*center, heading=rotation, width=size[0], height=size[1]).geometry
-        self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
+        return self.add_overlay(geometry, color_name, fill, linewidth, linestyle, alpha)
 
     def add_overlay(self, geometry, color_name, fill, linewidth, linestyle, alpha=1.0):
         color = color_picker(color_name)
@@ -138,7 +144,7 @@ class FeaturesManager:
         if linestyle is not None:
             kwargs["linestyle"] = linestyle
         kwargs["alpha"] = alpha
-        self.new_artist(geometry, color, 0, **kwargs)
+        return self.new_artist(geometry, color, 0, **kwargs)
 
     def update_waypoints(self, number, pick, coords=None):
         path = self._paths[number - 1]

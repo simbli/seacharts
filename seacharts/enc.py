@@ -215,7 +215,26 @@ class ENC:
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        self._display.features.add_arrow(start, end, color, width, fill, head_size, thickness, edge_style)
+        return self._display.features.add_arrow(start, end, color, width, fill, head_size, thickness, edge_style)
+
+    def draw_text(
+        self,
+        text: str,
+        position: Tuple[float, float],
+        color: str,
+        size: float = None,
+        rotation: float = None,
+    ) -> None:
+        """
+        Add a text overlay to the environment plot.
+        :param text: str of text to display
+        :param position: tuple of text position coordinate pair
+        :param color: str of text color
+        :param size: float denoting the Matplotlib font size
+        :param rotation: float denoting the text rotation in degrees
+        :return: None
+        """
+        return self._display.features.add_text(text, position, color, size, rotation)
 
     def draw_circle(
         self,
@@ -226,7 +245,7 @@ class ENC:
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
         alpha: float = 1.0,
-    ) -> None:
+    ):
         """
         Add a circle or disk overlay to the environment plot.
         :param center: tuple of circle center coordinates
@@ -236,9 +255,9 @@ class ENC:
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :param alpha: float denoting the Matplotlib alpha value
-        :return: None
+        :return: Featureartist
         """
-        self._display.features.add_circle(center, radius, color, fill, thickness, edge_style, alpha)
+        return self._display.features.add_circle(center, radius, color, fill, thickness, edge_style, alpha)
 
     def draw_line(
         self,
@@ -250,7 +269,7 @@ class ENC:
         marker_type: str = None,
         marker_size: float = None,
         alpha: float = 1.0,
-    ) -> None:
+    ):
         """
         Add a straight line overlay to the environment plot.
         :param points: list of tuples of coordinate pairs
@@ -261,7 +280,7 @@ class ENC:
         :param marker_type: str denoting the Matplotlib marker type
         :param marker_size: float denoting the Matplotlib marker size
         :param alpha: float denoting the Matplotlib alpha value
-        :return: None
+        :return: Featureartist
         """
         self._display.features.add_line(points, color, buffer, linewidth, edge_style, marker_type, marker_size, alpha)
 
@@ -284,7 +303,7 @@ class ENC:
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :param alpha: float denoting the Matplotlib alpha value
-        :return: None
+        :return: Featureartist
         """
         self._display.features.add_polygon(geometry, color, interiors, fill, thickness, edge_style, alpha)
 
@@ -298,7 +317,7 @@ class ENC:
         thickness: float = None,
         edge_style: Union[str, tuple] = None,
         alpha: float = 1.0,
-    ) -> None:
+    ):
         """
         Add a rectangle or box overlay to the environment plot.
         :param center: tuple of rectangle center coordinates
@@ -309,7 +328,7 @@ class ENC:
         :param thickness: float denoting the Matplotlib linewidth
         :param edge_style: str or tuple denoting the Matplotlib linestyle
         :param alpha: float denoting the Matplotlib alpha value
-        :return: None
+        :return: Featureartist
         """
         self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style, alpha)
 
