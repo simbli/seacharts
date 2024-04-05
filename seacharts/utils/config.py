@@ -1,4 +1,5 @@
 """Contains functionality for reading, processing and validating seacharts configuration settings"""
+
 from pathlib import Path
 from typing import List
 
@@ -24,10 +25,6 @@ class ENCConfig:
     @property
     def settings(self):
         return self._settings
-
-    @settings.setter
-    def settings(self, new_settings: dict):
-        self._settings = new_settings
 
     def extract_valid_sections(self) -> List[str]:
         if self._schema is None:
@@ -68,8 +65,11 @@ class ENCConfig:
         for key, value in kwargs.items():
             new_settings[section][key] = value
 
-        self.validate(new_settings)
+        if "figname" in new_settings[section] and section == "enc":
+            new_settings["display"]["figname"] = new_settings[section]["figname"]
+            new_settings[section].pop("figname")
 
+        self.validate(new_settings)
         self._settings = new_settings
 
 
