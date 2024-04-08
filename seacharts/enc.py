@@ -101,13 +101,6 @@ class ENC:
         return self._display.is_active
 
     @property
-    def crs(self) -> UTM:
-        """Return the coordinate reference system projection used, as UTM object."""
-        if self._display.crs is None:
-            return UTM(self.utm_zone)
-        return self._display.crs
-
-    @property
     def supported_crs(self) -> str:
         """Return the supported coordinate reference system, as string."""
         return self._environment.supported_crs

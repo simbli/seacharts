@@ -39,7 +39,7 @@ class Display:
     def _setup_figure_stuff(self, settings: dict, **kwargs) -> None:
         self.figure = None
         if self._show_figure:
-            self.crs = UTM(settings["enc"]["utm_zone"])
+            self.crs = UTM(self._utm_zone)
             self._background = None
             self.anchor_index = self._init_anchor_index(settings)
             self.figure, self.sizes, self.spacing, widths = self._init_figure(settings, **kwargs)
@@ -248,6 +248,7 @@ class Display:
 
         j, i = self.anchor_index
         option = self.window_anchors[j][i]
+        option = "right"
         if option != "default":
             root = tk.Tk()
             screen_width = int(root.winfo_screenwidth())
@@ -331,6 +332,15 @@ class Display:
         if not self._show_figure:
             return
         plt.close(self.figure)
+        self.figure = None
+        self.crs = None
+        self.axes = None
+        self.grid_spec = None
+        self._colorbar = None
+        self._background = None
+        self._dark_mode = False
+        self.events = None
+        self.features = None
         self._show_figure = False
 
     @staticmethod
