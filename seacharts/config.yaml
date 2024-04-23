@@ -1,14 +1,19 @@
 enc:
-  #autosize: True #TODO: implement autosize
-#  size: [ 16.0, 12.0, ]
-  size: [ 22.0, 15.5 ]
-  origin: [ -98.0, 18.0 ]
-#  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
-  depths: [ 0, 50, 100, 200, 2000 ]
-  #UTM_zone: 33
+# TODO: implement autosize
+# test config for S-57
+  size: [ 3.5, 3.5 ]
+  origin: [ -96.7, 27.0 ]
+  depths: [ 0, 1 ]
+  crs: "WGS84"
   S57_layers: ["DEPARE", "LNDARE", "TSSLPT"]
   resources: [ "data/", "data/db/" ]
 
+# test config for FGDB
+#  size: [ 9000, 5062 ]
+#  center: [ 44300, 6956450 ]
+#  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
+#  crs: "UTM33N"
+#  resources: [ "/", "data/", "data/db/" ]
 display:
   colorbar: False
   dark_mode: True

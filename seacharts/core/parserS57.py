@@ -67,25 +67,23 @@ class S57Parser(DataParser):
         s57_path = None
         for path in self._file_paths:
             s57_path = self.get_s57_file(path)
-        s57_path = s57_path.__str__().replace("\\", "/")
+        s57_path = r'' + s57_path.__str__()
         # end
 
         for region in regions_list:
+            start_time = time.time()
+            dest_path = r'' + self._shapefile_dir_path(region.label).__str__() + "\\" + region.label + ".shp"
+
             if isinstance(region, Seabed):
-                self.convert_s57_depth_to_shapefile(s57_path,
-                                                    self._shapefile_dir_path(region.label).__str__() +
-                                                    "\\" + region.label + ".shp",
-                                                    region.depth)
+                self.convert_s57_depth_to_shapefile(s57_path, dest_path, region.depth)
             elif isinstance(region, Land):
-                self.convert_s57_to_shapefile(s57_path,
-                                              self._shapefile_dir_path(region.label).__str__() + "\\" +
-                                              region.label + ".shp",
-                                              "LNDARE")
+                self.convert_s57_to_shapefile(s57_path, dest_path, "LNDARE")
             elif isinstance(region, Shore):
-                self.convert_s57_to_shapefile(s57_path,
-                                              self._shapefile_dir_path(region.label).__str__() + "\\" +
-                                              region.label + ".shp",
-                                              "LNDARE")
+                self.convert_s57_to_shapefile(s57_path, dest_path, "LNDARE")  # TODO fix coastline
+            records = list(self._read_shapefile(region.label))
+            region.records_as_geometry(records)
+            end_time = round(time.time() - start_time, 1)
+            print(f"\rSaved {region.name} to shapefile in {end_time} s.")
 
     @staticmethod
     def get_s57_file(path) -> Path:

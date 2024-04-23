@@ -30,7 +30,8 @@ class Display:
 
     def __init__(self, settings: dict, environment: env.Environment):
         self._settings = settings
-        self.crs = UTM(environment.scope.extent.UTM_zone)
+        self.crs = UTM(environment.scope.extent.utm_zone,
+                       southern_hemisphere=environment.scope.extent.southern_hemisphere)
         self._environment = environment
         self._background = None
         self._dark_mode = False

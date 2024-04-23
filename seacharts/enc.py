@@ -3,6 +3,8 @@ Contains the ENC class for reading, storing and plotting maritime spatial data.
 """
 from pathlib import Path
 
+from shapely.geometry import Point
+
 from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
@@ -25,6 +27,12 @@ class ENC:
         self._config = config if isinstance(config, Config) else Config(config)
         self._environment = Environment(self._config.settings)
         self._display = None
+
+    def get_depth_at_coord(self, easting, northing):
+        point = Point(easting, northing)
+        for seabed in reversed(self.seabed.values()):
+            if any(polygon.contains(point) for polygon in seabed.geometry):
+                return seabed
 
     def update(self) -> None:
         """
