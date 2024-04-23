@@ -35,9 +35,9 @@ enc:
         type: float
 
     #UTM zone required for coordinates to work correctly
-    UTM_zone:
-      required: False
-      type: integer
+    crs:
+      required: True
+      type: string
 
     #depths are required for both formats, if not set they will be assigned default values
     depths:

@@ -30,10 +30,10 @@ class Scope:
 
         files.build_directory_structure(self.features, self.resources)
 
-    #DEPARE --> depthsX - must be put into buffer dir first, then distributed between appropriate depths
-    #LNDARE --> land
-    #COALNE --> shore
-    #remaining layers --> ?? separate dir for all or shared dir like "info"?
+    # DEPARE --> depthsX - must be put into buffer dir first, then distributed between appropriate depths
+    # LNDARE --> land
+    # COALNE --> shore
+    # remaining layers --> ?? separate dir for all or shared dir like "info"?
     def __s57_init(self, settings: dict):
         default_layers = ["LNDARE", "DEPARE", "COALNE"] #TODO move to separate file
         self.layers = settings["enc"].get("S57_layers", default_layers)
