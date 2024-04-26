@@ -33,7 +33,10 @@ class _Hypsometry(ABC):
         layers = [x for x in self.layers if x.label in scope.layers]
         if scope.new_data:
             if scope.parser.verbose:
-                print(f"Processing {scope.extent.area // 10 ** 6} km^2 of " f"{self.__class__.__name__} features from: " + ", ".join(scope.files))
+                print(
+                    f"Processing {scope.extent.area // 10 ** 6} km^2 of "
+                    f"{self.__class__.__name__} features from: " + ", ".join(scope.files)
+                )
             for layer in layers:
                 start_time = time.time()
                 records = layer.load_fgdb(scope.parser)
@@ -73,7 +76,6 @@ class _Hypsometry(ABC):
             if scope.parser.verbose:
                 print()
         else:
-            print("ENC spatial.hypsometry.load Warning: Using previously loaded data. Use new-data=True to reload.")
             for layer in layers:
                 layer.load_shapefile(scope.parser)
 
