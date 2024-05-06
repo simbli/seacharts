@@ -4,7 +4,6 @@ Contains the Extent class for defining the span of spatial data.
 import math
 import re
 
-from pyproj import Transformer, CRS
 from pyproj import Proj, transform
 
 
@@ -26,8 +25,8 @@ class Extent:
             self.utm_zone = self.wgs2utm(self.center[0])
             self.southern_hemisphere = False if self.center[1] >= 0 else True
             self.size = self._size_from_lat_long()
-            self.center = self.convert_lat_lon_to_utm(self.center[1], self.center[0], self.utm_zone)
             self.origin = self.convert_lat_lon_to_utm(self.origin[1], self.origin[0], self.utm_zone)
+            self.center = self.origin[0] + self.size[0] / 2, self.origin[1] + self.size[1] / 2
 
         elif re.match(r'^UTM\d{2}[NS]', crs):
             crs = re.search(r'\d+[A-Z]', crs).group(0)

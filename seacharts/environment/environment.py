@@ -20,6 +20,9 @@ class Environment:
 
     def set_parser(self) -> DataParser:
         if self.scope.type is MapFormat.S57:
-            return S57Parser(self.scope.extent.bbox, self.scope.resources, self.scope.autosize)
+            epsg = "32"
+            epsg += '7' if self.scope.extent.southern_hemisphere is True else '6'
+            epsg += self.scope.extent.utm_zone
+            return S57Parser(self.scope.extent.bbox, self.scope.resources, self.scope.autosize, epsg)
         elif self.scope.type is MapFormat.FGDB:
             return FGDBParser(self.scope.extent.bbox, self.scope.resources, self.scope.autosize)
