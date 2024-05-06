@@ -8,19 +8,27 @@ from seacharts.layers.layer import SingleDepthLayer
 
 
 class S57Parser(DataParser):
-
+    def __init__(
+            self,
+            bounding_box: tuple[int, int, int, int],
+            path_strings: list[str],
+            autosize: bool,
+            epsg: str
+    ):
+        super().__init__(bounding_box, path_strings, autosize)
+        self.epsg = epsg
 
     @staticmethod
-    def convert_s57_to_shapefile(s57_file_path, shapefile_output_path, layer):
+    def convert_s57_to_utm_shapefile(s57_file_path, shapefile_output_path, layer, epsg, bounding_box):
+        x_min, y_min, x_max, y_max = map(str, bounding_box)
         ogr2ogr_cmd = [
             'ogr2ogr',
             '-f', 'ESRI Shapefile',  # Output format
-            # '-update',
-            '-t_srs', 'EPSG:32616',  # TODO fixit to take calculated utm zone
+            '-t_srs', 'EPSG:' + epsg,
             shapefile_output_path,  # Output shapefile
             s57_file_path,  # Input S57 file
             layer,
-            '-skipfailures'
+            '-skipfailures',
         ]
         try:
             subprocess.run(ogr2ogr_cmd, check=True)
@@ -29,12 +37,12 @@ class S57Parser(DataParser):
             print(f"Error during conversion: {e}")
 
     @staticmethod
-    def convert_s57_depth_to_shapefile(s57_file_path, shapefile_output_path, depth):
+    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg, bounding_box):
+        x_min, y_min, x_max, y_max = map(str, bounding_box)
         ogr2ogr_cmd = [
             'ogr2ogr',
             '-f', 'ESRI Shapefile',  # Output format
-            # '-update',
-            '-t_srs', 'EPSG:32616',  # TODO fixit to take calculated utm zone
+            '-t_srs', "EPSG:" + epsg,
             shapefile_output_path,  # Output shapefile
             s57_file_path,  # Input S57 file
             '-sql', 'SELECT * FROM DEPARE WHERE DRVAL1 >= ' + depth.__str__(),
@@ -63,23 +71,21 @@ class S57Parser(DataParser):
         print("INFO: Updating ENC with data from available resources...\n")
         print(f"Processing {area // 10 ** 6} km^2 of ENC features:")
 
-        # ogr2ogr was crashing for backslashes, temporary fix
         s57_path = None
         for path in self._file_paths:
             s57_path = self.get_s57_file(path)
         s57_path = r'' + s57_path.__str__()
-        # end
 
         for region in regions_list:
             start_time = time.time()
             dest_path = r'' + self._shapefile_dir_path(region.label).__str__() + "\\" + region.label + ".shp"
 
             if isinstance(region, Seabed):
-                self.convert_s57_depth_to_shapefile(s57_path, dest_path, region.depth)
+                self.convert_s57_depth_to_utm_shapefile(s57_path, dest_path, region.depth, self.epsg, self.bounding_box)
             elif isinstance(region, Land):
-                self.convert_s57_to_shapefile(s57_path, dest_path, "LNDARE")
+                self.convert_s57_to_utm_shapefile(s57_path, dest_path, "LNDARE", self.epsg, self.bounding_box)
             elif isinstance(region, Shore):
-                self.convert_s57_to_shapefile(s57_path, dest_path, "LNDARE")  # TODO fix coastline
+                self.convert_s57_to_utm_shapefile(s57_path, dest_path, "LNDARE", self.epsg, self.bounding_box)  # TODO fix coastline
             records = list(self._read_shapefile(region.label))
             region.records_as_geometry(records)
             end_time = round(time.time() - start_time, 1)
