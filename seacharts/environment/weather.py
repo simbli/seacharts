@@ -3,7 +3,7 @@ Contains the WeatherData class for containing parsed weather data.
 """
 from seacharts.layers import Layer
 from .collection import DataCollection
-
+import requests
 
 class WeatherData(DataCollection):
     def __post_init__(self):
