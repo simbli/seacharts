@@ -7,7 +7,7 @@ class WeatherManager:
         query_dict.pop("Pythor_adress")
         for k,v in query_dict.items():
             api_query += k + "="
-            if v is not list:
+            if not isinstance(v,list):
                 api_query += str(v)+"&"
             else:
                 for weater_var in v:
