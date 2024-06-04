@@ -6,7 +6,6 @@ from .map import MapData
 from .user import UserData
 from .weather import WeatherData
 
-
 class Environment:
     def __init__(self, settings: dict):
         self.scope = Scope(settings)
