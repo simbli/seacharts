@@ -8,4 +8,3 @@ from .parser import DataParser
 from .parserFGDB import FGDBParser
 from .parserS57 import S57Parser
 from .scope import Scope, MapFormat
-from .weatherManager import WeatherManager

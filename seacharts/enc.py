@@ -5,7 +5,7 @@ from pathlib import Path
 
 from shapely.geometry import Point
 
-from seacharts.core import Config,WeatherManager
+from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
 from seacharts.layers import Layer
@@ -26,7 +26,6 @@ class ENC:
     def __init__(self, config: Config | Path | str = None):
         self._config = config if isinstance(config, Config) else Config(config)
         self._environment = Environment(self._config.settings)
-        self.weather_manager = WeatherManager(self._config.settings["weather"])
         self._display = None
 
     def get_depth_at_coord(self, easting, northing):
