@@ -1,12 +1,14 @@
 enc:
 # TODO: implement autosize
 # test config for S-57
+#  size: [ 3.5, 3.5 ]
   size: [ 3.5, 3.5 ]
-  origin: [ -96.7, 27.0 ]
+#  origin: [ -96.7, 27.0 ]
+  origin: [ -59.99, -22.17 ]
   depths: [ 0, 1 ]
   crs: "WGS84"
   S57_layers: ["DEPARE", "LNDARE", "TSSLPT"]
-  resources: [ "data/", "data/db/" ]
+  resources: [ "data/", "data/db/BR7P0900" ]
 
 # test config for FGDB
 #  size: [ 9000, 5062 ]

@@ -8,7 +8,6 @@ from .collection import DataCollection
 class WeatherData(DataCollection):
     def __post_init__(self):
         ...
-
     @property
     def layers(self) -> list[Layer]:
         return []

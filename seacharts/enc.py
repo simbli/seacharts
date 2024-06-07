@@ -31,7 +31,7 @@ class ENC:
     def get_depth_at_coord(self, easting, northing):
         point = Point(easting, northing)
         for seabed in reversed(self.seabed.values()):
-            if any(polygon.contains(point) for polygon in seabed.geometry):
+            if any(polygon.contains(point) for polygon in seabed.geometry.geoms):
                 return seabed
 
     def update(self) -> None:
