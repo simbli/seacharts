@@ -4,6 +4,7 @@ Contains the WeatherData class for containing parsed weather data.
 from dataclasses import dataclass
 
 import requests
+from dataclasses import dataclass
 
 from seacharts.layers import VirtualWeatherLayer, WeatherLayer
 from .collection import DataCollection
