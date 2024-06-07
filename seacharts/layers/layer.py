@@ -50,3 +50,15 @@ class SingleDepthLayer(Layer, SingleDepth, ABC):
 @dataclass
 class MultiDepthLayer(Layer, MultiDepth, ABC):
     ...
+
+
+@dataclass
+class WeatherLayer:
+    time: int
+    data: list[list[float]]
+
+
+@dataclass
+class VirtualWeatherLayer:
+    name: str
+    weather: list[WeatherLayer]

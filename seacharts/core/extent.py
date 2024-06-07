@@ -4,7 +4,7 @@ Contains the Extent class for defining the span of spatial data.
 import math
 import re
 
-from pyproj import Proj, transform
+from pyproj import Transformer
 
 
 # TODO size in extent for latlong needs  fixing
@@ -41,12 +41,14 @@ class Extent:
         return str(math.floor(longitude / 6 + 31))
 
     def convert_lat_lon_to_utm(self, latitude, longitude, zone):
-        in_proj = Proj(init='epsg:4326')  # WGS84
-        # TODO find if hemisphere code variation is necessary
+        in_proj = 'epsg:4326'  # WGS84
         hemisphere_code = '7' if self.southern_hemisphere is True else '6'
-        out_proj = Proj(init='epsg:32' + hemisphere_code + zone)
+        # TODO find if hemisphere code variation is necessary
+        out_proj = 'epsg:32' + hemisphere_code + zone
 
-        utm_east, utm_north = transform(in_proj, out_proj, longitude, latitude)
+        transformer = Transformer.from_crs(in_proj, out_proj, always_xy=True)
+        utm_east, utm_north = transformer.transform(longitude, latitude)
+
         utm_east = math.ceil(utm_east)
         utm_north = math.ceil(utm_north)
         return utm_east, utm_north
