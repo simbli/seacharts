@@ -27,8 +27,7 @@ class WeatherData(DataCollection):
     def verify_scope(self):
         ...
 
-    @staticmethod
-    def fetch_data(query_dict) -> dict:
+    def fetch_data(self,query_dict) -> dict:
         api_query = query_dict["PyThor_adress"] + "/api/weather?"
         query_dict.pop("PyThor_adress")
         for k, v in query_dict.items():
@@ -40,6 +39,14 @@ class WeatherData(DataCollection):
                     api_query += str(weater_var) + ","
                 api_query = api_query[:-1] + "&"
         api_query = api_query[:-1]
+        x_min, y_min, x_max, y_max = self.scope.extent.bbox
+        latitude_start,longitude_start = self.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
+        latitude_end, longitude_end = self.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
+        print(latitude_start,longitude_start,latitude_end, longitude_end)
+        api_query += "&latitude_start="+str(latitude_start)
+        api_query += "&longitude_start=" + str(longitude_start)
+        api_query += "&latitude_end=" + str(latitude_end)
+        api_query += "&longitude_end=" + str(longitude_end)
         print(api_query)
         return requests.get(api_query).json()
 

@@ -13,7 +13,7 @@ class Environment:
         self.parser = self.set_parser()
         self.map = MapData(self.scope, self.parser)
         self.user = UserData(self.scope, self.parser)
-        # self.weather = WeatherData(self.scope, self.parser)
+        self.weather = WeatherData(self.scope, self.parser)
         self.map.load_existing_shapefiles()
         if not self.map.loaded:
             self.map.parse_resources_into_shapefiles()

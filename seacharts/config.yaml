@@ -11,11 +11,7 @@ enc:
     PyThor_adress: "http://127.0.0.1:5000"
     time_start: 1717420980
     time_end: 1717420980
-    latitude_start: 36
-    latitude_end: 37
-    longitude_start: 15
-    longitude_end: 16
-    variables: [ "wave_direction","wave_height","wave_period","wind_direction","wind_speed" ]
+    variables: [ "wind_speed" ]
 
 # test config for FGDB
 #  size: [ 9000, 5062 ]

@@ -54,6 +54,14 @@ class Extent:
         utm_north = math.ceil(utm_north)
         return utm_east, utm_north
 
+    def convert_utm_to_lat_lon(self, utm_east, utm_north):
+        out_proj = 'epsg:4326'  # WGS84
+        in_proj = self.out_proj
+        transformer = Transformer.from_crs(in_proj, out_proj, always_xy=True)
+        longitude, latitude = transformer.transform(utm_east, utm_north)
+
+        return latitude, longitude
+
     def _origin_from_center(self) -> tuple[int, int]:
         return (
             int(self.center[0] - self.size[0] / 2),

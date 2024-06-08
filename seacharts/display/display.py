@@ -7,6 +7,8 @@ from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import colors
 from matplotlib.widgets import Slider
 from matplotlib.widgets import Button
 from cartopy.crs import UTM
@@ -112,6 +114,20 @@ class Display:
         :return: None
         """
         self._refresh_vessels([])
+    @staticmethod
+    def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+        new_cmap = colors.LinearSegmentedColormap.from_list(
+            'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+            cmap(np.linspace(minval, maxval, n)))
+        return new_cmap
+
+    def draw_heatmap(self):
+        heatmap_data = self._environment.weather.weather_layers[0].weather[0].data
+        print(heatmap_data)
+        x_min, y_min, x_max, y_max = self._environment.scope.extent.bbox
+        extent = (x_min, x_max, y_min, y_max)
+        cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.30, 0.9)
+        heatmap = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5)
 
     def draw_arrow(
         self,

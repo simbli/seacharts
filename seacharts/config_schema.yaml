@@ -78,18 +78,6 @@ enc:
         time_end:
           required: False
           type: integer
-        latitude_start:
-          required: False
-          type: float
-        latitude_end:
-          required: False
-          type: float
-        longitude_start:
-          required: False
-          type: float
-        longitude_end:
-          required: False
-          type: float
         variables:
           type: list
           required: False
