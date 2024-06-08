@@ -27,7 +27,7 @@ class S57Parser(DataParser):
             shapefile_output_path,      # Output shapefile
             s57_file_path,              # Input S57 file
             layer,
-            '-t_srs', 'EPSG:' + epsg,
+            '-t_srs', epsg.upper(),
             '-clipdst', x_min, y_min, x_max, y_max,
             '-skipfailures'
         ]
@@ -38,7 +38,7 @@ class S57Parser(DataParser):
             print(f"Error during conversion: {e}")
 
     @staticmethod
-    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg, bounding_box):
+    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg:str, bounding_box):
         x_min, y_min, x_max, y_max = map(str, bounding_box)
         ogr2ogr_cmd = [
             'ogr2ogr',
@@ -46,7 +46,7 @@ class S57Parser(DataParser):
             shapefile_output_path,      # Output shapefile
             s57_file_path,              # Input S57 file
             '-sql', 'SELECT * FROM DEPARE WHERE DRVAL1 >= ' + depth.__str__(),
-            '-t_srs', 'EPSG:' + epsg,
+            '-t_srs', epsg.upper(),
             '-clipdst', x_min, y_min, x_max, y_max,
             '-skipfailures'
         ]

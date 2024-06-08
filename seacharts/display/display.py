@@ -7,6 +7,8 @@ from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
+from matplotlib.widgets import Button
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 from matplotlib_scalebar.scalebar import ScaleBar
@@ -47,6 +49,7 @@ class Display:
         self._toggle_colorbar(self._colorbar_mode)
         self._toggle_dark_mode(self._dark_mode)
         self._add_scalebar()
+        self.add_slider()
         self.redraw_plot()
         if self._fullscreen_mode:
             self._toggle_fullscreen(self._fullscreen_mode)
@@ -480,3 +483,29 @@ class Display:
 
     def _terminate(self):
         plt.close(self.figure)
+
+    """
+    def add_slider(self):
+        fig, (ax_slider, ax_button) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]}, figsize=(8, 1))
+        self.slider = Slider(ax_slider, label='Slider', valmin=0, valmax=1, valinit=0.5)
+        button = Button(ax_button, 'Set', color='lightgray')
+        button.on_clicked(self.slider_changed_callback)
+
+        fig.show()
+    """
+
+    def add_slider(self):
+        fig, ax_slider = plt.subplots(figsize=(8, 1))
+        self.slider = Slider(ax_slider, label='Slider', valmin=0, valmax=1, valinit=0.5)
+        last_value = self.slider.val
+
+        def onrelease(event):
+            nonlocal last_value
+            if event.button == 1 and event.inaxes == ax_slider:
+                val = self.slider.val
+                if val != last_value:
+                    last_value = val
+                    print(f"Slider value: {val}")
+
+        fig.canvas.mpl_connect('button_release_event', onrelease)
+        fig.show()
