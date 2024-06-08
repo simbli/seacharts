@@ -19,7 +19,7 @@ class WeatherData(DataCollection):
     def __post_init__(self):
         print("k")
         self.weather_layers = list()
-        if self.scope.weather != []:
+        if self.scope.weather:
             self.verify_scope()
             unformatted_data = self.fetch_data(self.scope.weather.copy())
             self.parse_data(unformatted_data)
@@ -47,6 +47,7 @@ class WeatherData(DataCollection):
         self.time = data.pop("time_inter")
         self.latitude = data.pop("lat_inter")
         self.longitude = data.pop("lon_inter")
+
         for k, v in data.items():
             new_layer = VirtualWeatherLayer(name=k, weather=list())
             for time_index, weather_data in enumerate(v):

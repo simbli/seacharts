@@ -5,7 +5,7 @@ enc:
   origin: [ -96.7, 27.0 ]
   depths: [ 0, 1 ]
   crs: "WGS84"
-  S57_layers: ["DEPARE", "LNDARE", "TSSLPT"]
+  S57_layers: ["DEPARE", "LNDARE"]
   resources: [ "data/", "data/db/" ]
   weather:
     PyThor_adress: "http://127.0.0.1:5000"
