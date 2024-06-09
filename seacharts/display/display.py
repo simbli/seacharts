@@ -135,8 +135,8 @@ class Display:
         # fg_color = 'white'
 
         ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)),num=8)
-        self.weather_map = self.axes.imshow(heatmap_data,aspect='auto',extent=extent, origin='lower', cmap=cmap, alpha=0.5)
-        self._cbar = self.figure.colorbar( self.weather_map, ax=self.axes,shrink=0.7)
+        self.weather_map = self.axes.imshow(heatmap_data,extent=extent, origin='lower', cmap=cmap, alpha=0.5)
+        self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes,shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         self._cbar.outline.set_edgecolor(label_colour)
         print(heatmap_data)
