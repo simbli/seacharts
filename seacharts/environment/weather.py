@@ -12,12 +12,12 @@ from .collection import DataCollection
 
 @dataclass
 class WeatherData(DataCollection):
-    longitude: float = None
-    latitude: float = None
-    time: int = None
+    longitude: list[float] = None
+    latitude: list[float] = None
+    time: list[float] = None
+    selected_time_index: int = None
 
     def __post_init__(self):
-        print("k")
         self.weather_layers = list()
         if self.scope.weather:
             self.verify_scope()
@@ -54,7 +54,7 @@ class WeatherData(DataCollection):
         self.time = data.pop("time_inter")
         self.latitude = data.pop("lat_inter")
         self.longitude = data.pop("lon_inter")
-
+        self.selected_time_index = 0
         for k, v in data.items():
             new_layer = VirtualWeatherLayer(name=k, weather=list())
             for time_index, weather_data in enumerate(v):
@@ -68,3 +68,9 @@ class WeatherData(DataCollection):
     @property
     def loaded(self) -> bool:
         return any(self.layers)
+
+    def find_by_name(self,name:str) -> VirtualWeatherLayer:
+        for layer in self.layers:
+            if layer.name == name:
+                return layer
+        return None

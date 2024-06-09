@@ -115,19 +115,29 @@ class Display:
         """
         self._refresh_vessels([])
     @staticmethod
-    def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100) -> colors.LinearSegmentedColormap:
         new_cmap = colors.LinearSegmentedColormap.from_list(
             'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
             cmap(np.linspace(minval, maxval, n)))
         return new_cmap
 
-    def draw_heatmap(self):
-        heatmap_data = self._environment.weather.weather_layers[0].weather[0].data
-        print(heatmap_data)
+    def draw_weather_heatmap(self,variable_name:str,cmap: colors.Colormap,label_colour: str)->None:
+        weather_layer = self._environment.weather.find_by_name(variable_name)
+        if weather_layer is None:
+            return
+        heatmap_data = weather_layer.weather[self._environment.weather.selected_time_index].data
         x_min, y_min, x_max, y_max = self._environment.scope.extent.bbox
         extent = (x_min, x_max, y_min, y_max)
-        cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.30, 0.9)
+        #cmap = self.truncate_colormap(plt.get_cmap('summer'), 0.2, 1)
+        # cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9)
+        # fg_color = 'white'
+
         heatmap = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5)
+        ticks = np.round(np.linspace(start=np.nanmin(np.array(heatmap_data)),stop=np.nanmax(np.array(heatmap_data)),num=8),2)
+        cbar = self.figure.colorbar(heatmap, ax=self.axes,shrink=0.7,ticks=ticks)
+        cbar.ax.yaxis.set_tick_params(color=label_colour)
+        cbar.outline.set_edgecolor(label_colour)
+        plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color=label_colour)
 
     def draw_arrow(
         self,
