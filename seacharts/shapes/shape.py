@@ -51,6 +51,8 @@ class Shape(ABC):
             return geo.MultiPolygon(geometry)
         elif isinstance(geometry[0], geo.LineString):
             return geo.MultiLineString(geometry)
+        elif isinstance(geometry[0], geo.MultiPolygon):
+            return geometry[0]
         else:
             raise NotImplementedError(type(geometry))
 
