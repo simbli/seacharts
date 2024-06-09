@@ -114,6 +114,7 @@ class Display:
         :return: None
         """
         self._refresh_vessels([])
+
     @staticmethod
     def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100) -> colors.LinearSegmentedColormap:
         new_cmap = colors.LinearSegmentedColormap.from_list(
@@ -128,16 +129,20 @@ class Display:
         heatmap_data = weather_layer.weather[self._environment.weather.selected_time_index].data
         x_min, y_min, x_max, y_max = self._environment.scope.extent.bbox
         extent = (x_min, x_max, y_min, y_max)
+        # print(extent)
         #cmap = self.truncate_colormap(plt.get_cmap('summer'), 0.2, 1)
-        # cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9)
+        #cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9)
         # fg_color = 'white'
 
-        heatmap = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5)
-        ticks = np.round(np.linspace(start=np.nanmin(np.array(heatmap_data)),stop=np.nanmax(np.array(heatmap_data)),num=8),2)
-        cbar = self.figure.colorbar(heatmap, ax=self.axes,shrink=0.7,ticks=ticks)
-        cbar.ax.yaxis.set_tick_params(color=label_colour)
-        cbar.outline.set_edgecolor(label_colour)
-        plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color=label_colour)
+        ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)),num=8)
+        self.weather_map = self.axes.imshow(heatmap_data,aspect='auto',extent=extent, origin='lower', cmap=cmap, alpha=0.5)
+        self._cbar = self.figure.colorbar( self.weather_map, ax=self.axes,shrink=0.7)
+        self._cbar.ax.yaxis.set_tick_params(color=label_colour)
+        self._cbar.outline.set_edgecolor(label_colour)
+        print(heatmap_data)
+        print(np.nanmin(np.array(heatmap_data)))
+        print(np.nanmax(np.array(heatmap_data)))
+        plt.setp(plt.getp(self._cbar.ax.axes, 'yticklabels'), color=label_colour)
 
     def draw_arrow(
         self,
@@ -522,7 +527,8 @@ class Display:
 
     def add_slider(self):
         fig, ax_slider = plt.subplots(figsize=(8, 1))
-        self.slider = Slider(ax_slider, label='Slider', valmin=0, valmax=1, valinit=0.5)
+        times = self._environment.weather.time
+        self.slider = Slider(ax_slider, label='Time:', valmin=0, valmax=len(times)-1, valinit=0,valstep=1)
         last_value = self.slider.val
 
         def onrelease(event):
@@ -530,7 +536,12 @@ class Display:
             if event.button == 1 and event.inaxes == ax_slider:
                 val = self.slider.val
                 if val != last_value:
+                    self._environment.weather.selected_time_index = val
+                    self._cbar.remove()
+                    self.weather_map.remove()
                     last_value = val
+                    self.draw_weather_heatmap(self._environment.weather.weather_layers[0].name,cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9),label_colour='white')
+                    self.redraw_plot()
                     print(f"Slider value: {val}")
 
         fig.canvas.mpl_connect('button_release_event', onrelease)

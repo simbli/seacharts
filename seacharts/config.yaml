@@ -9,8 +9,8 @@ enc:
   resources: [ "data/", "data/db/" ]
   weather:
     PyThor_adress: "http://127.0.0.1:5000"
-    time_start: 1717420980
-    time_end: 1717420980
+    time_start: 1717931596
+    time_end: 1717952909
     variables: [ "wave_height" ]
 
 # test config for FGDB
