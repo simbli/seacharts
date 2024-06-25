@@ -51,11 +51,13 @@ class WeatherData(DataCollection):
         return requests.get(api_query).json()
 
     def parse_data(self, data: dict) -> None:
+        self.weather_names =  []
         self.time = data.pop("time_inter")
         self.latitude = data.pop("lat_inter")
         self.longitude = data.pop("lon_inter")
         self.selected_time_index = 0
         for k, v in data.items():
+            self.append = self.weather_names.append(k)
             new_layer = VirtualWeatherLayer(name=k, weather=list())
             for time_index, weather_data in enumerate(v):
                 new_layer.weather.append(WeatherLayer(time=self.time[time_index], data=weather_data))
