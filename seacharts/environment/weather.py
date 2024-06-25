@@ -28,6 +28,11 @@ class WeatherData(DataCollection):
         ...
 
     def fetch_data(self,query_dict) -> dict:
+        """
+        fetch data from PyThor service
+        :param query_dict: Dict with API query data
+        :return: Dictionary with weather data.
+        """
         api_query = query_dict["PyThor_adress"] + "/api/weather?"
         query_dict.pop("PyThor_adress")
         for k, v in query_dict.items():
@@ -51,13 +56,17 @@ class WeatherData(DataCollection):
         return requests.get(api_query).json()
 
     def parse_data(self, data: dict) -> None:
+        """
+        parse data from weather service
+        :param data: Dict with data from weather service
+        """
         self.weather_names =  []
         self.time = data.pop("time_inter")
         self.latitude = data.pop("lat_inter")
         self.longitude = data.pop("lon_inter")
         self.selected_time_index = 0
         for k, v in data.items():
-            self.append = self.weather_names.append(k)
+            self.weather_names.append(k)
             new_layer = VirtualWeatherLayer(name=k, weather=list())
             for time_index, weather_data in enumerate(v):
                 new_layer.weather.append(WeatherLayer(time=self.time[time_index], data=weather_data))
