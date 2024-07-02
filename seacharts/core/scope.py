@@ -28,6 +28,8 @@ class Scope:
         else:
             self.type = MapFormat.FGDB
 
+        self.weather = settings["enc"].get("weather", [])
+
         files.build_directory_structure(self.features, self.resources)
 
     # DEPARE --> depthsX - must be put into buffer dir first, then distributed between appropriate depths

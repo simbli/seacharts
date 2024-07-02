@@ -8,7 +8,7 @@ from shapely.geometry import Point
 from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
-from seacharts.layers import Layer
+from seacharts.layers import Layer, VirtualWeatherLayer
 
 
 class ENC:
@@ -31,7 +31,7 @@ class ENC:
     def get_depth_at_coord(self, easting, northing):
         point = Point(easting, northing)
         for seabed in reversed(self.seabed.values()):
-            if any(polygon.contains(point) for polygon in seabed.geometry):
+            if any(polygon.contains(point) for polygon in seabed.geometry.geoms):
                 return seabed
 
     def update(self) -> None:
@@ -105,3 +105,11 @@ class ENC:
         :return: list of considered depth bins
         """
         return self._environment.scope.depths
+
+    @property
+    def weather_names(self) -> list(str):
+        return self._environment.weather.weather_names
+
+    @property
+    def weather_data(self, name) -> VirtualWeatherLayer:
+        return self._environment.weather.find_by_name(name)

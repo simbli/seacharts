@@ -64,6 +64,27 @@ enc:
       schema:
         type: string
 
+    weather:
+      required: False
+      type: dict
+      schema:
+        PyThor_adress:
+          required: False
+          type: string
+        #in epoch time
+        time_start:
+          required: False
+          type: integer
+        time_end:
+          required: False
+          type: integer
+        variables:
+          type: list
+          required: False
+          schema:
+            type: string
+
+
 display:
   required: False
   type: dict

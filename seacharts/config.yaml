@@ -1,12 +1,17 @@
 enc:
 # TODO: implement autosize
 # test config for S-57
-  size: [ 3.5, 3.5 ]
-  origin: [ -96.7, 27.0 ]
-  depths: [ 0, 1 ]
+  size: [ 6, 6 ]
+  origin: [ -96.7, 24.0 ]
+  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
   crs: "WGS84"
-  S57_layers: ["DEPARE", "LNDARE", "TSSLPT"]
+  S57_layers: ["DEPARE", "LNDARE"]
   resources: [ "data/", "data/db/" ]
+  weather:
+    PyThor_adress: "http://127.0.0.1:5000"
+    time_start: 1717931596
+    time_end: 1717952909
+    variables: [ "wave_height" ]
 
 # test config for FGDB
 #  size: [ 9000, 5062 ]
@@ -21,3 +26,6 @@ display:
   resolution: 640
   anchor: "center"
   dpi: 96
+
+
+

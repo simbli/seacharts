@@ -1,10 +1,10 @@
+import os.path
 import subprocess
 import time
 from pathlib import Path
 
 from seacharts.core import DataParser
 from seacharts.layers import Layer, Land, Shore, Seabed
-from seacharts.layers.layer import SingleDepthLayer
 
 
 class S57Parser(DataParser):
@@ -23,12 +23,13 @@ class S57Parser(DataParser):
         x_min, y_min, x_max, y_max = map(str, bounding_box)
         ogr2ogr_cmd = [
             'ogr2ogr',
-            '-f', 'ESRI Shapefile',  # Output format
-            '-t_srs', 'EPSG:' + epsg,
-            shapefile_output_path,  # Output shapefile
-            s57_file_path,  # Input S57 file
+            '-f', 'ESRI Shapefile',     # Output format
+            shapefile_output_path,      # Output shapefile
+            s57_file_path,              # Input S57 file
             layer,
-            '-skipfailures',
+            '-t_srs', epsg.upper(),
+            '-clipdst', x_min, y_min, x_max, y_max,
+            '-skipfailures'
         ]
         try:
             subprocess.run(ogr2ogr_cmd, check=True)
@@ -37,15 +38,16 @@ class S57Parser(DataParser):
             print(f"Error during conversion: {e}")
 
     @staticmethod
-    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg, bounding_box):
+    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg:str, bounding_box):
         x_min, y_min, x_max, y_max = map(str, bounding_box)
         ogr2ogr_cmd = [
             'ogr2ogr',
-            '-f', 'ESRI Shapefile',  # Output format
-            '-t_srs', "EPSG:" + epsg,
-            shapefile_output_path,  # Output shapefile
-            s57_file_path,  # Input S57 file
+            '-f', 'ESRI Shapefile',     # Output format
+            shapefile_output_path,      # Output shapefile
+            s57_file_path,              # Input S57 file
             '-sql', 'SELECT * FROM DEPARE WHERE DRVAL1 >= ' + depth.__str__(),
+            '-t_srs', epsg.upper(),
+            '-clipdst', x_min, y_min, x_max, y_max,
             '-skipfailures'
         ]
         try:

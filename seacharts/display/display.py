@@ -7,6 +7,10 @@ from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import colors
+from matplotlib.widgets import Slider
+from matplotlib.widgets import Button
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 from matplotlib_scalebar.scalebar import ScaleBar
@@ -47,6 +51,7 @@ class Display:
         self._toggle_colorbar(self._colorbar_mode)
         self._toggle_dark_mode(self._dark_mode)
         self._add_scalebar()
+        self.add_slider()
         self.redraw_plot()
         if self._fullscreen_mode:
             self._toggle_fullscreen(self._fullscreen_mode)
@@ -54,7 +59,7 @@ class Display:
             self._set_figure_position()
 
     def start(self) -> None:
-        """
+        self.started__ = """
         Starts the display, if it is not already started.
         """
         if self._is_active:
@@ -110,16 +115,53 @@ class Display:
         """
         self._refresh_vessels([])
 
+    @staticmethod
+    def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100) -> colors.LinearSegmentedColormap:
+        """
+        helper function to truncate a colormap
+        """
+        new_cmap = colors.LinearSegmentedColormap.from_list(
+            'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+            cmap(np.linspace(minval, maxval, n)))
+        return new_cmap
+
+    def draw_weather(self, variable_name):
+        None
+
+    def _draw_arrow_map(self):
+        None
+
+    def _draw_weather_heatmap(self, variable_name: str, cmap: colors.Colormap, label_colour: str) -> None:
+        """
+        Draws a heatmap and colorbar for specified weather variable using provided color map and label colour for color bar
+        :return: None
+        """
+        weather_layer = self._environment.weather.find_by_name(variable_name)
+        if weather_layer is None:
+            return
+        heatmap_data = weather_layer.weather[self._environment.weather.selected_time_index].data
+        x_min, y_min, x_max, y_max = self._environment.scope.extent.bbox
+        extent = (x_min, x_max, y_min, y_max)
+        ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=8)
+        self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5)
+        self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
+        self._cbar.ax.yaxis.set_tick_params(color=label_colour)
+        self._cbar.outline.set_edgecolor(label_colour)
+        print(heatmap_data)
+        print(np.nanmin(np.array(heatmap_data)))
+        print(np.nanmax(np.array(heatmap_data)))
+        plt.setp(plt.getp(self._cbar.ax.axes, 'yticklabels'), color=label_colour)
+
     def draw_arrow(
-        self,
-        start: tuple[float, float],
-        end: tuple[float, float],
-        color: str,
-        width: float = None,
-        fill: bool = False,
-        head_size: float = None,
-        thickness: float = None,
-        edge_style: str | tuple = None,
+            self,
+            start: tuple[float, float],
+            end: tuple[float, float],
+            color: str,
+            width: float = None,
+            fill: bool = False,
+            head_size: float = None,
+            thickness: float = None,
+            edge_style: str | tuple = None,
     ) -> None:
         """
         Add a straight arrow overlay to the environment plot.
@@ -138,14 +180,14 @@ class Display:
         )
 
     def draw_circle(
-        self,
-        center: tuple[float, float],
-        radius: float,
-        color: str,
-        fill: bool = True,
-        thickness: float = None,
-        edge_style: str | tuple = None,
-        alpha: float = 1.0,
+            self,
+            center: tuple[float, float],
+            radius: float,
+            color: str,
+            fill: bool = True,
+            thickness: float = None,
+            edge_style: str | tuple = None,
+            alpha: float = 1.0,
     ) -> None:
         """
         Add a circle or disk overlay to the environment plot.
@@ -163,13 +205,13 @@ class Display:
         )
 
     def draw_line(
-        self,
-        points: list[tuple[float, float]],
-        color: str,
-        width: float = None,
-        thickness: float = None,
-        edge_style: str | tuple = None,
-        marker_type: str = None,
+            self,
+            points: list[tuple[float, float]],
+            color: str,
+            width: float = None,
+            thickness: float = None,
+            edge_style: str | tuple = None,
+            marker_type: str = None,
     ) -> None:
         """
         Add a straight line overlay to the environment plot.
@@ -184,14 +226,14 @@ class Display:
         self.features.add_line(points, color, width, thickness, edge_style, marker_type)
 
     def draw_polygon(
-        self,
-        geometry: Any | list[tuple[float, float]],
-        color: str,
-        interiors: list[list[tuple[float, float]]] = None,
-        fill: bool = True,
-        thickness: float = None,
-        edge_style: str | tuple = None,
-        alpha: float = 1.0,
+            self,
+            geometry: Any | list[tuple[float, float]],
+            color: str,
+            interiors: list[list[tuple[float, float]]] = None,
+            fill: bool = True,
+            thickness: float = None,
+            edge_style: str | tuple = None,
+            alpha: float = 1.0,
     ) -> None:
         """
         Add an arbitrary polygon shape overlay to the environment plot.
@@ -209,15 +251,15 @@ class Display:
         )
 
     def draw_rectangle(
-        self,
-        center: tuple[float, float],
-        size: tuple[float, float],
-        color: str,
-        rotation: float = 0.0,
-        fill: bool = True,
-        thickness: float = None,
-        edge_style: str | tuple = None,
-        alpha: float = 1.0,
+            self,
+            center: tuple[float, float],
+            size: tuple[float, float],
+            color: str,
+            rotation: float = 0.0,
+            fill: bool = True,
+            thickness: float = None,
+            edge_style: str | tuple = None,
+            alpha: float = 1.0,
     ) -> None:
         """
         Add a rectangle or box overlay to the environment plot.
@@ -236,11 +278,11 @@ class Display:
         )
 
     def save_image(
-        self,
-        name: str = None,
-        path: Path | None = None,
-        scale: float = 1.0,
-        extension: str = "png",
+            self,
+            name: str = None,
+            path: Path | None = None,
+            scale: float = 1.0,
+            extension: str = "png",
     ) -> None:
         """
         Save the environment plot as a .png image.
@@ -451,11 +493,11 @@ class Display:
         return self.figure, self.axes
 
     def _save_figure(
-        self,
-        name: str | None = None,
-        path: Path | None = None,
-        scale: float = 1.0,
-        extension: str = "png",
+            self,
+            name: str | None = None,
+            path: Path | None = None,
+            scale: float = 1.0,
+            extension: str = "png",
     ):
         try:
             if name is None:
@@ -480,3 +522,39 @@ class Display:
 
     def _terminate(self):
         plt.close(self.figure)
+
+    """
+    def add_slider(self):
+        fig, (ax_slider, ax_button) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]}, figsize=(8, 1))
+        self.slider = Slider(ax_slider, label='Slider', valmin=0, valmax=1, valinit=0.5)
+        button = Button(ax_button, 'Set', color='lightgray')
+        button.on_clicked(self.slider_changed_callback)
+
+        fig.show()
+    """
+    def _weather_slider_handle(self,val):
+        self._environment.weather.selected_time_index = val
+        self._cbar.remove()
+        self.weather_map.remove()
+        self.draw_weather_heatmap(self._environment.weather.weather_layers[0].name,
+                                  cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9),
+                                  label_colour='white')
+        self.redraw_plot()
+
+    def add_slider(self):
+        fig, ax_slider = plt.subplots(figsize=(8, 1))
+        times = self._environment.weather.time  # TODO make it universal
+        self.slider = Slider(ax_slider, label='Time:', valmin=0, valmax=len(times) - 1, valinit=0, valstep=1)
+        last_value = self.slider.val
+
+        def onrelease(event):
+            nonlocal last_value
+            if event.button == 1 and event.inaxes == ax_slider:
+                val = self.slider.val
+                if val != last_value:
+                    self._weather_slider_handle(val)
+                    last_value = val
+                    print(f"Slider value: {val}")
+
+        fig.canvas.mpl_connect('button_release_event', onrelease)
+        fig.show()
