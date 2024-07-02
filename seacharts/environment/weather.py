@@ -18,6 +18,7 @@ class WeatherData(DataCollection):
     selected_time_index: int = None
 
     def __post_init__(self):
+        self.weather_names = list()
         self.weather_layers = list()
         if self.scope.weather:
             self.verify_scope()
@@ -60,7 +61,6 @@ class WeatherData(DataCollection):
         parse data from weather service
         :param data: Dict with data from weather service
         """
-        self.weather_names =  []
         self.time = data.pop("time_inter")
         self.latitude = data.pop("lat_inter")
         self.longitude = data.pop("lon_inter")
