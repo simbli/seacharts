@@ -117,12 +117,15 @@ class Display:
 
     @staticmethod
     def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100) -> colors.LinearSegmentedColormap:
+        """
+        helper function to truncate a colormap
+        """
         new_cmap = colors.LinearSegmentedColormap.from_list(
             'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
             cmap(np.linspace(minval, maxval, n)))
         return new_cmap
 
-    def draw_weather(self,variable_name):
+    def draw_weather(self, variable_name):
         None
 
     def _draw_arrow_map(self):
@@ -529,10 +532,18 @@ class Display:
 
         fig.show()
     """
+    def _weather_slider_handle(self,val):
+        self._environment.weather.selected_time_index = val
+        self._cbar.remove()
+        self.weather_map.remove()
+        self.draw_weather_heatmap(self._environment.weather.weather_layers[0].name,
+                                  cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9),
+                                  label_colour='white')
+        self.redraw_plot()
 
     def add_slider(self):
         fig, ax_slider = plt.subplots(figsize=(8, 1))
-        times = self._environment.weather.time
+        times = self._environment.weather.time  # TODO make it universal
         self.slider = Slider(ax_slider, label='Time:', valmin=0, valmax=len(times) - 1, valinit=0, valstep=1)
         last_value = self.slider.val
 
@@ -541,14 +552,8 @@ class Display:
             if event.button == 1 and event.inaxes == ax_slider:
                 val = self.slider.val
                 if val != last_value:
-                    self._environment.weather.selected_time_index = val
-                    self._cbar.remove()
-                    self.weather_map.remove()
+                    self._weather_slider_handle(val)
                     last_value = val
-                    self.draw_weather_heatmap(self._environment.weather.weather_layers[0].name,
-                                              cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9),
-                                              label_colour='white')
-                    self.redraw_plot()
                     print(f"Slider value: {val}")
 
         fig.canvas.mpl_connect('button_release_event', onrelease)
