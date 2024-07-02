@@ -25,7 +25,6 @@ class Extent:
             self.southern_hemisphere = False if self.center[1] >= 0 else True
             hemisphere_code = '7' if self.southern_hemisphere is True else '6'
             self.out_proj = 'epsg:32' + hemisphere_code + self.utm_zone
-
             self.size = self._size_from_lat_long()
             self.origin = self.convert_lat_lon_to_utm(self.origin[1], self.origin[0])
             self.center = self.origin[0] + self.size[0] / 2, self.origin[1] + self.size[1] / 2

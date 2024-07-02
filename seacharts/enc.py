@@ -107,7 +107,7 @@ class ENC:
         return self._environment.scope.depths
 
     @property
-    def weather_names(self) -> list(str):
+    def weather_names(self) -> list[str]:
         return self._environment.weather.weather_names
 
     @property

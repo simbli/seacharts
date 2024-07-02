@@ -36,6 +36,11 @@ class Display:
         self._settings = settings
         self.crs = UTM(environment.scope.extent.utm_zone,
                        southern_hemisphere=environment.scope.extent.southern_hemisphere)
+
+        self._bbox = (max(environment.scope.extent.bbox[0], self.crs.x_limits[0]),  # x-min
+                      max(environment.scope.extent.bbox[1], self.crs.y_limits[0]),  # y-min
+                      min(environment.scope.extent.bbox[2], self.crs.x_limits[1]),  # x-max
+                      min(environment.scope.extent.bbox[3], self.crs.y_limits[1]))  # y-max
         self._environment = environment
         self._background = None
         self._dark_mode = False
@@ -543,7 +548,9 @@ class Display:
 
     def add_slider(self):
         fig, ax_slider = plt.subplots(figsize=(8, 1))
-        times = self._environment.weather.time  # TODO make it universal
+        times = self._environment.weather.time
+        if times is None:
+            times = [0]
         self.slider = Slider(ax_slider, label='Time:', valmin=0, valmax=len(times) - 1, valinit=0, valstep=1)
         last_value = self.slider.val
 
