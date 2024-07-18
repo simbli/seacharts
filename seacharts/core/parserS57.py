@@ -87,7 +87,8 @@ class S57Parser(DataParser):
             elif isinstance(region, Land):
                 self.convert_s57_to_utm_shapefile(s57_path, dest_path, "LNDARE", self.epsg, self.bounding_box)
             elif isinstance(region, Shore):
-                self.convert_s57_to_utm_shapefile(s57_path, dest_path, "LNDARE", self.epsg, self.bounding_box)  # TODO fix coastline
+                self.convert_s57_to_utm_shapefile(s57_path, dest_path, "COALNE", self.epsg, self.bounding_box)
+
             records = list(self._read_shapefile(region.label))
             region.records_as_geometry(records)
             end_time = round(time.time() - start_time, 1)

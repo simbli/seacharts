@@ -3,6 +3,8 @@ Contains the FeaturesManager class for plotting spatial features on a display.
 """
 import shapely.geometry as geo
 from cartopy.feature import ShapelyFeature
+from matplotlib.lines import Line2D
+from shapely.geometry import MultiLineString
 
 from seacharts import shapes, core
 from .colors import color_picker
@@ -26,14 +28,16 @@ class FeaturesManager:
                 rank = -300 + i
                 bins = len(self._display._environment.scope.depths)
                 color = color_picker(i, bins)
-                artist = self.new_artist(seabed.geometry, color, rank)
-                self._seabeds[rank] = artist
+                self._seabeds[rank] = self.assign_artist(seabed, rank, color)
+
         shore = self._display._environment.map.shore
         color = color_picker(shore.__class__.__name__)
-        self._shore = self.new_artist(shore.geometry, color, -200)
+        self._shore = self.assign_artist(shore, -110, color)
+
         land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
-        self._land = self.new_artist(land.geometry, color, -100)
+        self._land = self.assign_artist(land, -100, color)
+
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
         geometry = shapes.Rectangle(
@@ -45,6 +49,15 @@ class FeaturesManager:
     @property
     def animated(self):
         return [a for a in [v["artist"] for v in self._vessels.values()] if a]
+
+    def assign_artist(self, layer, z_axis, color):
+        if isinstance(layer.geometry, MultiLineString):
+            artist = []
+            for line in layer.geometry.geoms:
+                artist.append(self.new_line_artist(line, color, z_axis))
+        else:
+            artist = self.new_artist(layer.geometry, color, z_axis)
+        return artist
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
         kwargs["crs"] = self._display.crs
@@ -59,6 +72,14 @@ class FeaturesManager:
         if z_order is None:
             artist.set_animated(True)
         return artist
+
+    def new_line_artist(self, line_geometry, color, z_order=None, animated=True, **kwargs):
+        x, y = line_geometry.xy
+        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 1)))
+        if z_order is None:
+            line.set_zorder(z_order)
+            line.set_animated(animated)
+        return line
 
     def add_arrow(
         self, start, end, color_name, buffer, fill, head_size, linewidth, linestyle
@@ -170,11 +191,19 @@ class FeaturesManager:
         self.update_vessels()
         self._display.update_plot()
 
+    @staticmethod
+    def set_visibility(artist, new_state):
+        if not isinstance(artist, list):
+            artist.set_visible(new_state)
+        else:
+            for line in artist:
+                line.set_visible(new_state)
+
     def toggle_topography_visibility(self, new_state: bool = None):
         if new_state is None:
             new_state = not self._land.get_visible()
-        self._land.set_visible(new_state)
-        self._shore.set_visible(new_state)
+        self.set_visibility(self._land, new_state)
+        self.set_visibility(self._shore, new_state)
         self._display.redraw_plot()
 
     def show_top_hidden_layer(self):
