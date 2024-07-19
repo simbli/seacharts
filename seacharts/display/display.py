@@ -54,7 +54,7 @@ class Display:
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self._toggle_colorbar(self._colorbar_mode)
-        self._toggle_dark_mode(self._dark_mode)
+        # self._toggle_dark_mode(self._dark_mode)
         self._add_scalebar()
         self.add_slider()
         self.redraw_plot()
