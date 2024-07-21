@@ -4,7 +4,6 @@ Contains the Shape base class for creating and manipulating shapes.
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
-
 from shapely import geometry as geo, ops
 
 
@@ -44,7 +43,7 @@ class Shape(ABC):
         return geo.shape(record["geometry"])
 
     @staticmethod
-    def as_multi(geometry: [Any]) -> Any:
+    def as_multi(geometry) -> Any:
         if isinstance(geometry[0], geo.Point):
             return geo.MultiPoint(geometry)
         elif isinstance(geometry[0], geo.Polygon):

@@ -5,6 +5,8 @@ from abc import ABC
 from dataclasses import dataclass, field
 
 from shapely import geometry as geo
+from shapely.geometry import base as geobase
+from shapely.ops import unary_union
 
 from seacharts.layers.types import ZeroDepth, SingleDepth, MultiDepth
 from seacharts.shapes import Shape
@@ -12,23 +14,41 @@ from seacharts.shapes import Shape
 
 @dataclass
 class Layer(Shape, ABC):
-    geometry: geo.MultiPolygon = field(default_factory=geo.MultiPolygon)
+    geometry: geobase.BaseMultipartGeometry = field(default_factory=geo.MultiPolygon)
     depth: int = None
 
     @property
     def label(self) -> str:
         return self.name.lower()
-        # return self.name
 
     def records_as_geometry(self, records: list[dict]) -> None:
         geometries = []
-
+        multi_geoms = []
+        linestrings = []
+        multi_linestrings = []
         if len(records) > 0:
             for record in records:
                 geom_tmp = self._record_to_geometry(record)
                 if isinstance(geom_tmp, geo.Polygon):
                     geometries.append(geom_tmp)
-            self.geometry = self.as_multi(geometries)
+                elif isinstance(geom_tmp, geo.MultiPolygon):
+                    multi_geoms.append(geom_tmp)
+                elif isinstance(geom_tmp, geo.LineString):
+                    linestrings.append(geom_tmp)
+                elif isinstance(geom_tmp, geo. MultiLineString):
+                    multi_linestrings.append(geom_tmp)
+
+            if len(geometries) + len(multi_geoms) > 0:
+                if len(geometries):
+                    geometries = self.as_multi(geometries)
+                    multi_geoms.append(geometries)
+                self.geometry = unary_union(multi_geoms)
+
+            elif len(linestrings) + len(multi_linestrings) > 0:
+                if len(linestrings):
+                    linestrings = self.as_multi(linestrings)
+                    multi_linestrings.append(linestrings)
+                self.geometry = unary_union(multi_linestrings)
 
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]
