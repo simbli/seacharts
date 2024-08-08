@@ -42,13 +42,20 @@ class Layer(Shape, ABC):
                 if len(geometries):
                     geometries = self.as_multi(geometries)
                     multi_geoms.append(geometries)
-                self.geometry = unary_union(multi_geoms)
+                geom = unary_union(multi_geoms)
+                if not isinstance(geom, geo.MultiPolygon):
+                    geom = geo.MultiPolygon([geom])
+                self.geometry = geom
+
 
             elif len(linestrings) + len(multi_linestrings) > 0:
                 if len(linestrings):
                     linestrings = self.as_multi(linestrings)
                     multi_linestrings.append(linestrings)
-                self.geometry = unary_union(multi_linestrings)
+                geom = unary_union(multi_linestrings)
+                if not isinstance(geom, geo.MultiLineString):
+                    geom = geo.MultiLineString([geom])
+                self.geometry = geom
 
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]
