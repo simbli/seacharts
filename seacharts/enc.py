@@ -28,11 +28,12 @@ class ENC:
         self._environment = Environment(self._config.settings)
         self._display = None
 
-    def get_depth_at_coord(self, easting, northing):
+    def get_depth_at_coord(self, easting, northing) -> int:
         point = Point(easting, northing)
         for seabed in reversed(self.seabed.values()):
             if any(polygon.contains(point) for polygon in seabed.geometry.geoms):
-                return seabed
+                return seabed.depth
+        return None
 
     def update(self) -> None:
         """

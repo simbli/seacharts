@@ -131,10 +131,10 @@ class Display:
         return new_cmap
 
     def draw_weather(self, variable_name):
-        None
+        ...
 
     def _draw_arrow_map(self):
-        None
+        ...
 
     def _draw_weather_heatmap(self, variable_name: str, cmap: colors.Colormap, label_colour: str) -> None:
         """

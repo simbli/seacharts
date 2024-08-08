@@ -32,11 +32,11 @@ class FeaturesManager:
 
         shore = self._display._environment.map.shore
         color = color_picker(shore.__class__.__name__)
-        self._shore = self.assign_artist(shore, -110, color)
+        self._shore = self.assign_artist(shore, -100, color)
 
         land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
-        self._land = self.assign_artist(land, -100, color)
+        self._land = self.assign_artist(land, -110, color)
 
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
@@ -44,19 +44,19 @@ class FeaturesManager:
             *center, width=size[0] / 2, heading=0, height=size[1] / 2
         ).geometry
         color = (color_picker("black")[0], "none")
-        self.new_artist(geometry, color, 10000, linewidth=3)
+        self.new_artist(geometry, color, z_order=10000, linewidth=3)
 
     @property
     def animated(self):
         return [a for a in [v["artist"] for v in self._vessels.values()] if a]
 
-    def assign_artist(self, layer, z_axis, color):
+    def assign_artist(self, layer, z_order, color):
         if isinstance(layer.geometry, MultiLineString):
             artist = []
             for line in layer.geometry.geoms:
-                artist.append(self.new_line_artist(line, color, z_axis))
+                artist.append(self.new_line_artist(line, color, z_order))
         else:
-            artist = self.new_artist(layer.geometry, color, z_axis)
+            artist = self.new_artist(layer.geometry, color, z_order=z_order)
         return artist
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
@@ -73,12 +73,13 @@ class FeaturesManager:
             artist.set_animated(True)
         return artist
 
-    def new_line_artist(self, line_geometry, color, z_order=None, animated=True, **kwargs):
+    def new_line_artist(self, line_geometry, color, z_order=None, **kwargs):
         x, y = line_geometry.xy
         line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 1)))
         if z_order is None:
+            line.set_animated(True)
+        else:
             line.set_zorder(z_order)
-            line.set_animated(animated)
         return line
 
     def add_arrow(
