@@ -7,11 +7,11 @@ enc:
   crs: "WGS84"
   S57_layers: ["DEPARE", "LNDARE"]
   resources: [ "data/", "data/db/" ]
-#  weather:
-#    PyThor_adress: "http://127.0.0.1:5000"
-#    time_start: 1717931596
-#    time_end: 1717952909
-#    variables: [ "wave_height" ]
+  weather:
+    PyThor_adress: "http://127.0.0.1:5000"
+    time_start: 1723137483
+    time_end: 1723137483
+    variables: [ "wave_height" ]
 
 # test config for FGDB
 #  size: [ 9000, 5062 ]
