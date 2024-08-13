@@ -135,7 +135,6 @@ class Display:
         lon = self._environment.weather.longitude
         weather_layer = self._environment.weather.find_by_name(variable_name)
         x_min, y_min, x_max, y_max = self._bbox
-        print(self._bbox)
         lat_min,lon_min = self._environment.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
         lat_max, lon_max = self._environment.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
         print(lat_min, lat_max)
@@ -145,8 +144,6 @@ class Display:
             lon_min = 180 + (180 + lon_min)
         if lon_max < 0:
             lon_max = 180 + (180 + lon_max)
-        lon_min += 0.2
-        lon_max -= 0.7
         lat_indxes = [None,None]
         for i in range(len(lat)):
             if lat[i] >= lat_min and lat_indxes[0] is None:
@@ -184,10 +181,13 @@ class Display:
 
         x_min, y_min, x_max, y_max = self._bbox
         extent = (x_min, x_max, y_min, y_max)
-        heatmap_data = weather_data
+        heatmap_data = np.array(weather_data)
+        lon = np.linspace(x_min, x_max, heatmap_data.shape[1])
+        lat = np.linspace(y_min, y_max, heatmap_data.shape[0])
+        lon, lat = np.meshgrid(lon, lat)
         ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=8)
-        self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5,
-                                            interpolation="bicubic",projection=self.crs)
+        self.weather_map = self.axes.pcolormesh(lon, lat, heatmap_data, cmap=cmap, alpha=0.5, transform=self.crs)
+        self.axes.set_extent(extent, crs=self.crs)
         self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         self._cbar.outline.set_edgecolor(label_colour)
