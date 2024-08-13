@@ -131,25 +131,60 @@ class Display:
         return new_cmap
 
     def draw_weather(self, variable_name):
-        ...
+        lat = np.array(self._environment.weather.latitude)
+        lon = np.array(self._environment.weather.longitude)
+        print(lon)
+        weather_layer = self._environment.weather.find_by_name(variable_name)
+        x_min, y_min, x_max, y_max = self._bbox
+        lat_min,lon_min = self._environment.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
+        lat_max, lon_max = self._environment.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
+        print(lat_min, lat_max)
+        print(lon_min, lon_max)
+        if lon_min < 0:
+            lon_min = 180 + (180 + lon_min)
+        if lon_max < 0:
+            lon_max = 180 + (180 + lon_max)
+        lat_indxes = [None,None]
+        for i in range(len(lat)):
+            if lat[i] >= lat_min:
+                lat_indxes[0] = i
+            if lat[len(lat)-(i+1)] <= lat_max:
+                lat_indxes[1] = len(lat) - (i+1)
+            if None not in lat_indxes:
+                break
+        lon_indxes = [None, None]
+        for i in range(len(lon)):
+            if lon[i] >= lon_min:
+                lon_indxes[0] = i
+            print(lon[-(i + 1)])
+            if lon[len(lon)-(i + 1)] <= lon_max:
+                lon_indxes[1] = len(lon) - (i + 1)
+            if None not in lon_indxes:
+                break
+        print(lat_indxes,lon_indxes)
+        # TODO choose correct display for variables
+        self._draw_weather_heatmap(weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]][lon_indxes[0]:lon_indxes[1]],
+                                   cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white')
+
 
     def _draw_arrow_map(self):
         ...
 
-    def _draw_weather_heatmap(self, variable_name: str, cmap: colors.Colormap, label_colour: str) -> None:
+    def _draw_weather_heatmap(self, weather_data: str, cmap: colors.Colormap, label_colour: str) -> None:
         """
         Draws a heatmap and colorbar for specified weather variable using provided color map and label colour for color bar
         :return: None
         """
-        weather_layer = self._environment.weather.find_by_name(variable_name)
-        if weather_layer is None:
+
+        if weather_data is None:
             return
 
         x_min, y_min, x_max, y_max = self._bbox
         extent = (x_min, x_max, y_min, y_max)
-        heatmap_data = weather_layer.weather[self._environment.weather.selected_time_index].data
+        heatmap_data = weather_data
         ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=8)
-        self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5, interpolation="bicubic")
+        self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5,
+                                            interpolation="bicubic")
         self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         self._cbar.outline.set_edgecolor(label_colour)
