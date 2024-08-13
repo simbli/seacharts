@@ -131,39 +131,42 @@ class Display:
         return new_cmap
 
     def draw_weather(self, variable_name):
-        lat = np.array(self._environment.weather.latitude)
-        lon = np.array(self._environment.weather.longitude)
-        print(lon)
+        lat = self._environment.weather.latitude
+        lon = self._environment.weather.longitude
         weather_layer = self._environment.weather.find_by_name(variable_name)
         x_min, y_min, x_max, y_max = self._bbox
+        print(self._bbox)
         lat_min,lon_min = self._environment.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
         lat_max, lon_max = self._environment.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
         print(lat_min, lat_max)
         print(lon_min, lon_max)
+
         if lon_min < 0:
             lon_min = 180 + (180 + lon_min)
         if lon_max < 0:
             lon_max = 180 + (180 + lon_max)
+        lon_min += 0.2
+        lon_max -= 0.7
         lat_indxes = [None,None]
         for i in range(len(lat)):
-            if lat[i] >= lat_min:
+            if lat[i] >= lat_min and lat_indxes[0] is None:
                 lat_indxes[0] = i
-            if lat[len(lat)-(i+1)] <= lat_max:
-                lat_indxes[1] = len(lat) - (i+1)
+            if lat[len(lat)-(i+1)] <= lat_max and lat_indxes[1] is None:
+                lat_indxes[1] = len(lat) - i
             if None not in lat_indxes:
                 break
         lon_indxes = [None, None]
         for i in range(len(lon)):
-            if lon[i] >= lon_min:
+            if lon[i] >= lon_min and lon_indxes[0] is None:
                 lon_indxes[0] = i
-            print(lon[-(i + 1)])
-            if lon[len(lon)-(i + 1)] <= lon_max:
-                lon_indxes[1] = len(lon) - (i + 1)
+            if lon[len(lon)-(i + 1)] <= lon_max and lon_indxes[1] is None:
+                lon_indxes[1] = len(lon) - i
             if None not in lon_indxes:
                 break
         print(lat_indxes,lon_indxes)
         # TODO choose correct display for variables
-        self._draw_weather_heatmap(weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]][lon_indxes[0]:lon_indxes[1]],
+        data = [x[lon_indxes[0]:lon_indxes[1]] for x in weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
+        self._draw_weather_heatmap(data,
                                    cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white')
 
 
@@ -184,13 +187,10 @@ class Display:
         heatmap_data = weather_data
         ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=8)
         self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5,
-                                            interpolation="bicubic")
+                                            interpolation="bicubic",projection=self.crs)
         self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         self._cbar.outline.set_edgecolor(label_colour)
-        print(heatmap_data)
-        print(np.nanmin(np.array(heatmap_data)))
-        print(np.nanmax(np.array(heatmap_data)))
         plt.setp(plt.getp(self._cbar.ax.axes, 'yticklabels'), color=label_colour)
 
     def draw_arrow(
