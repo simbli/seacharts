@@ -19,3 +19,10 @@ class Land(ZeroDepthLayer):
 @dataclass
 class Shore(ZeroDepthLayer):
     ...
+
+@dataclass
+class ExtraLayer(ZeroDepthLayer):
+    tag:str = None
+    @property
+    def name(self) -> str:
+        return self.tag

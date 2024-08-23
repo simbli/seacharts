@@ -34,6 +34,17 @@ class ENC:
             if any(polygon.contains(point) for polygon in seabed.geometry.geoms):
                 return seabed.depth
         return None
+    
+    def is_coord_in_layer(self, easting, northing, layer_name:str):
+        layer_name = layer_name.lower()
+        layers = self._environment.get_layers()
+        point = Point(easting, northing)
+        for layer in layers:
+            if layer.label == layer_name:
+                if any(polygon.contains(point) for polygon in layer.geometry.geoms):
+                    return True
+                return False
+        raise Exception("no such layer loaded")
 
     def update(self) -> None:
         """

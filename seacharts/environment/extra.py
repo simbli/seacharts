@@ -1,18 +1,19 @@
-"""
-Contains the MapData class for containing parsed map (charts) data.
-"""
+from seacharts.layers import ExtraLayer
+from seacharts.layers.layer import Layer
+from .collection import DataCollection
 from dataclasses import dataclass
 
-from seacharts.layers import Layer, Land, Shore, Seabed
-from .collection import DataCollection
-
-
 @dataclass
-class MapData(DataCollection):
+class ExtraLayers(DataCollection):
+    
     def __post_init__(self):
-        self.bathymetry = {d: Seabed(depth=d) for d in self.scope.depths}
-        self.land = Land()
-        self.shore = Shore()
+        self.extra_layers : list[ExtraLayer] = []
+        for tag, color in self.scope.extra_layers.items():
+            self.extra_layers.append(ExtraLayer(tag=tag, color=color))
+
+    @property
+    def layers(self) -> list[Layer]:
+        return self.extra_layers
 
     def load_existing_shapefiles(self) -> None:
         self.parser.load_shapefiles(self.featured_regions)
@@ -31,10 +32,6 @@ class MapData(DataCollection):
             print("WARNING: Given spatial data source(s) seem empty.\n")
 
     @property
-    def layers(self) -> list[Layer]:
-        return [self.land, self.shore, *self.bathymetry.values()]
-
-    @property
     def loaded(self) -> bool:
         return any(self.loaded_regions)
 
@@ -48,4 +45,4 @@ class MapData(DataCollection):
     
     @property
     def featured_regions(self) -> list[Layer]:
-        return [x for x in self.layers if x.label in self.scope.features]
+        return [x for x in self.layers if x.tag in self.scope.extra_layers.keys()]

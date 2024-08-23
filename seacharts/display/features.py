@@ -19,6 +19,7 @@ class FeaturesManager:
         self._seabeds = {}
         self._land = None
         self._shore = None
+        self._extra_layers = {}
         self._init_layers()
 
     def _init_layers(self):
@@ -37,6 +38,12 @@ class FeaturesManager:
         land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
         self._land = self.assign_artist(land, -110, color)
+
+        extra_layers = self._display._environment.extra_layers.layers
+        for i, extra_layer in enumerate(extra_layers):
+            if not extra_layer.geometry.is_empty:
+                rank = -90 + i
+                self._extra_layers[rank] = self.assign_artist(extra_layer, rank, extra_layer.color)
 
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size

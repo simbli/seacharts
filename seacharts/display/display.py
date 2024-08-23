@@ -9,8 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
-from matplotlib.widgets import Slider
-from matplotlib.widgets import Button
+from matplotlib.widgets import Slider, RadioButtons
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 from matplotlib_scalebar.scalebar import ScaleBar
@@ -46,6 +45,7 @@ class Display:
         self._dark_mode = False
         self._colorbar_mode = False
         self._fullscreen_mode = False
+        self._controls = True
         self._resolution = 720
         self._dpi = 96
         self._anchor_index = self._init_anchor_index(settings)
@@ -54,9 +54,9 @@ class Display:
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self._toggle_colorbar(self._colorbar_mode)
-        # self._toggle_dark_mode(self._dark_mode)
+        self._toggle_dark_mode(self._dark_mode)
         self._add_scalebar()
-        self.add_slider()
+        self.add_control_panel(self._controls)
         self.redraw_plot()
         if self._fullscreen_mode:
             self._toggle_fullscreen(self._fullscreen_mode)
@@ -350,6 +350,8 @@ class Display:
                 self._resolution = d["resolution"]
             if "dpi" in d:
                 self._dpi = d["dpi"]
+            if "controls" in d:
+                self._controls = d["controls"]
 
         if self._fullscreen_mode:
             plt.rcParams["toolbar"] = "None"
@@ -528,15 +530,6 @@ class Display:
     def _terminate(self):
         plt.close(self.figure)
 
-    """
-    def add_slider(self):
-        fig, (ax_slider, ax_button) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]}, figsize=(8, 1))
-        self.slider = Slider(ax_slider, label='Slider', valmin=0, valmax=1, valinit=0.5)
-        button = Button(ax_button, 'Set', color='lightgray')
-        button.on_clicked(self.slider_changed_callback)
-
-        fig.show()
-    """
     def _weather_slider_handle(self,val):
         self._environment.weather.selected_time_index = val
         self._cbar.remove()
@@ -546,22 +539,50 @@ class Display:
                                   label_colour='white')
         self.redraw_plot()
 
-    def add_slider(self):
-        fig, ax_slider = plt.subplots(figsize=(8, 1))
-        times = self._environment.weather.time
-        if times is None:
-            times = [0]
-        self.slider = Slider(ax_slider, label='Time:', valmin=0, valmax=len(times) - 1, valinit=0, valstep=1)
+    def _add_time_slider(self, ax_slider, fig):
+        times = self._environment.scope.time.get_datetimes_strings()
+        self.slider = Slider(ax=ax_slider, valmin=0, valmax=len(times) - 1, valinit=0, valstep=1, label="Time")
+        self.time_label = ax_slider.text(0.5, 1.2, times[0], transform=ax_slider.transAxes,
+                        ha='center', va='center', fontsize=12)
         last_value = self.slider.val
 
-        def onrelease(event):
+        def __on_slider_change(event):
             nonlocal last_value
             if event.button == 1 and event.inaxes == ax_slider:
                 val = self.slider.val
                 if val != last_value:
                     self._weather_slider_handle(val)
                     last_value = val
-                    print(f"Slider value: {val}")
 
-        fig.canvas.mpl_connect('button_release_event', onrelease)
-        fig.show()
+        def __update(val):
+            index = int(self.slider.val)
+            self.time_label.set_text(times[index])
+            fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect('button_release_event', __on_slider_change)
+        self.slider.on_changed(__update)
+            
+
+    def add_control_panel(self, controls: bool):
+        if not controls: return
+        fig, (ax_slider, ax_radio) = plt.subplots(2, 1, figsize=(8, 2), gridspec_kw={'height_ratios': [1, 2]})
+        if self._environment.scope.time is not None:
+            self._add_time_slider(ax_slider=ax_slider, fig=fig)
+        
+        # VISIBLE LAYER PICKER START
+            # if weather layers is not None -> add_radio_pick for weather layers
+        radio_labels = ['a', 'b', 'c']
+        self.radio_buttons = RadioButtons(ax_radio, ['--'] + radio_labels, active=0)
+        def on_radio_change(label):
+            print(f"Radio button selected: {label}")
+            # Add handling code for radio button change here
+        self.radio_buttons.on_clicked(on_radio_change)
+        # VISIBLE LAYER PICKER END
+        
+        # TODO: layer picked in such way should be saved to variable
+        # then we can add, analogically to date slider, opacity slider for picked weather layer
+        
+        # Set the window title and show the figure
+        fig.canvas.manager.set_window_title('Controls')
+        plt.show()
+

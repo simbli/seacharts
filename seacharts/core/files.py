@@ -23,7 +23,7 @@ def build_directory_structure(features: list[str], resources: list[str]) -> None
         shapefile_dir.mkdir(parents=True, exist_ok=True)
     for resource in resources:
         path = Path(resource).resolve()
-        if not path.suffix == ".gdb":
+        if not path.suffix == ".gdb" or not path.suffix == ".000":
             path.mkdir(exist_ok=True)
 
 

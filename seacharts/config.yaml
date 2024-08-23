@@ -1,12 +1,18 @@
 enc:
-# TODO: implement autosize
 # test config for S-57
   size: [ 6.0, 4.5 ]
   origin: [ -85.0, 20.0 ]
   depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
   crs: "WGS84"
-  S57_layers: ["DEPARE", "LNDARE"]
-  resources: [ "data/", "data/db/" ]
+  S57_layers: 
+    "TSSLPT": "#8B0000"
+    "CTNARE": "#964B00"
+  resources: [ "data/db/US1GC09M" ]
+  time:
+    time_start: "22-01-2024"
+    time_end: "22-02-2024"
+    period: "day"
+
 #  weather:
 #    PyThor_adress: "http://127.0.0.1:5000"
 #    time_start: 1717931596
@@ -19,10 +25,13 @@ enc:
 #  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
 #  crs: "UTM33N"
 #  resources: [ "/", "data/", "data/db/" ]
+
+
 display:
   colorbar: False
-  dark_mode: True
+  dark_mode: False
   fullscreen: False
+  controls: True
   resolution: 640
   anchor: "center"
   dpi: 96
