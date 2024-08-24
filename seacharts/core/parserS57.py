@@ -17,6 +17,10 @@ class S57Parser(DataParser):
         super().__init__(bounding_box, path_strings)
         self.epsg = epsg
 
+    def get_source_root_name(self, path) -> str:
+        for path in self._file_paths:
+            
+    
     @staticmethod
     def convert_s57_to_utm_shapefile(s57_file_path, shapefile_output_path, layer, epsg, bounding_box):
         x_min, y_min, x_max, y_max = map(str, bounding_box)
@@ -74,8 +78,8 @@ class S57Parser(DataParser):
 
         s57_path = None
         for path in self._file_paths:
-            s57_path = self.get_s57_file(path)
-        s57_path = s57_path.__str__()
+            s57_path = self.get_s57_file_path(path)
+        s57_path = str(s57_path)
 
         for region in regions_list:
             start_time = time.time()
@@ -96,15 +100,20 @@ class S57Parser(DataParser):
             print(f"\rSaved {region.name} to shapefile in {end_time} s.")
 
     @staticmethod
-    def get_s57_file(path) -> Path:
+    def get_s57_file_path(path: Path) -> Path:
         for p in path.iterdir():
             if p.suffix == ".000":
                 return p
 
-    def _is_map_type(self, path):
+    def _is_map_type(self, path: Path) -> bool:
         if path.is_dir():
             for p in path.iterdir():
                 if p.suffix == ".000":
                     return True
+        elif path.is_file():
+            if p.suffix == ".000":
+                    return True
+        return False
+
 
 
