@@ -5,6 +5,7 @@ from seacharts.core import Scope, MapFormat, S57Parser, FGDBParser, DataParser
 from .map import MapData
 from .weather import WeatherData
 from .extra import ExtraLayers
+from seacharts.core import files
 
 
 class Environment:
@@ -27,8 +28,9 @@ class Environment:
     def get_layers(self):
         return [
             *self.map.loaded_regions,
-            *self.extra_layers.loaded_regions
-            ] # TODO add weather layers
+            *self.extra_layers.loaded_regions,
+            *self.weather.loaded_regions
+            ] 
 
     def set_parser(self) -> DataParser:
         if self.scope.type is MapFormat.S57:

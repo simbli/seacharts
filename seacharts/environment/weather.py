@@ -76,10 +76,6 @@ class WeatherData(DataCollection):
     def layers(self) -> list[VirtualWeatherLayer]:
         return self.weather_layers
 
-    @property
-    def loaded(self) -> bool:
-        return any(self.layers)
-
     def find_by_name(self,name:str) -> VirtualWeatherLayer:
         for layer in self.layers:
             if layer.name == name:

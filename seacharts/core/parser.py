@@ -68,6 +68,10 @@ class DataParser:
     def _is_map_type(self, path) -> bool:
         pass
     
+    @abstractmethod
+    def get_source_root_name(self, path) -> str:
+        pass
+
     @property
     def _file_paths(self) -> Generator[Path, None, None]:
         for path in self.paths:
