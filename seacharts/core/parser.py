@@ -69,7 +69,7 @@ class DataParser:
         pass
     
     @abstractmethod
-    def get_source_root_name(self, path) -> str:
+    def get_source_root_name(self) -> str:
         pass
 
     @property
