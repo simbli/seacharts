@@ -12,6 +12,7 @@ class Environment:
     def __init__(self, settings: dict):
         self.scope = Scope(settings)
         self.parser = self.set_parser()
+        files.build_directory_structure(self.scope.features, self.scope.resources, self.parser)
         self.map = MapData(self.scope, self.parser)
         self.weather = WeatherData(self.scope, self.parser)
         self.extra_layers = ExtraLayers(self.scope, self.parser)

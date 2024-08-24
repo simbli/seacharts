@@ -1,10 +1,10 @@
 from seacharts.layers import ExtraLayer
 from seacharts.layers.layer import Layer
-from .collection import DataCollection
+from .collection import ShapefileBasedCollection
 from dataclasses import dataclass
 
 @dataclass
-class ExtraLayers(DataCollection):
+class ExtraLayers(ShapefileBasedCollection):
     
     def __post_init__(self):
         self.extra_layers : list[ExtraLayer] = []

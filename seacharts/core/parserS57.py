@@ -17,8 +17,11 @@ class S57Parser(DataParser):
         super().__init__(bounding_box, path_strings)
         self.epsg = epsg
 
-    def get_source_root_name(self, path) -> str:
+    def get_source_root_name(self) -> str:
         for path in self._file_paths:
+            path = self.get_s57_file_path(path)
+            if path is not None:
+                return path.stem
             
     
     @staticmethod
@@ -100,10 +103,11 @@ class S57Parser(DataParser):
             print(f"\rSaved {region.name} to shapefile in {end_time} s.")
 
     @staticmethod
-    def get_s57_file_path(path: Path) -> Path:
+    def get_s57_file_path(path: Path) -> Path | None:
         for p in path.iterdir():
             if p.suffix == ".000":
                 return p
+        return None
 
     def _is_map_type(self, path: Path) -> bool:
         if path.is_dir():
@@ -111,7 +115,7 @@ class S57Parser(DataParser):
                 if p.suffix == ".000":
                     return True
         elif path.is_file():
-            if p.suffix == ".000":
+            if path.suffix == ".000":
                     return True
         return False
 

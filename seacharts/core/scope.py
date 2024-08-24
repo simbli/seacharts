@@ -41,6 +41,5 @@ class Scope:
 
         self.extra_layers:dict[str,str] = settings["enc"].get("S57_layers", {})
         self.features.extend(self.extra_layers)
-        files.build_directory_structure(self.features, self.resources)
 
 
