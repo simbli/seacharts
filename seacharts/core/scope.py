@@ -23,7 +23,8 @@ class Scope:
             self.features.append(f"seabed{depth}m")
 
         if settings["enc"].get("S57_layers", []):
-            self.__s57_init(settings)
+            self.type = MapFormat.S57
+
         else:
             self.type = MapFormat.FGDB
 
@@ -38,10 +39,8 @@ class Scope:
             self.time = None
         self.weather = settings["enc"].get("weather", [])
 
-        files.build_directory_structure(self.features, self.resources)
-
-    def __s57_init(self, settings: dict):
         self.extra_layers:dict[str,str] = settings["enc"].get("S57_layers", {})
         self.features.extend(self.extra_layers)
-        self.type = MapFormat.S57
+        files.build_directory_structure(self.features, self.resources)
+
 
