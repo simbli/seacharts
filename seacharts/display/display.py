@@ -407,7 +407,7 @@ class Display:
                 color="white",
                 box_alpha=0.0,
                 pad=0.5,
-                font_properties={"size": 12},
+                font_properties={"size": 12}
             )
         )
 

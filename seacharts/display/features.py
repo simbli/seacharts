@@ -20,30 +20,28 @@ class FeaturesManager:
         self._land = None
         self._shore = None
         self._extra_layers = {}
+        self._number_of_layers = len(self._display._environment.get_layers())
+        self._next_z_order = self._number_of_layers * -1
         self._init_layers()
 
     def _init_layers(self):
         seabeds = list(self._display._environment.map.bathymetry.values())
         for i, seabed in enumerate(seabeds):
             if not seabed.geometry.is_empty:
-                rank = -300 + i
                 bins = len(self._display._environment.scope.depths)
                 color = color_picker(i, bins)
-                self._seabeds[rank] = self.assign_artist(seabed, rank, color)
+                self._seabeds[i] = self.assign_artist(seabed, self._get_next_z_order(), color)
 
         shore = self._display._environment.map.shore
         color = color_picker(shore.__class__.__name__)
-        self._shore = self.assign_artist(shore, -100, color)
+        self._shore = self.assign_artist(shore, self._get_next_z_order(), color)
 
         land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
-        self._land = self.assign_artist(land, -110, color)
+        self._land = self.assign_artist(land, self._get_next_z_order(), color)
 
-        extra_layers = self._display._environment.extra_layers.layers
-        for i, extra_layer in enumerate(extra_layers):
-            if not extra_layer.geometry.is_empty:
-                rank = -90 + i
-                self._extra_layers[rank] = self.assign_artist(extra_layer, rank, extra_layer.color)
+        for i, extra_layer in enumerate(self._display._environment.extra_layers.loaded_regions):
+            self._extra_layers[i] = self.assign_artist(extra_layer, self._get_next_z_order(), extra_layer.color)
 
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
@@ -51,7 +49,12 @@ class FeaturesManager:
             *center, width=size[0] / 2, heading=0, height=size[1] / 2
         ).geometry
         color = (color_picker("black")[0], "none")
-        self.new_artist(geometry, color, z_order=10000, linewidth=3)
+        self.new_artist(geometry, color, z_order=self._get_next_z_order(), linewidth=3)
+
+    def _get_next_z_order(self) -> int:
+        z_order = self._next_z_order
+        self._next_z_order += 1
+        return z_order
 
     @property
     def animated(self):
@@ -82,7 +85,8 @@ class FeaturesManager:
 
     def new_line_artist(self, line_geometry, color, z_order=None, **kwargs):
         x, y = line_geometry.xy
-        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 1)))
+        # TODO: confirm if linewidth 2 wont cause errors in research, linewidth=1 is not visible
+        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 2)))
         if z_order is None:
             line.set_animated(True)
         else:

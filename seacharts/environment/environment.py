@@ -14,12 +14,15 @@ class Environment:
         self.map = MapData(self.scope, self.parser)
         self.weather = WeatherData(self.scope, self.parser)
         self.extra_layers = ExtraLayers(self.scope, self.parser)
+
         self.map.load_existing_shapefiles()
-        self.extra_layers.load_existing_shapefiles()
         if len(self.map.not_loaded_regions) > 0:
             self.map.parse_resources_into_shapefiles()
-        if len(self.extra_layers.not_loaded_regions) > 0:
-            self.extra_layers.parse_resources_into_shapefiles()
+
+        if self.scope.type is MapFormat.S57:
+            self.extra_layers.load_existing_shapefiles()
+            if len(self.extra_layers.not_loaded_regions) > 0:
+                self.extra_layers.parse_resources_into_shapefiles()
 
     def get_layers(self):
         return [
