@@ -173,7 +173,10 @@ class Display:
         #                             cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
 
     class ArrowMap:
-        arrows: list = []
+        arrows: list
+
+        def __init__(self):
+            self.arrows = []
 
         def add_arrow(self, arrow):
             self.arrows.append(arrow)
@@ -181,7 +184,6 @@ class Display:
         def remove(self):
             for arrow in self.arrows:
                 arrow.remove()
-            self.arrows = []
 
     def _draw_arrow_map(self,direction_data,data,latitudes,longitude):
         cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9)
@@ -610,7 +612,7 @@ class Display:
 
     def _weather_slider_handle(self,val):
         self._environment.weather.selected_time_index = val
-        self._cbar.remove()
+        # self._cbar.remove()
         self.weather_map.remove()
         self.draw_weather("wind")
         self.redraw_plot()
@@ -660,5 +662,5 @@ class Display:
         
         # Set the window title and show the figure
         fig.canvas.manager.set_window_title('Controls')
-        plt.show()
+        fig.show()
 
