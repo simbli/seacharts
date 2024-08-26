@@ -70,16 +70,9 @@ enc:
       required: False
       type: dict
       schema:
-        PyThor_adress:
+        PyThor_address:
           required: False
           type: string
-        #in epoch time
-        time_start:
-          required: False
-          type: integer
-        time_end:
-          required: False
-          type: integer
         variables:
           type: list
           required: False

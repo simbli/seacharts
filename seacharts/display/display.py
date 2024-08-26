@@ -1,6 +1,7 @@
 """
 Contains the Display class for displaying and plotting maritime spatial data.
 """
+import math
 import tkinter as tk
 from pathlib import Path
 from typing import Any
@@ -134,11 +135,12 @@ class Display:
         lat = self._environment.weather.latitude
         lon = self._environment.weather.longitude
         weather_layer = self._environment.weather.find_by_name(variable_name)
+        if variable_name == "wind":
+            weather_layer = self._environment.weather.find_by_name("ws")
+            direction_layer = self._environment.weather.find_by_name("wdir")
         x_min, y_min, x_max, y_max = self._bbox
         lat_min,lon_min = self._environment.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
         lat_max, lon_max = self._environment.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
-        print(lat_min, lat_max)
-        print(lon_min, lon_max)
 
         if lon_min < 0:
             lon_min = 180 + (180 + lon_min)
@@ -160,15 +162,44 @@ class Display:
                 lon_indxes[1] = len(lon) - i
             if None not in lon_indxes:
                 break
-        print(lat_indxes,lon_indxes)
+
         # TODO choose correct display for variables
         data = [x[lon_indxes[0]:lon_indxes[1]] for x in weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
-        self._draw_weather_heatmap(data,
-                                   cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white')
+        direction_data = [x[lon_indxes[0]:lon_indxes[1]] for x in direction_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
+        print(data)
+        #TODO max value pick
+        self._draw_arrow_map(direction_data,data,10,latitudes=lat[lat_indxes[0]:lat_indxes[1]],longitude=lon[lon_indxes[0]:lon_indxes[1]])
+        # self._draw_weather_heatmap(data,
+        #                            cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
 
 
-    def _draw_arrow_map(self):
-        ...
+    def _draw_arrow_map(self,direction_data,data,max,latitudes,longitude):
+        utm_east = [0] * len(longitude)
+        utm_north = [0] * len(latitudes)
+        print(self._environment.scope.extent.origin, (self._environment.scope.extent.center[0] + 700, self._environment.scope.extent.center[1] + 600))
+        for i in range(len(latitudes)):
+            utm_east[0], utm_north[i] = self._environment.scope.extent.convert_lat_lon_to_utm(latitudes[i], longitude[0])
+        for i in range(len(longitude)):
+            utm_east[i], utm_north[0] = self._environment.scope.extent.convert_lat_lon_to_utm(latitudes[0], longitude[i])
+        print(utm_east,utm_north)
+        size = (abs(utm_east[1] - utm_east[0]) if len(utm_east) > 1 else (abs(utm_north[1] - utm_north[0]) if len(utm_north) > 1 else abs(self._bbox[0] - self._bbox[2]))) * 0.9
+        if direction_data is None:
+            return
+        for i in range(len(direction_data)):
+            for j in range(len(direction_data[i])):
+                x = direction_data[i][j]
+                from math import isnan
+                if not isnan(direction_data[i][j]) and not data[i][j] == 0:
+                    degree = math.radians(direction_data[i][j])
+                    res = size
+                    if not isnan(data[i][j]):
+                        res = size*(data[i][j]/max) if (data[i][j]/max) <= 1 else size
+                    center = utm_east[j],utm_north[i]
+                    start = [center[0], center[1] + res/2]
+                    start = [center[0] + (start[0]-center[0]) * math.cos(degree) - (start[1]-center[1]) * math.sin(degree), center[1] + (start[0]-center[0]) * math.sin(degree) - (start[1]-center[1]) * math.cos(degree)]
+                    end = [center[0] , center[1] - res / 2]
+                    end = [center[0] + (end[0]-center[0]) * math.cos(degree) - (end[1]-center[1]) * math.sin(degree), center[1] + (end[0]-center[0]) * math.sin(degree) - (end[1]-center[1]) * math.cos(degree)]
+                    self.draw_arrow(start,end,"black",head_size=res/4, width=size/20,fill=True)
 
     def _draw_weather_heatmap(self, weather_data: str, cmap: colors.Colormap, label_colour: str) -> None:
         """
@@ -181,15 +212,13 @@ class Display:
 
         x_min, y_min, x_max, y_max = self._bbox
         extent = (x_min, x_max, y_min, y_max)
-        heatmap_data = np.array(weather_data)
-        lon = np.linspace(x_min, x_max, heatmap_data.shape[1])
-        lat = np.linspace(y_min, y_max, heatmap_data.shape[0])
-        lon, lat = np.meshgrid(lon, lat)
-        ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=8)
-        self.weather_map = self.axes.pcolormesh(lon, lat, heatmap_data, cmap=cmap, alpha=0.5, transform=self.crs)
-        self.axes.set_extent(extent, crs=self.crs)
+        heatmap_data = weather_data
+        ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=10)
+        self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5,
+                                            interpolation="bicubic")
         self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
+        self._cbar.set_ticks(ticks)
         self._cbar.outline.set_edgecolor(label_colour)
         plt.setp(plt.getp(self._cbar.ax.axes, 'yticklabels'), color=label_colour)
 

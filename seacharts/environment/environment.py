@@ -30,7 +30,6 @@ class Environment:
         return [
             *self.map.loaded_regions,
             *self.extra_layers.loaded_regions,
-            *self.weather.loaded_regions
             ] 
 
     def set_parser(self) -> DataParser:
