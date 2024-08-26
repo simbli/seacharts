@@ -1,6 +1,8 @@
 """
 Contains functions and structures for color management.
 """
+import re
+
 import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np
@@ -65,6 +67,8 @@ def color_picker(name: str, bins: int = None) -> tuple:
         return _layer_colors[name]
     elif name in clr.CSS4_COLORS:
         return clr.CSS4_COLORS[name]
+    elif re.match("^#(?:[0-9a-fA-F]{3,4}){1,2}$",name):
+        return name,name
     else:
         raise ValueError(f"{name} is not a valid color")
 

@@ -168,12 +168,23 @@ class Display:
         direction_data = [x[lon_indxes[0]:lon_indxes[1]] for x in direction_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
         print(data)
         #TODO max value pick
-        self._draw_arrow_map(direction_data,data,10,latitudes=lat[lat_indxes[0]:lat_indxes[1]],longitude=lon[lon_indxes[0]:lon_indxes[1]])
+        self._draw_arrow_map(direction_data,data,latitudes=lat[lat_indxes[0]:lat_indxes[1]],longitude=lon[lon_indxes[0]:lon_indxes[1]])
         # self._draw_weather_heatmap(data,
-        #                            cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
+        #                             cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
 
+    class ArrowMap:
+        arrows: list = []
 
-    def _draw_arrow_map(self,direction_data,data,max,latitudes,longitude):
+        def add_arrow(self, arrow):
+            self.arrows.append(arrow)
+
+        def remove(self):
+            for arrow in self.arrows:
+                arrow.remove()
+            self.arrows = []
+
+    def _draw_arrow_map(self,direction_data,data,latitudes,longitude):
+        cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9)
         utm_east = [0] * len(longitude)
         utm_north = [0] * len(latitudes)
         print(self._environment.scope.extent.origin, (self._environment.scope.extent.center[0] + 700, self._environment.scope.extent.center[1] + 600))
@@ -183,23 +194,22 @@ class Display:
             utm_east[i], utm_north[0] = self._environment.scope.extent.convert_lat_lon_to_utm(latitudes[0], longitude[i])
         print(utm_east,utm_north)
         size = (abs(utm_east[1] - utm_east[0]) if len(utm_east) > 1 else (abs(utm_north[1] - utm_north[0]) if len(utm_north) > 1 else abs(self._bbox[0] - self._bbox[2]))) * 0.9
+        self.weather_map = self.ArrowMap()
         if direction_data is None:
             return
         for i in range(len(direction_data)):
             for j in range(len(direction_data[i])):
                 x = direction_data[i][j]
                 from math import isnan
-                if not isnan(direction_data[i][j]) and not data[i][j] == 0:
+                if not isnan(direction_data[i][j]) and data!=0 and not isnan(data[i][j]):
                     degree = math.radians(direction_data[i][j])
-                    res = size
-                    if not isnan(data[i][j]):
-                        res = size*(data[i][j]/max) if (data[i][j]/max) <= 1 else size
                     center = utm_east[j],utm_north[i]
-                    start = [center[0], center[1] + res/2]
+                    start = [center[0], center[1] + size/2]
                     start = [center[0] + (start[0]-center[0]) * math.cos(degree) - (start[1]-center[1]) * math.sin(degree), center[1] + (start[0]-center[0]) * math.sin(degree) - (start[1]-center[1]) * math.cos(degree)]
-                    end = [center[0] , center[1] - res / 2]
+                    end = [center[0] , center[1] - size / 2]
                     end = [center[0] + (end[0]-center[0]) * math.cos(degree) - (end[1]-center[1]) * math.sin(degree), center[1] + (end[0]-center[0]) * math.sin(degree) - (end[1]-center[1]) * math.cos(degree)]
-                    self.draw_arrow(start,end,"black",head_size=res/4, width=size/20,fill=True)
+                    color = cmap(data[i][j]/ max([max(k) for k in data]))
+                    self.weather_map.add_arrow(self.draw_arrow(start,end,color=str(colors.rgb2hex(color, keep_alpha=True)),head_size=size/4, width=size/20,fill=True))
 
     def _draw_weather_heatmap(self, weather_data: str, cmap: colors.Colormap, label_colour: str) -> None:
         """
@@ -212,10 +222,13 @@ class Display:
 
         x_min, y_min, x_max, y_max = self._bbox
         extent = (x_min, x_max, y_min, y_max)
-        heatmap_data = weather_data
+        heatmap_data = np.array(weather_data)
+        lon = np.linspace(x_min, x_max, heatmap_data.shape[1])
+        lat = np.linspace(y_min, y_max, heatmap_data.shape[0])
+        lon, lat = np.meshgrid(lon, lat)
         ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=10)
-        self.weather_map = self.axes.imshow(heatmap_data, extent=extent, origin='lower', cmap=cmap, alpha=0.5,
-                                            interpolation="bicubic")
+        self.weather_map = self.axes.pcolormesh(lon, lat, heatmap_data, cmap=cmap, alpha=0.5, transform=self.crs)
+        self.axes.set_extent(extent, crs=self.crs)
         self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         self._cbar.set_ticks(ticks)
@@ -232,7 +245,7 @@ class Display:
             head_size: float = None,
             thickness: float = None,
             edge_style: str | tuple = None,
-    ) -> None:
+    ) -> Any:
         """
         Add a straight arrow overlay to the environment plot.
         :param start: tuple of start point coordinate pair
@@ -245,7 +258,7 @@ class Display:
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        self.features.add_arrow(
+        return self.features.add_arrow(
             start, end, color, width, fill, head_size, thickness, edge_style
         )
 
@@ -599,9 +612,7 @@ class Display:
         self._environment.weather.selected_time_index = val
         self._cbar.remove()
         self.weather_map.remove()
-        self.draw_weather_heatmap(self._environment.weather.weather_layers[0].name,
-                                  cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9),
-                                  label_colour='white')
+        self.draw_weather("wind")
         self.redraw_plot()
 
     def _add_time_slider(self, ax_slider, fig):
