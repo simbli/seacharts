@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 class Time:
     def __init__(self, time_start: str, time_end: str, period: str):
             # Parse the start and end dates
-            self.time_start = datetime.strptime(time_start, "%d-%m-%Y")
-            self.time_end = datetime.strptime(time_end, "%d-%m-%Y")
+            self._date_string_format = "%d-%m-%Y %H:%M"
+            self.time_start = datetime.strptime(time_start, self._date_string_format)
+            self.time_end = datetime.strptime(time_end, self._date_string_format)
             self.period = period
             
             # Generate the list of datetimes and epoch times
@@ -40,4 +41,4 @@ class Time:
             raise ValueError(f"Unknown period: {self.period}")
         
     def get_datetimes_strings(self):
-        return [datetime.strftime("%d-%m-%Y") for datetime in self.datetimes]
+        return [datetime.strftime(self._date_string_format) for datetime in self.datetimes]

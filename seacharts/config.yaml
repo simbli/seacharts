@@ -1,14 +1,14 @@
 enc:
 # test config for S-57
 
-  # size: [ 6.0, 4.5 ]
-  # origin: [ -85.0, 20.0 ]
-  # depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
-  # crs: "WGS84"
-  # S57_layers: 
-  #   "TSSLPT": "#8B0000"
-  #   "CTNARE": "#964B00"
-  # resources: [ "data/db/US1GC09M" ]
+  size: [ 6.0, 4.5 ]
+  origin: [ -85.0, 20.0 ]
+  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
+  crs: "WGS84"
+  S57_layers:
+    "TSSLPT": "#8B0000"
+    "CTNARE": "#964B00"
+  resources: [ "data/db/US1GC09M" ]
 
 
 #  weather:
@@ -21,23 +21,23 @@ enc:
 
 # test config for FGDB
 
-  size: [ 9000, 5062 ]
-  center: [ 44300, 6956450 ]
-  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
-  crs: "UTM33N"
-  resources: [ "data/db/More_og_Romsdal_utm33.gdb" ]
+  # size: [ 9000, 5062 ]
+  # center: [ 44300, 6956450 ]
+  # depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
+  # crs: "UTM33N"
+  # resources: [ "data/db/More_og_Romsdal_utm33.gdb" ]
 
   time:
-    time_start: "22-01-2024"
-    time_end: "22-02-2024"
-    period: "day"
+    time_start: "22-02-2024 09:00"
+    time_end: "22-02-2024 15:00"
+    period: "hour"
 
 
 display:
   colorbar: False
   dark_mode: False
   fullscreen: False
-  controls: False
+  controls: True
   resolution: 640
   anchor: "center"
   dpi: 96
