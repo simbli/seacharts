@@ -16,7 +16,7 @@ enc:
         type: float
         min: 1.0
 
-    #that's where you want top-left corner to be
+    #that's where you want bottom-left corner to be
     origin:
       required: True
       excludes: center
