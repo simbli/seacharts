@@ -19,24 +19,29 @@ class FeaturesManager:
         self._seabeds = {}
         self._land = None
         self._shore = None
+        self._extra_layers = {}
+        self._number_of_layers = len(self._display._environment.get_layers())
+        self._next_z_order = self._number_of_layers * -1
         self._init_layers()
 
     def _init_layers(self):
         seabeds = list(self._display._environment.map.bathymetry.values())
         for i, seabed in enumerate(seabeds):
             if not seabed.geometry.is_empty:
-                rank = -300 + i
                 bins = len(self._display._environment.scope.depths)
                 color = color_picker(i, bins)
-                self._seabeds[rank] = self.assign_artist(seabed, rank, color)
+                self._seabeds[i] = self.assign_artist(seabed, self._get_next_z_order(), color)
 
         shore = self._display._environment.map.shore
         color = color_picker(shore.__class__.__name__)
-        self._shore = self.assign_artist(shore, -110, color)
+        self._shore = self.assign_artist(shore, self._get_next_z_order(), color)
 
         land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
-        self._land = self.assign_artist(land, -100, color)
+        self._land = self.assign_artist(land, self._get_next_z_order(), color)
+
+        for i, extra_layer in enumerate(self._display._environment.extra_layers.loaded_regions):
+            self._extra_layers[i] = self.assign_artist(extra_layer, self._get_next_z_order(), extra_layer.color)
 
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
@@ -44,19 +49,24 @@ class FeaturesManager:
             *center, width=size[0] / 2, heading=0, height=size[1] / 2
         ).geometry
         color = (color_picker("black")[0], "none")
-        self.new_artist(geometry, color, 10000, linewidth=3)
+        self.new_artist(geometry, color, z_order=self._get_next_z_order(), linewidth=3)
+
+    def _get_next_z_order(self) -> int:
+        z_order = self._next_z_order
+        self._next_z_order += 1
+        return z_order
 
     @property
     def animated(self):
         return [a for a in [v["artist"] for v in self._vessels.values()] if a]
 
-    def assign_artist(self, layer, z_axis, color):
+    def assign_artist(self, layer, z_order, color):
         if isinstance(layer.geometry, MultiLineString):
             artist = []
             for line in layer.geometry.geoms:
-                artist.append(self.new_line_artist(line, color, z_axis))
+                artist.append(self.new_line_artist(line, color, z_order))
         else:
-            artist = self.new_artist(layer.geometry, color, z_axis)
+            artist = self.new_artist(layer.geometry, color, z_order=z_order)
         return artist
 
     def new_artist(self, geometry, color, z_order=None, **kwargs):
@@ -73,12 +83,14 @@ class FeaturesManager:
             artist.set_animated(True)
         return artist
 
-    def new_line_artist(self, line_geometry, color, z_order=None, animated=True, **kwargs):
+    def new_line_artist(self, line_geometry, color, z_order=None, **kwargs):
         x, y = line_geometry.xy
-        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 1)))
+        # TODO: confirm if linewidth 2 wont cause errors in research, linewidth=1 is not visible
+        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 2)))
         if z_order is None:
+            line.set_animated(True)
+        else:
             line.set_zorder(z_order)
-            line.set_animated(animated)
         return line
 
     def add_arrow(
@@ -89,7 +101,7 @@ class FeaturesManager:
         if head_size is None:
             head_size = 50
         body = shapes.Arrow(start=start, end=end, width=buffer).body(head_size)
-        self.add_overlay(body, color_name, fill, linewidth, linestyle)
+        return self.add_overlay(body, color_name, fill, linewidth, linestyle)
 
     def add_circle(self, center, radius, color_name, fill, linewidth, linestyle, alpha):
         geometry = shapes.Circle(*center, radius).geometry
@@ -149,7 +161,7 @@ class FeaturesManager:
         if linestyle is not None:
             kwargs["linestyle"] = linestyle
         kwargs["alpha"] = alpha
-        self.new_artist(geometry, color, 0, **kwargs)
+        return self.new_artist(geometry, color, 0, **kwargs)
 
     def update_vessels(self):
         if self.show_vessels:

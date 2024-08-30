@@ -1,6 +1,7 @@
 """
 Contains the Display class for displaying and plotting maritime spatial data.
 """
+import math
 import tkinter as tk
 from pathlib import Path
 from typing import Any
@@ -9,8 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
-from matplotlib.widgets import Slider
-from matplotlib.widgets import Button
+from matplotlib.widgets import Slider, RadioButtons
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 from matplotlib_scalebar.scalebar import ScaleBar
@@ -46,6 +46,7 @@ class Display:
         self._dark_mode = False
         self._colorbar_mode = False
         self._fullscreen_mode = False
+        self._controls = True
         self._resolution = 720
         self._dpi = 96
         self._anchor_index = self._init_anchor_index(settings)
@@ -54,9 +55,9 @@ class Display:
         self.events = EventsManager(self)
         self.features = FeaturesManager(self)
         self._toggle_colorbar(self._colorbar_mode)
-        # self._toggle_dark_mode(self._dark_mode)
+        self._toggle_dark_mode(self._dark_mode)
         self._add_scalebar()
-        self.add_slider()
+        self.add_control_panel(self._controls)
         self.redraw_plot()
         if self._fullscreen_mode:
             self._toggle_fullscreen(self._fullscreen_mode)
@@ -133,12 +134,13 @@ class Display:
     def draw_weather(self, variable_name):
         lat = self._environment.weather.latitude
         lon = self._environment.weather.longitude
-        weather_layer = self._environment.weather.find_by_name(variable_name)
+
+        if variable_name == "wind":
+            weather_layer = self._environment.weather.find_by_name("wind_speed")
+            direction_layer = self._environment.weather.find_by_name("wind_direction")
         x_min, y_min, x_max, y_max = self._bbox
         lat_min,lon_min = self._environment.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
         lat_max, lon_max = self._environment.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
-        print(lat_min, lat_max)
-        print(lon_min, lon_max)
 
         if lon_min < 0:
             lon_min = 180 + (180 + lon_min)
@@ -160,15 +162,79 @@ class Display:
                 lon_indxes[1] = len(lon) - i
             if None not in lon_indxes:
                 break
-        print(lat_indxes,lon_indxes)
+
+        weather_layer = None
+        direction_layer = None
+
+        match variable_name:
+            case "wind":
+                weather_layer = self._environment.weather.find_by_name("wind_speed")
+                direction_layer = self._environment.weather.find_by_name("wind_direction")
+            case "wave":
+                weather_layer = self._environment.weather.find_by_name("wave_height")
+                direction_layer = self._environment.weather.find_by_name("wave_direction")
+            case "sea_current":
+                weather_layer = self._environment.weather.find_by_name("sea_current_speed")
+                direction_layer = self._environment.weather.find_by_name("sea_current_direction")
+            case _:
+                if "direction" in variable_name:
+                    direction_layer = self._environment.weather.find_by_name(variable_name)
+                else:
+                    weather_layer = self._environment.weather.find_by_name(variable_name)
+
+
         # TODO choose correct display for variables
-        data = [x[lon_indxes[0]:lon_indxes[1]] for x in weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
-        self._draw_weather_heatmap(data,
-                                   cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white')
+        data = None
+        if weather_layer is not None:
+            data = [x[lon_indxes[0]:lon_indxes[1]] for x in weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
+        if direction_layer is not None:
+            direction_data = [x[lon_indxes[0]:lon_indxes[1]] for x in direction_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
+            self._draw_arrow_map(direction_data,data,latitudes=lat[lat_indxes[0]:lat_indxes[1]],longitude=lon[lon_indxes[0]:lon_indxes[1]])
+        elif data is not None:
+            self._draw_weather_heatmap(weather_layer.weather[self._environment.weather.selected_time_index].data,
+                                     cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
 
+    class ArrowMap:
+        arrows: list
 
-    def _draw_arrow_map(self):
-        None
+        def __init__(self):
+            self.arrows = []
+
+        def add_arrow(self, arrow):
+            self.arrows.append(arrow)
+
+        def remove(self):
+            for arrow in self.arrows:
+                arrow.remove()
+
+    def _draw_arrow_map(self,direction_data,data,latitudes,longitude):
+        cmap = self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9)
+        utm_east = [0] * len(longitude)
+        utm_north = [0] * len(latitudes)
+        print(self._environment.scope.extent.origin, (self._environment.scope.extent.center[0] + 700, self._environment.scope.extent.center[1] + 600))
+        for i in range(len(latitudes)):
+            utm_east[0], utm_north[i] = self._environment.scope.extent.convert_lat_lon_to_utm(latitudes[i], longitude[0])
+        for i in range(len(longitude)):
+            utm_east[i], utm_north[0] = self._environment.scope.extent.convert_lat_lon_to_utm(latitudes[0], longitude[i])
+        print(utm_east,utm_north)
+        size = (abs(utm_east[1] - utm_east[0]) if len(utm_east) > 1 else (abs(utm_north[1] - utm_north[0]) if len(utm_north) > 1 else abs(self._bbox[0] - self._bbox[2]))) * 0.9
+        self.weather_map = self.ArrowMap()
+        if direction_data is None:
+            return
+        draw_default = data is None
+        for i in range(len(direction_data)):
+            for j in range(len(direction_data[i])):
+                x = direction_data[i][j]
+                from math import isnan
+                if not isnan(direction_data[i][j]):
+                    degree = math.radians(direction_data[i][j])
+                    center = utm_east[j],utm_north[i]
+                    start = [center[0], center[1] + size/2]
+                    start = [center[0] + (start[0]-center[0]) * math.cos(degree) - (start[1]-center[1]) * math.sin(degree), center[1] + (start[0]-center[0]) * math.sin(degree) - (start[1]-center[1]) * math.cos(degree)]
+                    end = [center[0] , center[1] - size / 2]
+                    end = [center[0] + (end[0]-center[0]) * math.cos(degree) - (end[1]-center[1]) * math.sin(degree), center[1] + (end[0]-center[0]) * math.sin(degree) - (end[1]-center[1]) * math.cos(degree)]
+                    color = "black" if draw_default else str(colors.rgb2hex(cmap(data[i][j]/ max([max(k) for k in data])), keep_alpha=True))
+                    self.weather_map.add_arrow(self.draw_arrow(start,end,color=color,head_size=size/4, width=size/20,fill=True))
 
     def _draw_weather_heatmap(self, weather_data: str, cmap: colors.Colormap, label_colour: str) -> None:
         """
@@ -185,11 +251,12 @@ class Display:
         lon = np.linspace(x_min, x_max, heatmap_data.shape[1])
         lat = np.linspace(y_min, y_max, heatmap_data.shape[0])
         lon, lat = np.meshgrid(lon, lat)
-        ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=8)
+        ticks = np.linspace(np.nanmin(np.array(heatmap_data)), np.nanmax(np.array(heatmap_data)), num=10)
         self.weather_map = self.axes.pcolormesh(lon, lat, heatmap_data, cmap=cmap, alpha=0.5, transform=self.crs)
         self.axes.set_extent(extent, crs=self.crs)
         self._cbar = self.figure.colorbar(self.weather_map, ax=self.axes, shrink=0.7)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
+        self._cbar.set_ticks(ticks)
         self._cbar.outline.set_edgecolor(label_colour)
         plt.setp(plt.getp(self._cbar.ax.axes, 'yticklabels'), color=label_colour)
 
@@ -203,7 +270,7 @@ class Display:
             head_size: float = None,
             thickness: float = None,
             edge_style: str | tuple = None,
-    ) -> None:
+    ) -> Any:
         """
         Add a straight arrow overlay to the environment plot.
         :param start: tuple of start point coordinate pair
@@ -216,7 +283,7 @@ class Display:
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        self.features.add_arrow(
+        return self.features.add_arrow(
             start, end, color, width, fill, head_size, thickness, edge_style
         )
 
@@ -386,6 +453,8 @@ class Display:
                 self._resolution = d["resolution"]
             if "dpi" in d:
                 self._dpi = d["dpi"]
+            if "controls" in d:
+                self._controls = d["controls"]
 
         if self._fullscreen_mode:
             plt.rcParams["toolbar"] = "None"
@@ -441,7 +510,7 @@ class Display:
                 color="white",
                 box_alpha=0.0,
                 pad=0.5,
-                font_properties={"size": 12},
+                font_properties={"size": 12}
             )
         )
 
@@ -564,41 +633,57 @@ class Display:
     def _terminate(self):
         plt.close(self.figure)
 
-    """
-    def add_slider(self):
-        fig, (ax_slider, ax_button) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [3, 1]}, figsize=(8, 1))
-        self.slider = Slider(ax_slider, label='Slider', valmin=0, valmax=1, valinit=0.5)
-        button = Button(ax_button, 'Set', color='lightgray')
-        button.on_clicked(self.slider_changed_callback)
-
-        fig.show()
-    """
-
-    def _weather_slider_handle(self, val):
+    def _weather_slider_handle(self,val):
         self._environment.weather.selected_time_index = val
-        self._cbar.remove()
+        # self._cbar.remove()
         self.weather_map.remove()
-        self.draw_weather_heatmap(self._environment.weather.weather_layers[0].name,
-                                  cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9),
-                                  label_colour='white')
+        self.draw_weather("wind")
         self.redraw_plot()
 
-    def add_slider(self):
-        fig, ax_slider = plt.subplots(figsize=(8, 1))
-        times = self._environment.weather.time
-        if times is None:
-            times = [0]
-        self.slider = Slider(ax_slider, label='Time:', valmin=0, valmax=len(times) - 1, valinit=0, valstep=1)
+    def _add_time_slider(self, ax_slider, fig):
+        times = self._environment.scope.time.get_datetimes_strings()
+        self.slider = Slider(ax=ax_slider, valmin=0, valmax=len(times) - 1, valinit=0, valstep=1, label="Time")
+        self.time_label = ax_slider.text(0.5, 1.2, times[0], transform=ax_slider.transAxes,
+                        ha='center', va='center', fontsize=12)
         last_value = self.slider.val
 
-        def onrelease(event):
+        def __on_slider_change(event):
             nonlocal last_value
             if event.button == 1 and event.inaxes == ax_slider:
                 val = self.slider.val
                 if val != last_value:
                     self._weather_slider_handle(val)
                     last_value = val
-                    print(f"Slider value: {val}")
 
-        fig.canvas.mpl_connect('button_release_event', onrelease)
+        def __update(val):
+            index = int(self.slider.val)
+            self.time_label.set_text(times[index])
+            fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect('button_release_event', __on_slider_change)
+        self.slider.on_changed(__update)
+            
+
+    def add_control_panel(self, controls: bool):
+        if not controls: return
+        fig, (ax_slider, ax_radio) = plt.subplots(2, 1, figsize=(8, 2), gridspec_kw={'height_ratios': [1, 2]})
+        if self._environment.scope.time is not None:
+            self._add_time_slider(ax_slider=ax_slider, fig=fig)
+        
+        # VISIBLE LAYER PICKER START
+            # if weather layers is not None -> add_radio_pick for weather layers
+        radio_labels = ['a', 'b', 'c']
+        self.radio_buttons = RadioButtons(ax_radio, ['--'] + radio_labels, active=0)
+        def on_radio_change(label):
+            print(f"Radio button selected: {label}")
+            # Add handling code for radio button change here
+        self.radio_buttons.on_clicked(on_radio_change)
+        # VISIBLE LAYER PICKER END
+        
+        # TODO: layer picked in such way should be saved to variable
+        # then we can add, analogically to date slider, opacity slider for picked weather layer
+        
+        # Set the window title and show the figure
+        fig.canvas.manager.set_window_title('Controls')
         fig.show()
+

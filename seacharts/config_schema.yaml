@@ -51,9 +51,11 @@ enc:
     #you can pick specific S-57 layers you want to extract, default required is LNDARE, DEPARE and COALNE
     S57_layers:
       required: False
-      type: list
-      minlength: 1
-      schema:
+      type: dict
+      minlength: 0
+      valuesrules:
+        type: string
+      keysrules:
         type: string
 
     #you must put paths to some resources
@@ -68,21 +70,36 @@ enc:
       required: False
       type: dict
       schema:
-        PyThor_adress:
+        PyThor_address:
           required: False
           type: string
-        #in epoch time
-        time_start:
-          required: False
-          type: integer
-        time_end:
-          required: False
-          type: integer
         variables:
           type: list
           required: False
           schema:
             type: string
+
+    time:
+      required: False
+      type: dict
+      schema:
+        time_start:
+          required: True
+          type: string
+          regex: "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-[0-9]{4} [0-2][0-9]:[0-5][0-9]$"  # dd-mm-yyyy hh:mm
+        time_end:
+          required: True
+          type: string
+          regex: "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-[0-9]{4} [0-2][0-9]:[0-5][0-9]$"  # dd-mm-yyyy hh:mm
+        period:
+          required: True
+          type: string
+          allowed:
+            - hour
+            - day
+            - week
+            - month
+            - year
 
 
 display:
@@ -112,3 +129,7 @@ display:
     dpi:
       required: False
       type: integer
+
+    controls:
+      required: False
+      type: boolean

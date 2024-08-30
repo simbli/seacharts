@@ -54,35 +54,50 @@ class EventsManager:
     def _key_press(self, event: Any) -> None:
         if event.key == "escape":
             self._display._terminate()
+
         elif event.key == "d":
             self._display._toggle_dark_mode()
+
         elif event.key == "t":
             self._display.features.show_top_hidden_layer()
+
         elif event.key == "g":
             self._display.features.show_bottom_hidden_layer()
+
         elif event.key == "h":
             self._display.features.hide_top_visible_layer()
+
         elif event.key == "b":
             self._display.features.hide_bottom_visible_layer()
+
         elif event.key == "u":
             self._display.features.update_vessels()
             self._display.update_plot()
+
         elif event.key == "v":
             self._display.features.toggle_vessels_visibility()
-        elif event.key == "l":
+
+        elif event.key == "p": # there were some issues with 'l' key
             self._display.features.toggle_topography_visibility()
+
         elif event.key == "c":
             self._display._toggle_colorbar()
+
         elif event.key == "ctrl+s":
             self._display._save_figure("svg", extension="svg")
+
         elif event.key == "s":
             self._display._save_figure("low_res", scale=2.0)
+
         elif event.key == "S":
             self._display._save_figure("high_res", scale=10.0)
+
         elif event.key == "shift":
             self._shift_pressed = True
+
         elif event.key == "control":
             self._control_pressed = True
+
         elif event.key[:4] == "alt+":
             key = event.key[4:]
             if key in self._directions:

@@ -1,10 +1,10 @@
 """
 Contains utility functions related to system files and directories.
 """
-import csv
+import csv, shutil
 from collections.abc import Generator
 from pathlib import Path
-
+from seacharts.core.parser import DataParser
 from . import paths
 
 
@@ -15,15 +15,20 @@ def verify_directory_exists(path_string: str) -> None:
         print(f"WARNING: {path_type} database path '{path}' not found.\n")
 
 
-def build_directory_structure(features: list[str], resources: list[str]) -> None:
+def build_directory_structure(features: list[str], resources: list[str], parser: DataParser) -> None:
+    map_dir_name = parser.get_source_root_name()
+    paths.shapefiles.mkdir(exist_ok=True)
+    paths.shapefiles =  paths.shapefiles / map_dir_name
     paths.output.mkdir(exist_ok=True)
     paths.shapefiles.mkdir(exist_ok=True)
+    shutil.copy(paths.config, paths.shapefiles)
+
     for feature in features:
         shapefile_dir = paths.shapefiles / feature.lower()
         shapefile_dir.mkdir(parents=True, exist_ok=True)
     for resource in resources:
         path = Path(resource).resolve()
-        if not path.suffix == ".gdb":
+        if not path.suffix == ".gdb" or not path.suffix == ".000":
             path.mkdir(exist_ok=True)
 
 

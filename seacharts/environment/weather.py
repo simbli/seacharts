@@ -34,8 +34,8 @@ class WeatherData(DataCollection):
         :param query_dict: Dict with API query data
         :return: Dictionary with weather data.
         """
-        api_query = query_dict["PyThor_adress"] + "/api/weather?"
-        query_dict.pop("PyThor_adress")
+        api_query = query_dict["PyThor_address"] + "/api/weather?"
+        query_dict.pop("PyThor_address")
         for k, v in query_dict.items():
             api_query += k + "="
             if not isinstance(v, list):
@@ -49,10 +49,11 @@ class WeatherData(DataCollection):
         latitude_start,longitude_start = self.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
         latitude_end, longitude_end = self.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
         print(latitude_start,longitude_start,latitude_end, longitude_end)
-        api_query += "&latitude_start="+str(latitude_start)
-        api_query += "&longitude_start=" + str(longitude_start)
-        api_query += "&latitude_end=" + str(latitude_end)
-        api_query += "&longitude_end=" + str(longitude_end)
+        api_query += "&latitude_start="+str(latitude_start-0.5 if latitude_start-0.5 >= -90 else -90)
+        api_query += "&longitude_start=" + str(longitude_start-0.5 if longitude_start-0.5 >= -180 else -180)
+        api_query += "&latitude_end=" + str(latitude_end+0.5 if latitude_end+0.5 <= 90 else 90)
+        api_query += "&longitude_end=" + str(longitude_end+0.5 if longitude_end+0.5 <= 180 else 180)
+        api_query += "&time_start="+ str(self.scope.time.epoch_times[0]) + "&time_end=" + str(self.scope.time.epoch_times[-1])
         print(api_query)
         return requests.get(api_query).json()
 
@@ -75,10 +76,6 @@ class WeatherData(DataCollection):
     @property
     def layers(self) -> list[VirtualWeatherLayer]:
         return self.weather_layers
-
-    @property
-    def loaded(self) -> bool:
-        return any(self.layers)
 
     def find_by_name(self,name:str) -> VirtualWeatherLayer:
         for layer in self.layers:

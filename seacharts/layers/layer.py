@@ -21,6 +21,15 @@ class Layer(Shape, ABC):
     def label(self) -> str:
         return self.name.lower()
 
+    def _geometries_to_multi(self, multi_geoms, geometries, geo_class):
+        if len(geometries):
+            geometries = self.as_multi(geometries)
+            multi_geoms.append(geometries)
+        geom = unary_union(multi_geoms)
+        if not isinstance(geom, geo_class):
+            geom = geo_class([geom])
+        return geom
+
     def records_as_geometry(self, records: list[dict]) -> None:
         geometries = []
         multi_geoms = []
@@ -29,6 +38,7 @@ class Layer(Shape, ABC):
         if len(records) > 0:
             for record in records:
                 geom_tmp = self._record_to_geometry(record)
+
                 if isinstance(geom_tmp, geo.Polygon):
                     geometries.append(geom_tmp)
                 elif isinstance(geom_tmp, geo.MultiPolygon):
@@ -39,16 +49,10 @@ class Layer(Shape, ABC):
                     multi_linestrings.append(geom_tmp)
 
             if len(geometries) + len(multi_geoms) > 0:
-                if len(geometries):
-                    geometries = self.as_multi(geometries)
-                    multi_geoms.append(geometries)
-                self.geometry = unary_union(multi_geoms)
+                self.geometry = self._geometries_to_multi(multi_geoms, geometries, geo.MultiPolygon)
 
             elif len(linestrings) + len(multi_linestrings) > 0:
-                if len(linestrings):
-                    linestrings = self.as_multi(linestrings)
-                    multi_linestrings.append(linestrings)
-                self.geometry = unary_union(multi_linestrings)
+                self.geometry = self._geometries_to_multi(multi_linestrings, linestrings, geo.MultiLineString)
 
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]

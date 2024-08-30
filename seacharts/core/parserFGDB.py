@@ -75,8 +75,13 @@ class FGDBParser(DataParser):
             records = self._parse_layers(gdb_path, external_labels, depth)
             yield from self._parse_records(records, name)
 
-    def _is_map_type(self, path):
+    def _is_map_type(self, path) -> bool:
         return path.is_dir() and path.suffix == ".gdb"
+    
+    def get_source_root_name(self) -> str:
+        for path in self._file_paths:
+            if self._is_map_type(path):
+                return path.stem
 
     def _parse_layers(
         self, path: Path, external_labels: list[str], depth: int
