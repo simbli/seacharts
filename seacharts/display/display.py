@@ -134,10 +134,10 @@ class Display:
     def draw_weather(self, variable_name):
         lat = self._environment.weather.latitude
         lon = self._environment.weather.longitude
-        weather_layer = self._environment.weather.find_by_name(variable_name)
+
         if variable_name == "wind":
-            weather_layer = self._environment.weather.find_by_name("ws")
-            direction_layer = self._environment.weather.find_by_name("wdir")
+            weather_layer = self._environment.weather.find_by_name("wind_speed")
+            direction_layer = self._environment.weather.find_by_name("wind_direction")
         x_min, y_min, x_max, y_max = self._bbox
         lat_min,lon_min = self._environment.scope.extent.convert_utm_to_lat_lon(x_min,y_min)
         lat_max, lon_max = self._environment.scope.extent.convert_utm_to_lat_lon(x_max, y_max)
@@ -163,14 +163,36 @@ class Display:
             if None not in lon_indxes:
                 break
 
+        weather_layer = None
+        direction_layer = None
+
+        match variable_name:
+            case "wind":
+                weather_layer = self._environment.weather.find_by_name("wind_speed")
+                direction_layer = self._environment.weather.find_by_name("wind_direction")
+            case "wave":
+                weather_layer = self._environment.weather.find_by_name("wave_height")
+                direction_layer = self._environment.weather.find_by_name("wave_direction")
+            case "sea_current":
+                weather_layer = self._environment.weather.find_by_name("sea_current_speed")
+                direction_layer = self._environment.weather.find_by_name("sea_current_direction")
+            case _:
+                if "direction" in variable_name:
+                    direction_layer = self._environment.weather.find_by_name(variable_name)
+                else:
+                    weather_layer = self._environment.weather.find_by_name(variable_name)
+
+
         # TODO choose correct display for variables
-        data = [x[lon_indxes[0]:lon_indxes[1]] for x in weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
-        direction_data = [x[lon_indxes[0]:lon_indxes[1]] for x in direction_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
-        print(data)
-        #TODO max value pick
-        self._draw_arrow_map(direction_data,data,latitudes=lat[lat_indxes[0]:lat_indxes[1]],longitude=lon[lon_indxes[0]:lon_indxes[1]])
-        # self._draw_weather_heatmap(data,
-        #                             cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
+        data = None
+        if weather_layer is not None:
+            data = [x[lon_indxes[0]:lon_indxes[1]] for x in weather_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
+        if direction_layer is not None:
+            direction_data = [x[lon_indxes[0]:lon_indxes[1]] for x in direction_layer.weather[self._environment.weather.selected_time_index].data[lat_indxes[0]:lat_indxes[1]]]
+            self._draw_arrow_map(direction_data,data,latitudes=lat[lat_indxes[0]:lat_indxes[1]],longitude=lon[lon_indxes[0]:lon_indxes[1]])
+        elif data is not None:
+            self._draw_weather_heatmap(weather_layer.weather[self._environment.weather.selected_time_index].data,
+                                     cmap=self.truncate_colormap(plt.get_cmap('jet'), 0.35, 0.9), label_colour='white' if self._dark_mode else 'black')
 
     class ArrowMap:
         arrows: list
@@ -199,19 +221,20 @@ class Display:
         self.weather_map = self.ArrowMap()
         if direction_data is None:
             return
+        draw_default = data is None
         for i in range(len(direction_data)):
             for j in range(len(direction_data[i])):
                 x = direction_data[i][j]
                 from math import isnan
-                if not isnan(direction_data[i][j]) and data!=0 and not isnan(data[i][j]):
+                if not isnan(direction_data[i][j]):
                     degree = math.radians(direction_data[i][j])
                     center = utm_east[j],utm_north[i]
                     start = [center[0], center[1] + size/2]
                     start = [center[0] + (start[0]-center[0]) * math.cos(degree) - (start[1]-center[1]) * math.sin(degree), center[1] + (start[0]-center[0]) * math.sin(degree) - (start[1]-center[1]) * math.cos(degree)]
                     end = [center[0] , center[1] - size / 2]
                     end = [center[0] + (end[0]-center[0]) * math.cos(degree) - (end[1]-center[1]) * math.sin(degree), center[1] + (end[0]-center[0]) * math.sin(degree) - (end[1]-center[1]) * math.cos(degree)]
-                    color = cmap(data[i][j]/ max([max(k) for k in data]))
-                    self.weather_map.add_arrow(self.draw_arrow(start,end,color=str(colors.rgb2hex(color, keep_alpha=True)),head_size=size/4, width=size/20,fill=True))
+                    color = "black" if draw_default else str(colors.rgb2hex(cmap(data[i][j]/ max([max(k) for k in data])), keep_alpha=True))
+                    self.weather_map.add_arrow(self.draw_arrow(start,end,color=color,head_size=size/4, width=size/20,fill=True))
 
     def _draw_weather_heatmap(self, weather_data: str, cmap: colors.Colormap, label_colour: str) -> None:
         """
