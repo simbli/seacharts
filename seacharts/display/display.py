@@ -711,7 +711,11 @@ class Display:
         if "sea_current_speed" and "sea_current_direction" in radio_labels:
             radio_labels.append("sea_current")
         if not controls: return
-        fig, (ax_slider, ax_radio) = plt.subplots(2, 1, figsize=(8, 1 * len(radio_labels)), gridspec_kw={'height_ratios': [1, 2]})
+        
+        slider_height = 0.2
+        fig_height = 1 * len(radio_labels) + slider_height
+        fig, (ax_slider, ax_radio) = plt.subplots(2, 1, figsize=(8, fig_height), height_ratios=[slider_height, 1])
+
         if self._environment.scope.time is not None:
             self._add_time_slider(ax_slider=ax_slider, fig=fig)
 

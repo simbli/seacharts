@@ -1,5 +1,4 @@
 enc:
-  # test config for S-57
 
   size: [ 6.0, 4.5 ]
   origin: [ -85.0, 20.0 ]
@@ -7,7 +6,7 @@ enc:
   crs: "WGS84"
   S57_layers:
     "TSSLPT": "#8B0000"
-  #     "CTNARE": "#964B00"
+    "CTNARE": "#964B00"
   resources: [ "data/db/US1GC09M" ]
 
   weather:
