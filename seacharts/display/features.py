@@ -101,7 +101,7 @@ class FeaturesManager:
         if head_size is None:
             head_size = 50
         body = shapes.Arrow(start=start, end=end, width=buffer).body(head_size)
-        self.add_overlay(body, color_name, fill, linewidth, linestyle)
+        return self.add_overlay(body, color_name, fill, linewidth, linestyle)
 
     def add_circle(self, center, radius, color_name, fill, linewidth, linestyle, alpha):
         geometry = shapes.Circle(*center, radius).geometry
@@ -161,7 +161,7 @@ class FeaturesManager:
         if linestyle is not None:
             kwargs["linestyle"] = linestyle
         kwargs["alpha"] = alpha
-        self.new_artist(geometry, color, 0, **kwargs)
+        return self.new_artist(geometry, color, 0, **kwargs)
 
     def update_vessels(self):
         if self.show_vessels:
