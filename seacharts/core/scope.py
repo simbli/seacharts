@@ -33,7 +33,8 @@ class Scope:
             self.time = Time(
                 time_start=time_config["time_start"],
                 time_end=time_config["time_end"],
-                period=time_config["period"]
+                period=time_config["period"],
+                period_mult=time_config["period_multiplier"]
             )
         else:
             self.time = None

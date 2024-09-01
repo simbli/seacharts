@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 class Time:
-    def __init__(self, time_start: str, time_end: str, period: str):
+    def __init__(self, time_start: str, time_end: str, period: str, period_mult: float):
             # Parse the start and end dates
+            self.period_mult = period_mult
             self._date_string_format = "%d-%m-%Y %H:%M"
             self.time_start = datetime.strptime(time_start, self._date_string_format)
             self.time_end = datetime.strptime(time_end, self._date_string_format)
@@ -26,11 +27,11 @@ class Time:
     def _increment_time(self, current_time):
         """Increment the datetime based on the specified period."""
         if self.period == "hour":
-            return current_time + timedelta(hours=1)
+            return current_time + timedelta(hours=int(1 * self.period_mult))
         elif self.period == "day":
-            return current_time + timedelta(days=1)
+            return current_time + timedelta(days=int(1 * self.period_mult))
         elif self.period == "week":
-            return current_time + timedelta(weeks=1)
+            return current_time + timedelta(weeks=int(1 * self.period_mult))
         elif self.period == "month":
             new_month = current_time.month + 1 if current_time.month < 12 else 1
             new_year = current_time.year if current_time.month < 12 else current_time.year + 1

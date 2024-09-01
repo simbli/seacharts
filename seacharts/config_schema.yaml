@@ -78,7 +78,15 @@ enc:
           required: False
           schema:
             type: string
-
+            allowed:
+              - wave_direction
+              - wave_height
+              - wave_period
+              - wind_direction
+              - wind_speed
+              - sea_current_speed
+              - sea_current_direction
+              - tide_height
     time:
       required: False
       type: dict
@@ -100,6 +108,9 @@ enc:
             - week
             - month
             - year
+        period_multiplier:
+          required: True
+          type: float
 
 
 display:
