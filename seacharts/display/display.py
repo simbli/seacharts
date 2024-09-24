@@ -285,8 +285,19 @@ class Display:
                 "sea_current": "sea_current_speed"
             }
             label = label_dict[self._selected_weather]
+        label_units = {
+            "sea_current_speed": "[m/s]",
+            "sea_current_direction": "[deg]",
+            "wave_height": "[m]",
+            "wave_direction": "[deg]",
+            "wave_period": "[s]",
+            "wind_speed": "[m/s]",
+            "wind_direction": "[deg]",
+            "tide_height": "[m]",
+
+        }
         self._cbar = self.figure.colorbar(plt.cm.ScalarMappable(norm, cmap), ax=self.axes, shrink=0.7,
-                                          use_gridspec=True, orientation="horizontal", label=label,
+                                          use_gridspec=True, orientation="horizontal", label=f"{label} {label_units[label]}",
                                           pad=0.05)
         self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         self._cbar.outline.set_edgecolor(label_colour)
