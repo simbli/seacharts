@@ -18,7 +18,8 @@ enc:
                  "wind_speed",
                  "sea_current_speed",
                  "sea_current_direction",
-                 "tide_height" ]
+                 "tide_height"
+    ]
 
 
 
@@ -31,8 +32,8 @@ enc:
   #  resources: [ "data/db/More_og_Romsdal_utm33.gdb" ]
 
   time:
-    time_start: "25-08-2024 09:00"
-    time_end: "25-08-2024 11:00"
+    time_start: "24-09-2024 05:00"
+    time_end: "24-09-2024 09:00"
     period: "hour"
     period_multiplier: 1
 
