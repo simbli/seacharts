@@ -6,7 +6,8 @@ from shapely.geometry import Point
 from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
-from seacharts.layers import Layer, VirtualWeatherLayer
+from seacharts.environment.weather import WeatherData
+from seacharts.layers import Layer
 
 
 class ENC:
@@ -121,5 +122,5 @@ class ENC:
         return self._environment.weather.weather_names
 
     @property
-    def weather_data(self, name) -> VirtualWeatherLayer:
-        return self._environment.weather.find_by_name(name)
+    def weather_data(self) -> WeatherData:
+        return self._environment.weather
