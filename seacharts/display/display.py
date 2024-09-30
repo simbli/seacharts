@@ -276,7 +276,7 @@ class Display:
         norm = plt.Normalize(min_v, max_v)
         label_colour = 'white' if self._dark_mode else 'black'
         ticks = np.linspace(min_v, max_v, num=10)
-        if self._selected_weather not in ["wind","wave","sea_current"]:
+        if self._selected_weather not in ["wind", "wave", "sea_current"]:
             label = self._selected_weather
         else:
             label_dict = {
@@ -299,9 +299,9 @@ class Display:
         self._cbar = self.figure.colorbar(plt.cm.ScalarMappable(norm, cmap), ax=self.axes, shrink=0.7,
                                           use_gridspec=True, orientation="horizontal", label=f"{label} {label_units[label]}",
                                           pad=0.05)
-        self._cbar.ax.yaxis.set_tick_params(color=label_colour)
-        self._cbar.outline.set_edgecolor(label_colour)
         self._cbar.set_ticks(ticks)
+        self._cbar.outline.set_edgecolor(label_colour)
+        self._cbar.ax.yaxis.set_tick_params(color=label_colour)
         plt.setp(plt.getp(self._cbar.ax.axes, 'yticklabels'), color=label_colour)
 
     def draw_arrow(
@@ -618,6 +618,15 @@ class Display:
         self._colorbar.ax.set_facecolor(color)
         self.features.toggle_topography_visibility(not state)
         self._dark_mode = state
+        if self._cbar is not None:
+            self._cbar.remove()
+            gs = self.grid_spec  # Recreate GridSpec without the colorbar space
+            self.axes.set_position(gs[0].get_position(self.figure))  # Adjust the position of the main plot
+            self.axes.set_subplotspec(gs[0])  # Update the subplot spec
+        if self.weather_map is not None:
+            self.weather_map.remove()
+        if self._selected_weather is not None:
+            self.draw_weather(self._selected_weather)
         self.redraw_plot()
 
     def _toggle_colorbar(self, state=None):
