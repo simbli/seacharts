@@ -695,6 +695,8 @@ class Display:
         self.slider = Slider(ax=ax_slider, valmin=0, valmax=len(times) - 1, valinit=0, valstep=1, label="Time")
         self.time_label = ax_slider.text(0.5, 1.2, times[0], transform=ax_slider.transAxes,
                                          ha='center', va='center', fontsize=12)
+        self.slider.valtext.set_text("")
+        
         last_value = self.slider.val
 
         def __on_slider_change(event):

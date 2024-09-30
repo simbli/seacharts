@@ -20,7 +20,7 @@ class DataParser:
     ):
         self.bounding_box = bounding_box
         self.paths = set([p.resolve() for p in (map(Path, path_strings))])
-        self.paths.update(paths.default_resources)
+        # self.paths.update(paths.default_resources)
 
     @staticmethod
     def _shapefile_path(label):
