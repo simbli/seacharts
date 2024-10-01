@@ -22,8 +22,8 @@ class S57Parser(DataParser):
             path = self.get_s57_file_path(path)
             if path is not None:
                 return path.stem
-            
-    
+
+
     @staticmethod
     def convert_s57_to_utm_shapefile(s57_file_path, shapefile_output_path, layer, epsg, bounding_box):
         x_min, y_min, x_max, y_max = map(str, bounding_box)
@@ -44,14 +44,17 @@ class S57Parser(DataParser):
             print(f"Error during conversion: {e}")
 
     @staticmethod
-    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg:str, bounding_box):
+    def convert_s57_depth_to_utm_shapefile(s57_file_path, shapefile_output_path, depth, epsg:str, bounding_box, next_depth = None):
         x_min, y_min, x_max, y_max = map(str, bounding_box)
+        query = f'SELECT * FROM DEPARE WHERE DRVAL1 >= {depth.__str__()}'
+        if next_depth is not None:
+            query += f' AND DRVAL1 < {next_depth.__str__()}'
         ogr2ogr_cmd = [
             'ogr2ogr',
             '-f', 'ESRI Shapefile',     # Output format
             shapefile_output_path,      # Output shapefile
             s57_file_path,              # Input S57 file
-            '-sql', 'SELECT * FROM DEPARE WHERE DRVAL1 >= ' + depth.__str__(),
+            '-sql', query,
             '-t_srs', epsg.upper(),
             '-clipdst', x_min, y_min, x_max, y_max,
             '-skipfailures'
@@ -84,13 +87,27 @@ class S57Parser(DataParser):
             s57_path = self.get_s57_file_path(path)
         s57_path = str(s57_path)
 
-        for region in regions_list:
+        seabeds = [region for region in regions_list if isinstance(region, Seabed)]
+        rest_of_regions = [region for region in regions_list if not isinstance(region, Seabed)]
+
+        for index, region in enumerate(seabeds):
+            start_time = time.time()
+            dest_path = os.path.join(self._shapefile_dir_path(region.label), region.label + ".shp")
+            if index < len(seabeds) - 1:
+                next_depth = seabeds[index + 1].depth
+                self.convert_s57_depth_to_utm_shapefile(s57_path, dest_path, region.depth, self.epsg, self.bounding_box, next_depth)
+            else:
+                self.convert_s57_depth_to_utm_shapefile(s57_path, dest_path, region.depth, self.epsg, self.bounding_box)
+            records = list(self._read_shapefile(region.label))
+            region.records_as_geometry(records)
+            end_time = round(time.time() - start_time, 1)
+            print(f"\rSaved {region.name} to shapefile in {end_time} s.")
+
+        for region in rest_of_regions:
             start_time = time.time()
             dest_path = os.path.join(self._shapefile_dir_path(region.label), region.label + ".shp")
 
-            if isinstance(region, Seabed):
-                self.convert_s57_depth_to_utm_shapefile(s57_path, dest_path, region.depth, self.epsg, self.bounding_box)
-            elif isinstance(region, Land):
+            if isinstance(region, Land):
                 self.convert_s57_to_utm_shapefile(s57_path, dest_path, "LNDARE", self.epsg, self.bounding_box)
             elif isinstance(region, Shore):
                 self.convert_s57_to_utm_shapefile(s57_path, dest_path, "COALNE", self.epsg, self.bounding_box)
