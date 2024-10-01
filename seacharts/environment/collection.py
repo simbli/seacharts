@@ -32,7 +32,8 @@ class DataCollection(ABC):
 @dataclass
 class ShapefileBasedCollection(DataCollection, ABC):
     def load_existing_shapefiles(self) -> None:
-        self.parser.load_shapefiles(self.featured_regions)
+        for region in self.featured_regions:
+            self.parser.load_shapefiles(region)
         if self.loaded:
             print("INFO: ENC created using data from existing shapefiles.\n")
         else:
