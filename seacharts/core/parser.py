@@ -49,10 +49,9 @@ class DataParser:
         if file_path.exists():
             yield from self._read_spatial_file(file_path)
 
-    def load_shapefiles(self, layers: list[Layer]) -> None:
-        for layer in layers:
-            records = list(self._read_shapefile(layer.label))
-            layer.records_as_geometry(records)
+    def load_shapefiles(self, layer: Layer) -> None:
+        records = list(self._read_shapefile(layer.label))
+        layer.records_as_geometry(records)
 
     # main method for parsing corresponding map format
     @abstractmethod

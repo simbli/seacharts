@@ -98,8 +98,7 @@ class S57Parser(DataParser):
                 self.convert_s57_depth_to_utm_shapefile(s57_path, dest_path, region.depth, self.epsg, self.bounding_box, next_depth)
             else:
                 self.convert_s57_depth_to_utm_shapefile(s57_path, dest_path, region.depth, self.epsg, self.bounding_box)
-            records = list(self._read_shapefile(region.label))
-            region.records_as_geometry(records)
+            self.load_shapefiles(region)
             end_time = round(time.time() - start_time, 1)
             print(f"\rSaved {region.name} to shapefile in {end_time} s.")
 
@@ -114,8 +113,7 @@ class S57Parser(DataParser):
             else:
                 self.convert_s57_to_utm_shapefile(s57_path, dest_path, region.name, self.epsg, self.bounding_box)
 
-            records = list(self._read_shapefile(region.label))
-            region.records_as_geometry(records)
+            self.load_shapefiles(region)
             end_time = round(time.time() - start_time, 1)
             print(f"\rSaved {region.name} to shapefile in {end_time} s.")
 
