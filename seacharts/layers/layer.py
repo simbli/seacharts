@@ -16,7 +16,7 @@ from seacharts.shapes import Shape
 class Layer(Shape, ABC):
     geometry: geobase.BaseMultipartGeometry = field(default_factory=geo.MultiPolygon)
     depth: int = None
-
+    
     @property
     def label(self) -> str:
         return self.name.lower()
@@ -53,7 +53,7 @@ class Layer(Shape, ABC):
 
             elif len(linestrings) + len(multi_linestrings) > 0:
                 self.geometry = self._geometries_to_multi(multi_linestrings, linestrings, geo.MultiLineString)
-
+        
     def unify(self, records: list[dict]) -> None:
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = self.collect(geometries)

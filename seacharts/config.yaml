@@ -9,17 +9,17 @@ enc:
     "CTNARE": "#964B00"
   resources: [ "data/db/US1GC09M" ]
 
-  weather:
-    PyThor_address: "http://127.0.0.1:5000"
-    variables: [ "wave_direction",
-                 "wave_height",
-                 "wave_period",
-                 "wind_direction",
-                 "wind_speed",
-                 "sea_current_speed",
-                 "sea_current_direction",
-                 "tide_height"
-    ]
+  # weather:
+  #   PyThor_address: "http://127.0.0.1:5000"
+  #   variables: [ "wave_direction",
+  #                "wave_height",
+  #                "wave_period",
+  #                "wind_direction",
+  #                "wind_speed",
+  #                "sea_current_speed",
+  #                "sea_current_direction",
+  #                "tide_height"
+  #   ]
 
 
 

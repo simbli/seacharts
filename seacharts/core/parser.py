@@ -52,7 +52,15 @@ class DataParser:
     def load_shapefiles(self, layer: Layer) -> None:
         records = list(self._read_shapefile(layer.label))
         layer.records_as_geometry(records)
-
+        layer.records= records
+        #if layer.name=='TSSLPT':
+            #print(records[0]['properties']['ORIENT'])
+            # tss_orients={}
+            # for r in records:
+            #     tss_orients[r['id']]: records[r]['properties']['ORIENT']
+            #     #print(records[0]['properties']['ORIENT'])
+            # print(tss_orients)
+        
     # main method for parsing corresponding map format
     @abstractmethod
     def parse_resources(
