@@ -52,7 +52,8 @@ class DataParser:
     def load_shapefiles(self, layer: Layer) -> None:
         records = list(self._read_shapefile(layer.label))
         layer.records_as_geometry(records)
-
+        layer.records= records
+        
     # main method for parsing corresponding map format
     @abstractmethod
     def parse_resources(
