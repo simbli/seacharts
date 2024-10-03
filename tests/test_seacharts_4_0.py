@@ -2,6 +2,7 @@
 # for 
 
 if __name__ == "__main__":
+    import shapely.geometry as geo
     from seacharts import ENC
 
     enc = ENC()
@@ -15,6 +16,9 @@ if __name__ == "__main__":
 
 
     center = enc.center
+    x, y = center
+    width = 2000
+    height = 2000
     enc.display.draw_circle(
         center, 20000, "yellow", thickness=2, edge_style="--", alpha=0.5
     )
@@ -26,4 +30,15 @@ if __name__ == "__main__":
         [(center[0], center[1] + 800), center, (center[0] - 300, center[1] - 400)],
         "white",
     )
+    box = geo.Polygon(
+        (
+            (x - width, y - height),
+            (x + width, y - height),
+            (x + width, y + height),
+            (x - width, y + height),
+        )
+    )
+    areas = list(box.difference(enc.seabed[10].geometry).geoms)
+    for area in areas[3:8] + [areas[14], areas[17]] + areas[18:21]:
+        enc.display.draw_polygon(area, "red", alpha=0.5)
     enc.display.show()

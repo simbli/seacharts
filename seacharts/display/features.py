@@ -4,7 +4,7 @@ Contains the FeaturesManager class for plotting spatial features on a display.
 import shapely.geometry as geo
 from cartopy.feature import ShapelyFeature
 from matplotlib.lines import Line2D
-from shapely.geometry import MultiLineString
+from shapely.geometry import MultiLineString, MultiPolygon
 
 from seacharts import shapes, core
 from .colors import color_picker
@@ -32,17 +32,32 @@ class FeaturesManager:
                 color = color_picker(i, bins)
                 self._seabeds[i] = self.assign_artist(seabed, self._get_next_z_order(), color)
 
+        # get two z-orders
+        z_orders = [self._get_next_z_order(), self._get_next_z_order()]
         shore = self._display._environment.map.shore
-        color = color_picker(shore.__class__.__name__)
-        self._shore = self.assign_artist(shore, self._get_next_z_order(), color)
+        if isinstance(shore.geometry, MultiPolygon):
+            # if shore is multipolygon (for fgdb) we draw it beneath the land
+            shore_z_order = z_orders[0]
+            land_z_order = z_orders[1]
+        else:
+            # if shore is multilinestring we draw it as edges for land
+            shore_z_order = z_orders[1]
+            land_z_order = z_orders[0]
 
+        # creating shore 
+        color = color_picker(shore.__class__.__name__)
+        self._shore = self.assign_artist(shore, shore_z_order, color)
+
+        # creating land
         land = self._display._environment.map.land
         color = color_picker(land.__class__.__name__)
-        self._land = self.assign_artist(land, self._get_next_z_order(), color)
+        self._land = self.assign_artist(land, land_z_order, color)
 
+        # creating extra layers
         for i, extra_layer in enumerate(self._display._environment.extra_layers.loaded_regions):
             self._extra_layers[i] = self.assign_artist(extra_layer, self._get_next_z_order(), extra_layer.color)
 
+        # creating borders of bounding box
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
         geometry = shapes.Rectangle(
@@ -85,8 +100,7 @@ class FeaturesManager:
 
     def new_line_artist(self, line_geometry, color, z_order=None, **kwargs):
         x, y = line_geometry.xy
-        # TODO: confirm if linewidth 2 wont cause errors in research, linewidth=1 is not visible
-        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 2)))
+        line = self._display.axes.add_line(Line2D(x, y, color=color, linewidth=kwargs.get('linewidth', 0.5)))
         if z_order is None:
             line.set_animated(True)
         else:
