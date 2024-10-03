@@ -1,4 +1,4 @@
-# first, add conda forge to channel using:
+# first, add conda-forge to channel using:
 # conda config --add channels conda-forge
 
 # when in directory with conda_requirements.txt file, use:

@@ -1,14 +1,20 @@
 enc:
-
   size: [ 6.0, 4.5 ]
   origin: [ -85.0, 20.0 ]
   depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
   crs: "WGS84"
   S57_layers:
-    "TSSLPT": "#8B0000"
-    "CTNARE": "#964B00"
+    "TSSLPT": "#8B0000" # extra layer (traffic separation scheme with color we want to display it in)
   resources: [ "data/db/US1GC09M" ]
 
+  # old config, working with More og Romsdal map and SeaCharts 4.0 
+  # size: [ 9000, 5062 ]
+  # center: [ 44300, 6956450 ]
+  # depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
+  # crs: "UTM33N" # remember to specify N or S for correct part of the globe
+  # resources: [ "data/db/More_og_Romsdal_utm33.gdb" ]
+
+  # uncomment this section if PyThor is up and running
   # weather:
   #   PyThor_address: "http://127.0.0.1:5000"
   #   variables: [ "wave_direction",
@@ -21,16 +27,6 @@ enc:
   #                "tide_height"
   #   ]
 
-
-
-  # test config for FGDB
-
-  #  size: [ 9000, 5062 ]
-  #  center: [ 44300, 6956450 ]
-  #  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
-  #  crs: "UTM33N"
-  #  resources: [ "data/db/More_og_Romsdal_utm33.gdb" ]
-
   time:
     time_start: "24-09-2024 05:00"
     time_end: "24-09-2024 09:00"
@@ -42,7 +38,7 @@ display:
   colorbar: False
   dark_mode: False
   fullscreen: False
-  controls: True
+  controls: True # use this for controls window to stop appearing
   resolution: 640
   anchor: "center"
   dpi: 96
