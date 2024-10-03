@@ -14,6 +14,8 @@ Python-based API for Electronic Navigational Charts (ENC)
 - Read and process spatial depth data from
   [FileGDB](https://gdal.org/drivers/vector/filegdb.html) files into
   shapefiles.
+- Read and process spatial depth data from [S-57](https://gdal.org/en/latest/drivers/vector/s57.html) files into shapefiles.
+- Visualize S-57 [layers](https://www.teledynecaris.com/s-57/frames/S57catalog.htm).
 - Access and manipulate standard geometric shapes such as points and polygon
   collections.
 - Visualize colorful seacharts features and vessels.
@@ -103,13 +105,13 @@ or locally inside the SeaCharts root folder as an editable package with `pip ins
 
 ## Usage
 
-This module supports reading and processing `FGDB` files for sea depth data,
-such as the Norwegian coastal data set used for demonstration purposes, found
+This module supports reading and processing `FGDB` and 'S-57' files for sea depth data.
+
+### Downloading regional datasets - FGDB
+
+The Norwegian coastal data set used for demonstration purposes, found
 [here](
 https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
-
-### Downloading regional datasets
-
 To visualize and access coastal data of Norway, follow the above link to download
 the `Depth data` (`Sjøkart - Dybdedata`) dataset from the [Norwegian Mapping Authority](
 https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority) by adding
@@ -122,7 +124,7 @@ format. Finally, select your appropriate user group and purpose, and click
 
 ### Configuration and startup
 
-Unpack the downloaded file(s) and place the extracted `.gdb` in a suitable location,
+Unpack the downloaded file(s) and place the extracted `.gdb` or 'S-57' folder in a suitable location,
 in which the SeaCharts setup may be configured to search. The current
 working directory as well as the relative `data/` and `data/db/` folders are
 included by default.
@@ -141,7 +143,7 @@ if __name__ == '__main__':
     enc.display.show()
 ```
 
-The `config.yaml` file specifies which file paths to open and which area to load.
+The `config.yaml` file specifies which file paths to open and which area to load. In the configuration file the desired map type can be specified by listring data to display - depths for 'FDGB', and [layers](https://www.teledynecaris.com/s-57/frames/S57catalog.htm) for 'S-57'.
 The corresponding `config_schema.yaml` specifies how the required setup parameters
 must be provided, using `cerberus`.
 
@@ -173,7 +175,12 @@ Note how custom settings may be set in a user-defined .yaml-file, if its path is
 provided to the ENC during initialization. One may also import and create an
 instance of the `seacharts.Config` dataclass, and provide it directly to the ENC.
 
+### FGDB demonstration
 ![](images/example2.svg "Example visualization of vessels and a
+colorbar with depth values in light mode.")
+
+### S-57 demonstration
+![](images/example3.png "Example visualization of S-57 map with TSS layer and a
 colorbar with depth values in light mode.")
 
 ### Environment visualization
