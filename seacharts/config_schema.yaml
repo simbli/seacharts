@@ -2,12 +2,12 @@ enc:
   required: True
   type: dict
   schema:
-    #set True if you want to display whole uploaded map
+    # set True if you want to display whole uploaded map
     autosize:
       required: False
       type: boolean
 
-    #size of displayed map
+    # size of displayed map
     size:
       required: True
       type: list
@@ -16,7 +16,7 @@ enc:
         type: float
         min: 1.0
 
-    #that's where you want bottom-left corner to be
+    # that's where you want bottom-left corner to be
     origin:
       required: True
       excludes: center
@@ -25,7 +25,7 @@ enc:
       schema:
         type: float
 
-    #that's where you want the center of a map to be
+    # that's where you want the center of a map to be
     center:
       required: True
       excludes: origin
@@ -34,12 +34,12 @@ enc:
       schema:
         type: float
 
-    #UTM zone required for coordinates to work correctly
+    # UTM zone required for coordinates to work correctly
     crs:
       required: True
       type: string
 
-    #depths are required for both formats, if not set they will be assigned default values
+    # depths are required for both formats, if not set they will be assigned default values
     depths:
       required: False
       type: list
@@ -48,7 +48,8 @@ enc:
         type: integer
         min: 0
 
-    #you can pick specific S-57 layers you want to extract, default required is LNDARE, DEPARE and COALNE
+    # you can pick specific S-57 layers you want to extract
+    # WARNING: LNDARE, COALNE and DEPARE are loaded on default as Land, Shore and Bathymetry
     S57_layers:
       required: False
       type: dict
@@ -58,7 +59,7 @@ enc:
       keysrules:
         type: string
 
-    #you must put paths to some resources
+    # you must put paths to some resources
     resources:
       required: True
       type: list

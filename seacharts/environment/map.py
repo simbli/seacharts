@@ -4,7 +4,7 @@ Contains the MapData class for containing parsed map (charts) data.
 from dataclasses import dataclass
 
 from seacharts.layers import Layer, Land, Shore, Seabed
-from .collection import DataCollection, ShapefileBasedCollection
+from .collection import ShapefileBasedCollection
 
 
 @dataclass
