@@ -26,9 +26,9 @@ This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
 
-## Prerequisites
+## Prerequisites - For SeaCharts 4.0 see [this](#seacharts-40-setup-tips) section
 
-### Linux (Virtual Environment)
+### DEPRECATED - Linux (Virtual Environment)
 
 First, ensure that you have the GDAL and GEOS libraries installed, as these are
 required in order to successfully install GDAL and Cartopy:
@@ -45,7 +45,7 @@ pip install -e .
 This should preferably be done inside a virtual environment in order to prevent
 Python packaging conflicts.
 
-### Anaconda
+### DEPRECATED - Anaconda
 
 Install an edition of the [Anaconda](
 https://www.anaconda.com/products/individual-d) package manager, and then create a new
@@ -65,7 +65,7 @@ conda install -c conda-forge fiona cartopy matplotlib
 conda install matplotlib-scalebar cerberys pyyaml
 ```
 
-### Windows (Pipwin)
+### DEPRECATED - Windows (Pipwin)
 
 First, ensure that [Python 3.11](https://www.python.org/downloads/) or higher
 is installed. Next, install all required packages using
@@ -193,6 +193,24 @@ the various depth legends may be toggled using the `c` key. Images of the
 currently shown display may be saved in various resolutions by pressing
 Control + `s`, Shift + `s` or `s`.
 
+### SeaCharts 4.0 setup tips
+```
+Please be aware that these setup tips require setting up Conda environment.
+Possible support for pip installation will be resolved in the future.
+```
+
+This is a short to-do list that might come useful when setting up SeaCharts 4.0 for the first time:
+1. Set up conda environment as instructed in `conda_requirements.txt` file
+2. Use `setup.ps1` (WINDOWS ONLY) to setup directory structure needed by SeaCharts or manually create directories: `data`, `data/db` and `data/shapefiles`
+3. Download US1GC09M map via [this link](https://www.charts.noaa.gov/ENCs/US1GC09M.zip), and put the `US1GC09M` directory (found in ENC_ROOT directory) inside data/db folder.
+4. Run `test_seacharts_4_0.py` code either by pasting code into some main.py file in root of your project directory or by running it directly (needs fixing the issues with importing seacharts in the test file)
+5. After execution you can expect such image to be displayed:
+![](images/test_results.svg
+"Example visualization with vessels and geometric shapes in dark mode.")
+
+```
+For further experimentation options, look into files: `enc.py`, `config.yaml` and `config-schema.yaml` (for reference)
+```
 ## License
 
 This project uses the [MIT](https://choosealicense.com/licenses/mit/) license.
