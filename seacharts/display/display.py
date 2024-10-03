@@ -6,6 +6,7 @@ import tkinter as tk
 from pathlib import Path
 from typing import Any
 
+from colorama import Fore
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,11 +40,7 @@ class Display:
         self._settings = settings
         self.crs = UTM(environment.scope.extent.utm_zone,
                        southern_hemisphere=environment.scope.extent.southern_hemisphere)
-
-        self._bbox = (max(environment.scope.extent.bbox[0], self.crs.x_limits[0]),  # x-min
-                      max(environment.scope.extent.bbox[1], self.crs.y_limits[0]),  # y-min
-                      min(environment.scope.extent.bbox[2], self.crs.x_limits[1]),  # x-max
-                      min(environment.scope.extent.bbox[3], self.crs.y_limits[1]))  # y-max
+        self._bbox = self._set_bbox(environment)
         self._environment = environment
         self._background = None
         self._dark_mode = False
@@ -66,6 +63,26 @@ class Display:
             self._toggle_fullscreen(self._fullscreen_mode)
         else:
             self._set_figure_position()
+
+    def _set_bbox(self, environment: env.Environment) -> tuple[float, float, float, float]:
+        """
+        Sets bounding box for the display taking projection's (crs's) x and y limits for display into account.
+        Making sure that bbox doesn't exceed limits prevents crashes. When such limit is exceeded, an appropriate message is displayed
+        to inform user about possibility of unexpeced display bound crop
+        """
+        bbox = (max(environment.scope.extent.bbox[0], self.crs.x_limits[0]),  # x-min
+                max(environment.scope.extent.bbox[1], self.crs.y_limits[0]),  # y-min
+                min(environment.scope.extent.bbox[2], self.crs.x_limits[1]),  # x-max
+                min(environment.scope.extent.bbox[3], self.crs.y_limits[1]))  # y-max
+        changed = []
+        for i in range(len(bbox)):
+            if (bbox[i] != environment.scope.extent.bbox[i]):
+                changed.append(i)
+        if len(changed)>0:
+            print(Fore.RED + f"WARNING: Bouding box for display has exceeded the limit of CRS axes and therefore been scaled down. Watch out for potentially cropped chart display!" + Fore.RESET)
+            for i in changed:
+                print(Fore.RED + f"index {i}: {environment.scope.extent.bbox[i]} changed to {bbox[i]}" + Fore.RESET)
+        return bbox
 
     def start(self) -> None:
         self.started__ = """
