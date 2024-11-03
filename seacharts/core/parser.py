@@ -90,7 +90,7 @@ class DataParser:
         layer.records_as_geometry(records)
         layer.records= records
 
-    def _valid_paths_and_resources(paths: set[Path], resources: list[str], area: float)-> bool:
+    def _valid_paths_and_resources(self, paths: set[Path], resources: list[str], area: float)-> bool:
         """
         Validates the provided paths and resources, checking if they exist and are usable.
 

@@ -39,9 +39,9 @@ class Extent:
 
         if crs.__eq__("WGS84"):
             # If CRS is WGS84, convert latitude/longitude to UTM
-            self.utm_zone_num = self.wgs2utm(self.center[0])
+            self.utm_zone = self.wgs2utm(self.center[0])
             self.southern_hemisphere = Extent._is_southern_hemisphere(center_east=self.center[1])
-            self.out_proj = Extent._get_epsg_proj_code(self.utm_zone_num, self.southern_hemisphere)
+            self.out_proj = Extent._get_epsg_proj_code(self.utm_zone, self.southern_hemisphere)
             self.size = self._size_from_lat_long()
             # Convert origin from lat/lon to UTM, recalculate center in UTM coordinates
             self.origin = self.convert_lat_lon_to_utm(self.origin[1], self.origin[0])
@@ -50,12 +50,12 @@ class Extent:
             # For UTM CRS, extract zone and hemisphere, and set EPSG projection code accordingly
             crs = re.search(r'\d+[A-Z]', crs).group(0)
             # eg. UTM33N:
-                # utm_zone_num = 33
+                # utm_zone = 33
                 # crs_hemisphere_code = 'N'
-            self.utm_zone_num = crs[0:2]
+            self.utm_zone = crs[0:2]
             crs_hemisphere_code = crs[2]
             self.southern_hemisphere = Extent._is_southern_hemisphere(crs_hemisphere_sym=crs_hemisphere_code)
-            self.out_proj = Extent._get_epsg_proj_code(self.utm_zone_num, self.southern_hemisphere)
+            self.out_proj = Extent._get_epsg_proj_code(self.utm_zone, self.southern_hemisphere)
         
         # Calculate bounding box and area based on origin and size
         self.bbox = self._bounding_box_from_origin_size()
