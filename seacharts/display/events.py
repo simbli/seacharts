@@ -8,10 +8,34 @@ import matplotlib.pyplot as plt
 
 # noinspection PyProtectedMember
 class EventsManager:
+    """
+    The EventsManager class is responsible for handling various user interaction events 
+    within a Matplotlib display. It manages zooming, panning, and keyboard shortcuts 
+    for controlling the display of data. This class captures events such as mouse scrolls, 
+    key presses, and mouse clicks, enabling users to manipulate the visualization 
+    dynamically.
+
+    Attributes:
+        _zoom_scale (float): A factor by which to scale the zoom operation.
+        _directions (dict): A mapping of direction keys to their corresponding numeric values 
+                            for movement (up, down, left, right).
+        _display (object): The display object that this EventsManager interacts with.
+        _canvas (object): The canvas from the display where the events are connected.
+        _view_limits (dict): A dictionary storing the current view limits for x and y axes.
+        _direction_keys (dict): A dictionary tracking the state of direction keys.
+        _control_pressed (bool): A flag indicating if the control key is currently pressed.
+        _shift_pressed (bool): A flag indicating if the shift key is currently pressed.
+        _mouse_press (dict): A dictionary storing the mouse press event coordinates.
+    """
     _zoom_scale = 0.9
     _directions = {"up": 1, "down": -1, "left": -1, "right": 1}
 
     def __init__(self, display):
+        """
+        Initializes the EventsManager with a specified display object.
+
+        :param display: The display object that will be managed by this EventsManager.
+        """
         self._display = display
         self._canvas = display.figure.canvas
         self._view_limits = dict(x=None, y=None)
@@ -22,6 +46,9 @@ class EventsManager:
         self._connect_canvas_events()
 
     def _connect_canvas_events(self) -> None:
+        """
+        Connects various event handlers to the canvas for mouse and keyboard events.
+        """
         self._canvas.mpl_connect("scroll_event", self._handle_zoom)
         self._canvas.mpl_connect("key_press_event", self._key_press)
         self._canvas.mpl_connect("key_release_event", self._key_release)
@@ -30,6 +57,11 @@ class EventsManager:
         self._canvas.mpl_connect("motion_notify_event", self._mouse_motion)
 
     def _handle_zoom(self, event: Any) -> None:
+        """
+        Handles mouse scroll events to zoom in or out on the display.
+
+        :param event: The scroll event containing the scroll direction and coordinates.
+        """
         if event.button == "down":
             scale_factor = 1 / self._zoom_scale
         elif event.button == "up":
@@ -52,6 +84,12 @@ class EventsManager:
         self._display.redraw_plot()
 
     def _key_press(self, event: Any) -> None:
+        """
+        Handles keyboard press events to trigger various actions such as toggling visibility, 
+        saving figures, or moving the display.
+
+        :param event: The key press event containing the key that was pressed.
+        """
         if event.key == "escape":
             self._display._terminate()
 
@@ -104,6 +142,12 @@ class EventsManager:
                 self._move_figure_position(key)
 
     def _key_release(self, event: Any) -> None:
+        """
+        Handles keyboard release events, updating the state of direction 
+        and modifier keys.
+
+        :param event: The key release event containing the key that was released.
+        """
         if event.key in self._directions:
             self._direction_keys[event.key] = False
         elif event.key == "shift":
@@ -112,6 +156,11 @@ class EventsManager:
             self._control_pressed = False
 
     def _move_figure_position(self, key: str) -> None:
+        """
+        Moves the display figure based on the arrow key pressed.
+
+        :param key: The direction key pressed ('left', 'right', 'up', 'down').
+        """
         matrix = self._display.window_anchors
         j, i = self._display._anchor_index
         if key == "left" or key == "right":
@@ -122,6 +171,11 @@ class EventsManager:
         self._display._set_figure_position()
 
     def _click_press(self, event: Any) -> None:
+        """
+        Captures the mouse press event and stores the current view limits.
+
+        :param event: The mouse button press event containing the coordinates.
+        """
         if event.inaxes != self._display.axes:
             return
         if event.button == plt.MouseButton.LEFT:
@@ -130,10 +184,18 @@ class EventsManager:
             self._mouse_press = dict(x=event.xdata, y=event.ydata)
 
     def _click_release(self, _) -> None:
+        """
+        Resets mouse press tracking and refreshes the display.
+        """
         self._mouse_press = None
         self._display.redraw_plot()
 
     def _mouse_motion(self, event: Any) -> None:
+        """
+        Handles mouse movement events to enable panning of the display.
+
+        :param event: The mouse motion event containing the current coordinates.
+        """
         if self._mouse_press is None:
             return
         if event.inaxes != self._display.axes:

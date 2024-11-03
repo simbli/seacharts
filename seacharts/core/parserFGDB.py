@@ -21,21 +21,8 @@ class FGDBParser(DataParser):
             resources: list[str],
             area: float
     ) -> None:
-        if not list(self.paths):
-            resources = sorted(list(set(resources)))
-            if not resources:
-                print("WARNING: No spatial data source location given in config.")
-            else:
-                message = "WARNING: No spatial data sources were located in\n"
-                message += "         "
-                resources = [f"'{r}'" for r in resources]
-                message += ", ".join(resources[:-1])
-                if len(resources) > 1:
-                    message += f" and {resources[-1]}"
-                print(message + ".")
-            return
-        print("INFO: Updating ENC with data from available resources...\n")
-        print(f"Processing {area // 10 ** 6} km^2 of ENC features:")
+        if not self._valid_paths_and_resources(self.paths, resources, area):
+            return # interrupt parsing if paths are not valid
         for regions in regions_list:
             start_time = time.time()
             records = self._load_from_file(regions)

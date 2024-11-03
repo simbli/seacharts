@@ -28,6 +28,13 @@ class ENC:
         self._display = None
 
     def get_depth_at_coord(self, easting, northing) -> int:
+        """
+        Retrieves the seabed depth at a given coordinate.
+
+        :param easting: The easting (x-coordinate) in the coordinate system used by ENC.
+        :param northing: The northing (y-coordinate) in the coordinate system used by ENC.
+        :return: Depth as an integer if the point is within a seabed polygon, else None.
+        """
         point = Point(easting, northing)
         for seabed in reversed(self.seabed.values()):
             if any(polygon.contains(point) for polygon in seabed.geometry.geoms):
@@ -35,6 +42,15 @@ class ENC:
         return None
     
     def is_coord_in_layer(self, easting, northing, layer_name:str):
+        """
+        Checks if a coordinate is within a specified layer.
+
+        :param easting: The easting (x-coordinate) in the coordinate system used by ENC.
+        :param northing: The northing (y-coordinate) in the coordinate system used by ENC.
+        :param layer_name: The name of the layer to check, as a string.
+        :return: True if the coordinate is in the specified layer; False otherwise.
+        :raises Exception: If the specified layer is not found.
+        """
         layer_name = layer_name.lower()
         layers = self._environment.get_layers()
         point = Point(easting, northing)
@@ -119,8 +135,14 @@ class ENC:
 
     @property
     def weather_names(self) -> list[str]:
+        """
+        :return: #TODO
+        """
         return self._environment.weather.weather_names
 
     @property
     def weather_data(self) -> WeatherData:
+        """
+        :return: #TODO
+        """
         return self._environment.weather
