@@ -98,3 +98,19 @@ class WeatherData(DataCollection):
             if layer.name == name:
                 return layer
         return None
+
+    def get_value(self, name, time, lat, lon):
+        lon = 360 + lon if lon < 0 else lon
+        from scipy.interpolate import RegularGridInterpolator as rgi
+        time_epoch = time.timestamp()
+        grid = []
+        times = []
+        layers = self.find_by_name(name).weather
+        layers.sort(key = lambda layer: layer.time)
+        for i in range(len(layers)):
+            if layers[i].time >= time_epoch and i>0:
+                times = [layers[i - 1].time, layers[i].time]
+                grid = [layers[i - 1].data, layers[i].data]
+                break
+        fn = rgi((times,self.latitude,self.longitude), grid)
+        return fn((time_epoch,lat,lon))
