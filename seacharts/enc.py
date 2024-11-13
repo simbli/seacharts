@@ -48,8 +48,7 @@ class ENC:
         :param easting: The easting (x-coordinate) in the coordinate system used by ENC.
         :param northing: The northing (y-coordinate) in the coordinate system used by ENC.
         :param layer_name: The name of the layer to check, as a string.
-        :return: True if the coordinate is in the specified layer; False otherwise.
-        :raises Exception: If the specified layer is not found.
+        :return: True if the coordinate is in the specified layer; False if not. Returns None if no matching layer was found.
         """
         layer_name = layer_name.lower()
         layers = self._environment.get_layers()
@@ -59,7 +58,7 @@ class ENC:
                 if any(polygon.contains(point) for polygon in layer.geometry.geoms):
                     return True
                 return False
-        raise Exception("no such layer loaded")
+        return None
 
     def update(self) -> None:
         """

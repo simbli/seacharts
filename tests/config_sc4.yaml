@@ -4,23 +4,14 @@ enc:
   depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
   crs: "WGS84"
   S57_layers:
-    "TSSLPT": "#8B0000"
+    "TSSLPT": "#8B0000" # extra layer (traffic separation scheme with color we want to display it in)
   resources: [ "data/db/US1GC09M" ]
-
-  time:
-    time_start: "24-09-2024 05:00"
-    time_end: "24-09-2024 09:00"
-    period: "hour"
-    period_multiplier: 1
 
 display:
   colorbar: False
   dark_mode: False
   fullscreen: False
-  controls: True
+  controls: False
   resolution: 640
   anchor: "center"
   dpi: 96
-
-
-

@@ -1,10 +1,16 @@
+import sys, os
+
 if __name__ == "__main__":
+    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.insert(0, root_path)
+
     import shapely.geometry as geo
     from seacharts.enc import ENC
 
     size = 9000, 5062
     center = 44300, 6956450
-    enc = ENC()
+    config_path = os.path.join('tests','config_classic.yaml')
+    enc = ENC(config_path)
     enc.display.start()
 
     # (id, easting, northing, heading, color)

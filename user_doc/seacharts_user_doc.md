@@ -31,15 +31,14 @@ git clone https://github.com/meeqn/seacharts_s57
    * **Other platforms**: Manually create these directories:
      * `data`
      * `data/db`
-     * `data/shapefiles`
 
 4. Download map data:
    * Download the `US1GC09M` map from [here](https://www.charts.noaa.gov/ENCs/US1GC09M.zip)
    * Extract and place the `US1GC09M` directory (found in map's ENC_ROOT directory) inside `data/db` folder
 
 5. Test the installation:
-   * Either run `test_seacharts_4_0.py` directly (may need manual setting up PYTHONPATH for run  configuration)
-   * Or copy the test code into a `main.py` file in your project root directory
+   * Run `test_seacharts_4_0.py`
+   * Expected result is shown below
 
 
 
@@ -68,8 +67,8 @@ The SeaCharts library is configured via `config.yaml` located in the seacharts d
 ```yaml
 enc:
   size: [width, height]        # Size of the chart in chosen CRS unit
-  origin: [lon, lat]           # Origin coordinates in chosen CRS unit (excludes center)
-  center: [lon, lat]           # Center point coordinates in chosen CRS unit (excludes origin)
+  origin: [x, y]           # Origin coordinates in chosen CRS unit (excludes center)
+  center: [x, y]           # Center point coordinates in chosen CRS unit (excludes origin)
   crs: "coordinate_system"     # Coordinate reference system
   S57_layers:                  # List of additional S-57 layers with display colors given in hex as value
     "LAYER_NAME": "#COLOR_IN_HEX"     # e.g., "TSSLPT": "#8B0000"
@@ -332,60 +331,6 @@ display.draw_arrow(
     edge_style=str|tuple      # Optional: line style
 )
 ```
-
-### Available color options
-1. **Ship Colors**: Predefined colors specifically intended for objects or ship-related overlays. These colors have both solid and semi-transparent options:
-
-   - **Red**: `"red"` or `#ff0000`, semi-transparent: `#ff000055`
-   - **Blue**: `"blue"` or `#0000ff`, semi-transparent: `#0000ff55`
-   - **Green**: `"green"` or `#00ff00`, semi-transparent: `#00ff0055`
-   - **Yellow**: `"yellow"` or `#ffff00`, semi-transparent: `#ffff0055`
-   - **Cyan**: `"cyan"` or `#00ffff`, semi-transparent: `#00ffff55`
-   - **Magenta**: `"magenta"` or `#ff00ff`, semi-transparent: `#ff00ff55`
-   - **Pink**: `"pink"` or `#ff88ff`, semi-transparent: `#ff88ff55`
-   - **Purple**: `"purple"` or `#bb22ff`, semi-transparent: `#bb22ff55`
-   - **Orange**: `"orange"` or `#ff9900`, semi-transparent: `#ff990055`
-   - **White**: `"white"` or `#ffffff`, semi-transparent: `#ffffff77`
-   - **Grey Variants**:
-     - Light Grey: `"lightgrey"` or `#b7b7b7`, semi-transparent: `#b7b7b755`
-     - Grey: `"grey"` or `#666666`, semi-transparent: `#66666655`
-     - Dark Grey: `"darkgrey"` or `#333333`, semi-transparent: `#33333355`
-   - **Black**: `"black"` or `#000000`, semi-transparent: `#00000077`
-
-2. **Horizon Colors**: Specialized colors for visualizing different regions of a horizon. Each area has a unique color, with both solid and semi-transparent options:
-
-   - **Full Horizon**: `"full_horizon"` or `#ffffff55`, very transparent: `#ffffff11`
-   - **Starboard Bow**: `"starboard_bow"` or `#00ff0099`, semi-transparent: `#00ff0055`
-   - **Starboard Side**: `"starboard_side"` or `#33ff3399`, semi-transparent: `#33ff3355`
-   - **Starboard Aft**: `"starboard_aft"` or `#ccffcc99`, semi-transparent: `#ccffcc55`
-   - **Rear Aft**: `"rear_aft"` or `#eeeeee99`, semi-transparent: `#eeeeee55`
-   - **Port Aft**: `"port_aft"` or `#ffcccc99`, semi-transparent: `#ffcccc55`
-   - **Port Side**: `"port_side"` or `#ff333388`, semi-transparent: `#ff333355`
-   - **Port Bow**: `"port_bow"` or `#ff000066`, semi-transparent: `#ff000055`
-
-3. **Layer Colors**: Colors that represent specific environmental layers, created by sampling from colormaps. These can be useful for visualizing different regions of a plot:
-
-   - **Seabed**: `"Seabed"`, a deep shade of blue from the "Blues" colormap
-   - **Land**: `"Land"`, a rich green from the "Greens" colormap
-   - **Shore**: `"Shore"`, a lighter shade of green from the "Greens" colormap
-   - **Highlight**: `"highlight"`, a semi-transparent white: `#ffffff44`
-   - **Blank**: `"blank"`, an opaque white: `#ffffffff`
-
-4. **CSS4 Color Names**: Any color name from the CSS4 color set is supported. These are standard color names recognized by most plotting libraries, including `matplotlib`. Examples include:
-   - `"aliceblue"`
-   - `"antiquewhite"`
-   - `"aqua"`
-   - `"aquamarine"`
-   - `"azure"`
-   - (and many more CSS4 color names...)
-
-5. **Hexadecimal Color Codes**: Custom colors can be specified directly using hexadecimal color codes. Accepted formats include:
-   - **RGB**: `"#RRGGBB"` or `"#RGB"`
-   - **RGBA**: `"#RRGGBBAA"` or `"#RGBA"`
-
-   For example:
-   - Solid blue: `"#0000FF"`
-   - Semi-transparent red: `"#FF000080"`
 
 ## Image Export
 

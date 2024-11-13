@@ -1,11 +1,16 @@
+import sys, os
+from shapely.geometry import MultiPolygon, Polygon
 # file made to showcase functionalities added in seacharts 4.0 integrated within old seacharts functionalities
 # for 
 
 if __name__ == "__main__":
+    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.insert(0, root_path)
+
     import shapely.geometry as geo
     from seacharts import ENC
-
-    enc = ENC()
+    config_path = os.path.join('tests','config_sc4.yaml')
+    enc = ENC(config_path)
     enc.display.start()
 
     coords = [111000, 2482000]
@@ -17,8 +22,8 @@ if __name__ == "__main__":
 
     center = enc.center
     x, y = center
-    width = 2000
-    height = 2000
+    width = 50000
+    height = 50000
     enc.display.draw_circle(
         center, 20000, "yellow", thickness=2, edge_style="--", alpha=0.5
     )
@@ -38,7 +43,15 @@ if __name__ == "__main__":
             (x - width, y + height),
         )
     )
-    areas = list(box.difference(enc.seabed[10].geometry).geoms)
-    for area in areas[3:8] + [areas[14], areas[17]] + areas[18:21]:
+    difference_result = box.difference(enc.seabed[0].geometry)
+
+    if isinstance(difference_result, MultiPolygon):
+        areas = list(difference_result.geoms)
+    elif isinstance(difference_result, Polygon):
+        areas = [difference_result] 
+    else:
+        areas = []
+
+    for area in areas:
         enc.display.draw_polygon(area, "red", alpha=0.5)
     enc.display.show()
