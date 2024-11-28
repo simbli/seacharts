@@ -5,7 +5,7 @@ from abc import ABC
 from dataclasses import dataclass, field
 
 from shapely import geometry as geo
-from shapely.geometry import base as geobase
+from shapely.geometry import base as geobase, Polygon, Point
 from shapely.ops import unary_union
 
 from seacharts.layers.types import ZeroDepth, SingleDepth, MultiDepth
@@ -26,6 +26,7 @@ class Layer(Shape, ABC):
     """
     geometry: geobase.BaseMultipartGeometry = field(default_factory=geo.MultiPolygon)
     depth: int = None
+    records: list[dict] = None
     
     @property
     def label(self) -> str:
@@ -112,7 +113,13 @@ class Layer(Shape, ABC):
         geometries = [self._record_to_geometry(r) for r in records]
         self.geometry = self.collect(geometries)
 
-
+    def get_params_at_coord(self, easting: int, northing: int) -> dict | None:
+        point = Point(easting, northing)
+        for record in self.records:
+            if record['geometry']['type'] == 'Polygon' and Polygon(record['geometry']['coordinates'][0]).contains(point):
+                return record['properties']
+        return None
+    
 @dataclass
 class ZeroDepthLayer(Layer, ZeroDepth, ABC):
     """Layer type representing geometries at zero depth."""

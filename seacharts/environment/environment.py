@@ -1,12 +1,13 @@
 """
 Contains the Environment class for collecting and manipulating loaded spatial data.
 """
+import _warnings
 from seacharts.core import Scope, MapFormat, S57Parser, FGDBParser, DataParser
 from .map import MapData
 from .weather import WeatherData
 from .extra import ExtraLayers
 from seacharts.core import files
-
+from seacharts.layers import Layer
 
 class Environment:
     """
@@ -38,7 +39,7 @@ class Environment:
             if len(self.extra_layers.not_loaded_regions) > 0:
                 self.extra_layers.parse_resources_into_shapefiles()
 
-    def get_layers(self):
+    def get_layers(self) -> list[Layer]:
         """
         Retrieves all loaded map and extra layers in the environment.
         
@@ -48,6 +49,16 @@ class Environment:
             *self.map.loaded_regions,
             *self.extra_layers.loaded_regions,
             ] 
+    
+    def get_layer_by_name(self, layer_name: str) -> Layer | None:
+        layer_name = layer_name.lower()
+        layers = self.get_layers()
+        for layer in layers:
+            if layer.label == layer_name:
+                return layer
+        _warnings.warn(f"Layer {layer_name} not found in the enc!")
+        return None
+            
 
     def set_parser(self) -> DataParser:
         """

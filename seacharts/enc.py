@@ -1,14 +1,14 @@
 """
 Contains the ENC class for reading, storing and plotting maritime spatial data.
 """
+import _warnings
 from pathlib import Path
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
 from seacharts.environment.weather import WeatherData
 from seacharts.layers import Layer
-
 
 class ENC:
     """
@@ -27,7 +27,7 @@ class ENC:
         self._environment = Environment(self._config.settings)
         self._display = None
 
-    def get_depth_at_coord(self, easting, northing) -> int:
+    def get_depth_at_coord(self, easting: int, northing: int) -> int:
         """
         Retrieves the seabed depth at a given coordinate.
 
@@ -41,7 +41,7 @@ class ENC:
                 return seabed.depth
         return None
     
-    def is_coord_in_layer(self, easting, northing, layer_name:str):
+    def is_coord_in_layer(self, easting: int, northing: int, layer_name: str):
         """
         Checks if a coordinate is within a specified layer.
 
@@ -50,14 +50,21 @@ class ENC:
         :param layer_name: The name of the layer to check, as a string.
         :return: True if the coordinate is in the specified layer; False if not. Returns None if no matching layer was found.
         """
-        layer_name = layer_name.lower()
-        layers = self._environment.get_layers()
+        layer = self._environment.get_layer_by_name(layer_name)
         point = Point(easting, northing)
-        for layer in layers:
-            if layer.label == layer_name:
-                if any(polygon.contains(point) for polygon in layer.geometry.geoms):
-                    return True
-                return False
+        if layer is not None:
+            if any(polygon.contains(point) for polygon in layer.geometry.geoms):
+                return True
+        return False
+    
+    def get_param_value_at_coords(self, easting: int, northing: int, layer_name: str, param_name: str):
+        param_name = param_name.upper()
+        if self.is_coord_in_layer(easting, northing, layer_name):
+            layer: Layer = self._environment.get_layer_by_name(layer_name)
+            parameters: dict | None = layer.get_params_at_coord(easting, northing)
+            if parameters is not None:
+                return parameters[param_name]
+            _warnings.warn(f"Couldn't find any value for parameter {param_name} in layer {layer_name}")
         return None
 
     def update(self) -> None:

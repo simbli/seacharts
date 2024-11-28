@@ -89,6 +89,7 @@ class DataParser:
         records = list(self._read_shapefile(layer.label))
         layer.records_as_geometry(records)
         layer.records= records
+        
 
     def _valid_paths_and_resources(self, paths: set[Path], resources: list[str], area: float)-> bool:
         """

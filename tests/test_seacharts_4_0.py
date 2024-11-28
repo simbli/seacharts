@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     print(f"depth at coordinates {coords}: {enc.get_depth_at_coord(coords[0], coords[1])}")
     print(f"coordinates {coords} in layer {layer_label}: {enc.is_coord_in_layer(coords[0], coords[1], 'TSSLPT')}")
-
+    print(f"ORIENT field val at {coords} is {enc.get_param_value_at_coords(coords[0], coords[1], 'TSSLPT', 'ORIENT')}")
 
     center = enc.center
     x, y = center
