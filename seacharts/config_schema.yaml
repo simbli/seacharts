@@ -46,7 +46,6 @@ enc:
       minlength: 1
       schema:
         type: integer
-        min: 0
 
     # you can pick specific S-57 layers you want to extract
     # WARNING: LNDARE, COALNE and DEPARE are loaded on default as Land, Shore and Bathymetry
