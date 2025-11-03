@@ -47,4 +47,4 @@ class ExtraLayers(ShapefileBasedCollection):
         :return: A list of Layer instances that correspond to the featured 
                  regions defined in the extra layers.
         """
-        return [x for x in self.layers if x.tag in self.scope.extra_layers.keys()]
+        return [x for x in self.extra_layers if x.tag in self.scope.extra_layers.keys()]

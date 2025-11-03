@@ -43,7 +43,9 @@ class Shape(ABC):
         return geo.shape(record["geometry"])
 
     @staticmethod
-    def as_multi(geometry) -> Any:
+    def as_multi(geometry: list) -> geo.base.BaseMultipartGeometry | None:
+        if len(geometry) == 0:
+            return None
         if isinstance(geometry[0], geo.Point):
             return geo.MultiPoint(geometry)
         elif isinstance(geometry[0], geo.Polygon):

@@ -1,10 +1,12 @@
 """
 Contains utility functions related to system files and directories.
 """
-import csv, shutil
+import csv
 from collections.abc import Generator
 from pathlib import Path
+
 from seacharts.core.parser import DataParser
+
 from . import paths
 
 
@@ -26,7 +28,7 @@ def verify_directory_exists(path_string: str) -> None:
 def build_directory_structure(features: list[str], resources: list[str], parser: DataParser) -> None:
     """
     Creates the directory structure for shapefiles and outputs based on the provided features 
-    and resources. It also copies the initial configuration file to the map's shapefile directory.
+    and resources.
 
     :param features: A list of feature names for which directories will be created.
     :param resources: A list of resource paths to validate and create directories for.
@@ -37,14 +39,13 @@ def build_directory_structure(features: list[str], resources: list[str], parser:
     paths.shapefiles =  paths.shapefiles / map_dir_name
     paths.output.mkdir(exist_ok=True)
     paths.shapefiles.mkdir(exist_ok=True)
-    # shutil.copy(paths.config, paths.shapefiles) # used to save initial config
 
     for feature in features:
         shapefile_dir = paths.shapefiles / feature.lower()
         shapefile_dir.mkdir(parents=True, exist_ok=True)
     for resource in resources:
         path = Path(resource).resolve()
-        if not path.suffix == ".gdb" or not path.suffix == ".000":
+        if path.suffix not in [".gdb", ".000"]:
             path.mkdir(exist_ok=True)
 
 

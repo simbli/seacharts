@@ -66,9 +66,16 @@ class FGDBParser(DataParser):
         return path.is_dir() and path.suffix == ".gdb"
     
     def get_source_root_name(self) -> str:
+        """
+        Returns concatenated names of all FGDB directories found in resources (without .gdb suffix).
+        """
+        names = []
         for path in self._file_paths:
             if self._is_map_type(path):
-                return path.stem
+                name = path.stem
+                if name not in names:
+                    names.append(name)
+        return "_".join(names) if names else "unknown"
 
     def _parse_layers(
         self, path: Path, external_labels: list[str], depth: int

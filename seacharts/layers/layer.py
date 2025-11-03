@@ -37,7 +37,7 @@ class Layer(Shape, ABC):
         """
         return self.name.lower()
 
-    def _geometries_to_multi(self, multi_geoms, geometries, geo_class):
+    def _geometries_to_multi(self, multi_geoms, geometries, geo_class: type):
         """
         Combines geometries into a single MultiGeometry.
 

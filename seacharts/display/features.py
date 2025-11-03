@@ -6,7 +6,8 @@ from cartopy.feature import ShapelyFeature
 from matplotlib.lines import Line2D
 from shapely.geometry import MultiLineString, MultiPolygon
 
-from seacharts import shapes, core
+from seacharts import core, display, shapes
+
 from .colors import color_picker
 
 
@@ -29,7 +30,7 @@ class FeaturesManager:
         _number_of_layers (int): The total number of layers in the display's environment.
         _next_z_order (int): The next z-order value to be used for layering features.
     """
-    def __init__(self, display):
+    def __init__(self, display: "display.Display"):
         """
         Initializes the FeaturesManager with a specified display object and 
         prepares spatial features for rendering.
@@ -89,7 +90,7 @@ class FeaturesManager:
         center = self._display._environment.scope.extent.center
         size = self._display._environment.scope.extent.size
         geometry = shapes.Rectangle(
-            *center, width=size[0] / 2, heading=0, height=size[1] / 2
+            x=center.x, y=center.y, width=size.x / 2, heading=0, height=size.y / 2
         ).geometry
         color = (color_picker("black")[0], "none")
         self.new_artist(geometry, color, z_order=self._get_next_z_order(), linewidth=3)

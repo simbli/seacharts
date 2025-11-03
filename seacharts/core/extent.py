@@ -7,7 +7,20 @@ import re
 
 from pyproj import Transformer
 
+class CoordTuple():
+    """
+    Helper class holding 2D plane data pair for x and y dimensions (like size or position).
+    """
+    x :float
+    y :float
 
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    def to_tuple(self) -> tuple[float, float]:
+        return (self.x, self.y)
+    
 class Extent:
     """
     Extent class defines the spatial area, origin, center, size, and coordinates transformations 
@@ -16,6 +29,7 @@ class Extent:
 
     :param settings: Dictionary containing configuration settings for ENC extent.
     """
+
     def __init__(self, settings: dict):
         """
         Initializes the Extent object with given settings, setting properties such as size, 
@@ -26,61 +40,69 @@ class Extent:
         """
 
         # Set the size of the extent, defaulting to (0, 0) if not specified in settings
-        self.size = tuple(settings["enc"].get("size", (0, 0)))
+        self.size = CoordTuple(*settings["enc"].get("size", (0, 0)))
         crs: str = settings["enc"].get("crs")
 
         # Set origin and center based on settings; if origin is given, calculate center, and vice versa
         if "origin" in settings["enc"]:
-            self.origin = tuple(settings["enc"].get("origin", (0, 0)))
+            self.origin = CoordTuple(*settings["enc"].get("origin", (0, 0)))
             self.center = self._center_from_origin()
         elif "center" in settings["enc"]:
-            self.center = tuple(settings["enc"].get("center", (0, 0)))
+            self.center = CoordTuple(*settings["enc"].get("center", (0, 0)))
             self.origin = self._origin_from_center()
 
         if crs.__eq__("WGS84"):
             # If CRS is WGS84, convert latitude/longitude to UTM
-            self.utm_zone = self.wgs2utm(self.center[0])
-            self.southern_hemisphere = Extent._is_southern_hemisphere(center_east=self.center[1])
+            self.utm_zone = self.wgs2utm(self.center.x)
+            self.southern_hemisphere = Extent._is_southern_hemisphere(center_east=self.center.y)
             self.out_proj = Extent._get_epsg_proj_code(self.utm_zone, self.southern_hemisphere)
             self.size = self._size_from_lat_long()
             # Convert origin from lat/lon to UTM, recalculate center in UTM coordinates
-            self.origin = self.convert_lat_lon_to_utm(self.origin[1], self.origin[0])
-            self.center = self.origin[0] + self.size[0] / 2, self.origin[1] + self.size[1] / 2
+            self.origin = CoordTuple(*self.convert_lat_lon_to_utm(self.origin.y, self.origin.x))
+            self.center = CoordTuple(self.origin.x + self.size.x / 2, self.origin.y + self.size.y / 2)
         elif re.match(r'^UTM\d{2}[NS]', crs):
             # For UTM CRS, extract zone and hemisphere, and set EPSG projection code accordingly
-            crs = re.search(r'\d+[A-Z]', crs).group(0)
+            crs_raw = re.search(r'\d+[A-Z]', crs)
+            if crs_raw:
+                crs = crs_raw.group(0)
+            else:
+                raise ValueError(f"Invalid CRS format: {crs_raw}")
+            
             # eg. UTM33N:
                 # utm_zone = 33
                 # crs_hemisphere_code = 'N'
-            self.utm_zone = crs[0:2]
+            self.utm_zone = crs[:2]
             crs_hemisphere_code = crs[2]
             self.southern_hemisphere = Extent._is_southern_hemisphere(crs_hemisphere_sym=crs_hemisphere_code)
             self.out_proj = Extent._get_epsg_proj_code(self.utm_zone, self.southern_hemisphere)
         
         # Calculate bounding box and area based on origin and size
         self.bbox = self._bounding_box_from_origin_size()
-        self.area: int = self.size[0] * self.size[1]
+        self.area: int = int(self.size.x * self.size.y)
 
     @staticmethod
-    def _is_southern_hemisphere(center_east: int = None, crs_hemisphere_sym: str = None) -> bool:
+    def _is_southern_hemisphere(center_east: float | None = None, crs_hemisphere_sym: str | None = None) -> bool:
         """
         Determines if the hemisphere is southern based on either 'center_east' (UTM) or
         'crs_hemisphere_sym' ('N' for Northern, 'S' for Southern hemisphere).
 
-        :param center_east: Integer value for the center's easting coordinate; if negative, the
+        :param center_east: Float value for the center's easting coordinate; if negative, the
                             center is in the southern hemisphere.
         :param crs_hemisphere_sym: String, either 'N' or 'S', indicating the UTM CRS hemisphere.
         :return: Boolean indicating if the southern hemisphere is determined.
         :raises ValueError: If neither or both arguments are provided.
         """
-        if (center_east is not None) == (crs_hemisphere_sym is not None):
+        if center_east is not None and crs_hemisphere_sym is not None:
             raise ValueError("Specify only one of 'center_east' or 'crs_hemisphere_sym'.")
+        elif center_east is None and crs_hemisphere_sym is None:
+            raise ValueError("One of 'center_east' or 'crs_hemisphere_sym' must be specified.")
 
         # Determine hemisphere based on the provided parameter
         if center_east is not None:
             return center_east < 0
         elif crs_hemisphere_sym is not None:
             return crs_hemisphere_sym == 'S'
+        
         
     @staticmethod
     def __get_hemisphere_epsg_code(is_southern_hemisphere: bool) -> str:
@@ -108,7 +130,7 @@ class Extent:
         """
         return str(math.floor(longitude / 6 + 31))
 
-    def convert_lat_lon_to_utm(self, latitude, longitude):
+    def convert_lat_lon_to_utm(self, latitude, longitude) -> tuple[int, int]:
         """
         Converts latitude and longitude coordinates to UTM coordinates.
 
@@ -140,26 +162,26 @@ class Extent:
 
         return latitude, longitude
 
-    def _origin_from_center(self) -> tuple[int, int]:
+    def _origin_from_center(self) -> CoordTuple:
         """
         Calculates the origin coordinates based on the center and size.
 
         :return: Tuple of origin x and y coordinates.
         """
-        return (
-            int(self.center[0] - self.size[0] / 2),
-            int(self.center[1] - self.size[1] / 2),
+        return CoordTuple(
+            int(self.center.x - self.size.x / 2),
+            int(self.center.y - self.size.y / 2),
         )
 
-    def _center_from_origin(self) -> tuple[int, int]:
+    def _center_from_origin(self) -> CoordTuple:
         """
         Calculates the center coordinates based on the origin and size.
 
         :return: Tuple of center x and y coordinates.
         """
-        return (
-            int(self.origin[0] + self.size[0] / 2),
-            int(self.origin[1] + self.size[1] / 2),
+        return CoordTuple(
+            int(self.origin.x + self.size.x / 2),
+            int(self.origin.y + self.size.y / 2),
         )
 
     def _bounding_box_from_origin_size(self) -> tuple[int, int, int, int]:
@@ -168,21 +190,21 @@ class Extent:
 
         :return: Tuple of bounding box coordinates (x_min, y_min, x_max, y_max).
         """
-        x_min, y_min = self.origin
-        x_max, y_max = x_min + self.size[0], y_min + self.size[1]
+        x_min, y_min = self.origin.to_tuple()
+        x_max, y_max = x_min + self.size.x, y_min + self.size.y
         return x_min, y_min, x_max, y_max
 
-    def _size_from_lat_long(self) -> tuple[int, int]:
+    def _size_from_lat_long(self) -> CoordTuple:
         """
         Converts geographic size (latitude/longitude) to UTM size.
 
         :return: Tuple of width and height in UTM coordinates.
         """
-        x_min, y_min = self.origin
-        x_max, y_max = x_min + self.size[0], y_min + self.size[1]
+        x_min, y_min = self.origin.to_tuple()
+        x_max, y_max = x_min + self.size.x, y_min + self.size.y
         converted_x_min, converted_y_min = self.convert_lat_lon_to_utm(y_min, x_min)
         converted_x_max, converted_y_max = self.convert_lat_lon_to_utm(y_max, x_max)
-        return converted_x_max - converted_x_min, converted_y_max - converted_y_min
+        return CoordTuple(converted_x_max - converted_x_min, converted_y_max - converted_y_min)
 
     def _bounding_box_from_origin_size_lat_long(self) -> tuple[int, int, int, int]:
         """
@@ -190,9 +212,9 @@ class Extent:
 
         :return: Tuple of bounding box coordinates (x_min, y_min, x_max, y_max) in UTM.
         """
-        x_min, y_min = self.origin
-        x_max, y_max = x_min + self.size[0], y_min + self.size[1]
+        x_min, y_min = self.origin.to_tuple()
+        x_max, y_max = x_min + self.size.x, y_min + self.size.y
         converted_x_min, converted_y_min = self.convert_lat_lon_to_utm(y_min, x_min)
         converted_x_max, converted_y_max = self.convert_lat_lon_to_utm(y_max, x_max)
-        self.size = tuple([converted_x_max - converted_x_min, converted_y_max - converted_y_min])
+        self.size = CoordTuple(converted_x_max - converted_x_min, converted_y_max - converted_y_min)
         return converted_x_min, converted_y_min, converted_x_max, converted_y_max

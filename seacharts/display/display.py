@@ -520,7 +520,7 @@ class Display:
         if self._fullscreen_mode:
             plt.rcParams["toolbar"] = "None"
 
-        width, height = self._environment.scope.extent.size
+        width, height = self._environment.scope.extent.size.to_tuple()
         window_height, ratio = self._resolution / self._dpi, width / height
         figure_width1, figure_height1 = ratio * window_height, window_height
         axes1_width, axes2_width, width_space = figure_width1, 1.1, 0.3

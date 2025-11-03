@@ -2,44 +2,47 @@ enc:
   required: True
   type: dict
   schema:
-    # set True if you want to display whole uploaded map
-    autosize:
-      required: False
-      type: boolean
-
-    # size of displayed map
+    # Size of displayed map
+    # Vertical, horizontal in degrees or UTM units
     size:
       required: True
       type: list
+      minlength: 2
       maxlength: 2
       schema:
         type: float
         min: 1.0
 
-    # that's where you want bottom-left corner to be
+    # That's where you want bottom-left corner to be
+    # Vertical, horizontal in degrees or UTM units
     origin:
       required: True
       excludes: center
       type: list
+      minlength: 2
       maxlength: 2
       schema:
         type: float
 
-    # that's where you want the center of a map to be
+    # That's where you want the center of a map to be
+    # Vertical, horizontal in degrees or UTM units
     center:
       required: True
       excludes: origin
       type: list
+      minlength: 2
       maxlength: 2
       schema:
         type: float
 
     # UTM zone required for coordinates to work correctly
+    # Set to WGS84 for lat/lon coordinates, UTM otherwise
     crs:
       required: True
       type: string
 
-    # depths are required for both formats, if not set they will be assigned default values
+    # Depths are required for both S57 and FGDB 
+    # If not set they will be assigned default values, can be negative
     depths:
       required: False
       type: list
@@ -47,8 +50,8 @@ enc:
       schema:
         type: integer
 
-    # you can pick specific S-57 layers you want to extract
-    # WARNING: LNDARE, COALNE and DEPARE are loaded on default as Land, Shore and Bathymetry
+    # Add specific S-57 layers (key) you want to extract, and assign them colors in HEX format (value)
+    # KEEP IN MIND that LNDARE, COALNE and DEPARE are loaded on default as Land, Shore and Bathymetry
     S57_layers:
       required: False
       type: dict
@@ -58,7 +61,7 @@ enc:
       keysrules:
         type: string
 
-    # you must put paths to some resources
+    # You must put paths to some resources
     resources:
       required: True
       type: list

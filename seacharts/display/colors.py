@@ -56,7 +56,7 @@ _layer_colors = dict(
 )
 
 
-def color_picker(name: str, bins: int = None) -> tuple:
+def color_picker(name: str | int, bins: int = None) -> tuple:
     if isinstance(name, int):
         return _blues(bins)[name]
     elif name in _ship_colors:

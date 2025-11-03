@@ -69,6 +69,11 @@ class ShapefileBasedCollection(DataCollection, ABC):
     :param scope: The scope object defining the context and extent of the data collection.
     :param parser: The DataParser instance responsible for parsing the spatial data.
     """
+
+    @property
+    def featured_regions(self) -> list[Layer]:
+        return []
+
     def load_existing_shapefiles(self) -> None:
         """
         Loads existing shapefiles for the featured regions using the specified parser.

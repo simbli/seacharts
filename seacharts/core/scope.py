@@ -31,7 +31,7 @@ class Scope:
         
         # Set default depth bins if not provided in settings
         default_depths = [0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500]
-        self.depths = settings["enc"].get("depths", default_depths)
+        self.depths: list[int] = settings["enc"].get("depths", default_depths)
 
         # Define core features for ENC, adding "seabed" layers based on depth bins
         self.features = ["land", "shore"]
