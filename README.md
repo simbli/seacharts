@@ -35,90 +35,26 @@ convention for Python code.
 
 ## Prerequisites
 
+First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy.
+
 ### Linux (Virtual Environment)
 
-First, ensure that you have gdal and geos libraries installed, as these are required in order to successfully install gdal and cartopy:
-```
+```bash
 sudo apt-get install libgeos-dev libgdal-dev
-```
-Then, from the root folder you can install an editable version of the package as follows:
-```
-pip install -e .
-```
-This should preferably be done inside a virtual environment in order to prevent python packaging conflicts.
-
-### Anaconda
-
-Install an edition of the [Anaconda](
-https://www.anaconda.com/products/individual-d) package manager, and then
-create a new _conda environment_ with **Python 3.10** or higher using e.g. the graphical
-user interface of [PyCharm Professional](
-https://www.jetbrains.com/lp/pycharm-anaconda/) as detailed [here](
-https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html
-).
-
-The required data processing libraries for spatial calculations and
-visualization may subsequently be installed simply by running the following
-command in the terminal of your chosen environment:
-
-```
-conda install -c conda-forge fiona cartopy matplotlib
+uv sync
 ```
 
-### Pipwin (Windows) DEPRECATED at the moment, needs revision.
+### MacOs
 
-First, ensure that [Python 3.9](https://www.python.org/downloads/)
-(or another compatible version) and the required [C++ build tools](
-https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
-are installed. In order to ensure that the correct version of Numpy+mkl linked
-to the [Intel® Math Kernel Library](
-https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html#gs.31vx8p)
-is acquired, download the wheel according to your Python version and Windows
-platform from [here](
-https://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy). Place the downloaded wheel
-file e.g. in the same directory the terminal is run from, and install it. The
-below snippet corresponds to Python 3.9 on Windows 64-bit:
-```
-pip install --upgrade pip
-pip install wheel
-pip install numpy-1.20.3+mkl-cp39-cp39-win_amd64.whl
-
+```bash
+brew install gdal
+uv sync
 ```
 
-The remaining required packages may be installed by the following:
-
-```
-pip install pipwin
-pipwin install gdal
-pipwin install scipy
-pipwin install fiona
-pipwin install shapely
-pipwin install cartopy
-pipwin install matplotlib
-
-```
-
-Simply copy and paste the entire block above (including the empty line) into
-the terminal of your virtual environment, and go get a cup of coffee while it
-does its thing.
-
-## Installation
-
-After the necessary dependencies have been correctly installed, the SeaCharts
-package may be installed directly through the Python Package Index ([PyPI](
-https://pypi.org/
-)) by running the following command in the terminal:
-
-```
-pip install seacharts
-```
-
-or locally inside the seacharts root folder as an editable package with `pip install -e .`
+## Usage
 
 ![](https://github.com/simbli/seacharts/blob/master/images/example2.svg?raw=True
 "Example visualization with default settings")
-
-## Usage
 
 This module supports reading and processing `FGDB` files for sea depth data
 such as the Norwegian coastal data set used for demonstration purposes, found
@@ -129,7 +65,7 @@ https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
 
 Follow the above link to download the `Depth data` (`Sjøkart - Dybdedata`)
 dataset from the [Norwegian Mapping Authority](
-https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority),
+https://kartkatalog.geonorge.no/metadata/sjoekart-dybdedata/2751aacf-5472-4850-a208-3532a51c529a),
 by adding it to the Download queue and navigating to the separate
 [download page](https://kartkatalog.geonorge.no/nedlasting). Choose one or more
 county areas (e.g. `Møre og Romsdal`), and select the
@@ -141,6 +77,13 @@ format. Finally, select your appropriate user group and purpose, and click
 Unpack the downloaded file(s) and place the extracted `.gdb` in the
 `data/external/` directory, where the top-level folder `data` is located in the
 same directory as the executing script.
+
+Test the installed code with
+
+```bash
+uv run pytest tests
+```
+or by manually debugging the `tests/test_seacharts.py` file.
 
 The `config.yaml` file specifies what ENC data to load and how it will be processed and displayed.
 The corresponding `config_schema.yaml` specifies the required parameters that must be provided for the software to function properly.
