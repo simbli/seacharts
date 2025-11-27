@@ -1,7 +1,6 @@
 import sys, os
 from shapely.geometry import MultiPolygon, Polygon
 # file made to showcase functionalities added in seacharts 4.0 integrated within old seacharts functionalities
-# for 
 
 if __name__ == "__main__":
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

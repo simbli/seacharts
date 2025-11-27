@@ -250,16 +250,16 @@ class FeaturesManager:
         self, shape, color, interiors, fill, linewidth, linestyle, alpha=1.0
     ):
         """
-        Adds an overlay geometry to the display.
+        Adds a polygon overlay to the display.
+            :param shape: The exterior coordinates of the polygon, or a collection of polygons.
+            :param color: The color to use for the polygon.
+            :param interiors: A list of interior coordinates (holes) for the polygon.
+            :param fill: Whether the polygon should be filled.
+            :param linewidth: The width of the polygon outline.
+            :param linestyle: The style of the polygon outline.
+            :param alpha: The transparency level of the polygon.
 
-        :param geometry: The geometry to overlay.
-        :param color_name: The name of the color for the overlay.
-        :param fill: Whether the overlay should be filled.
-        :param linewidth: The width of the overlay line.
-        :param linestyle: The style of the overlay line.
-        :param alpha: The transparency level of the overlay.
-
-        :return: The created overlay artist.
+            :return: The created overlay artist.
         """
         try:
             if isinstance(shape, geo.MultiPolygon) or isinstance(

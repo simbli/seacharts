@@ -6,17 +6,18 @@ import tkinter as tk
 from pathlib import Path
 from typing import Any
 
-from colorama import Fore
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import colors
-from matplotlib.widgets import Slider, RadioButtons
 from cartopy.crs import UTM
+from colorama import Fore
+from matplotlib import colors
 from matplotlib.gridspec import GridSpec
+from matplotlib.widgets import RadioButtons, Slider
 from matplotlib_scalebar.scalebar import ScaleBar
 
 import seacharts.environment as env
+
 from .colors import colorbar
 from .events import EventsManager
 from .features import FeaturesManager
@@ -68,7 +69,7 @@ class Display:
         """
         Sets bounding box for the display taking projection's (crs's) x and y limits for display into account.
         Making sure that bbox doesn't exceed limits prevents crashes. When such limit is exceeded, an appropriate message is displayed
-        to inform user about possibility of unexpeced display bound crop
+        to inform user about possibility of unexpected display bound crop
         """
         bbox = (max(environment.scope.extent.bbox[0], self.crs.x_limits[0]),  # x-min
                 max(environment.scope.extent.bbox[1], self.crs.y_limits[0]),  # y-min
@@ -79,13 +80,13 @@ class Display:
             if (bbox[i] != environment.scope.extent.bbox[i]):
                 changed.append(i)
         if len(changed)>0:
-            print(Fore.RED + f"WARNING: Bouding box for display has exceeded the limit of CRS axes and therefore been scaled down. Watch out for potentially cropped chart display!" + Fore.RESET)
+            print(Fore.RED + f"WARNING: Bounding box for display has exceeded the limit of CRS axes and therefore been scaled down. Watch out for potentially cropped chart display!" + Fore.RESET)
             for i in changed:
                 print(Fore.RED + f"index {i}: {environment.scope.extent.bbox[i]} changed to {bbox[i]}" + Fore.RESET)
         return bbox
 
     def start(self) -> None:
-        self.started__ = """
+        """
         Starts the display, if it is not already started.
         """
         if self._is_active:
@@ -199,7 +200,6 @@ class Display:
                 else:
                     weather_layer = self._environment.weather.find_by_name(variable_name)
 
-        # TODO choose correct display for variables
         data = None
         if weather_layer is not None:
             data = [x[lon_indxes[0]:lon_indxes[1]] for x in
@@ -246,7 +246,6 @@ class Display:
         draw_default = data is None
         for i in range(len(direction_data)):
             for j in range(len(direction_data[i])):
-                x = direction_data[i][j]
                 from math import isnan
                 if not isnan(direction_data[i][j]):
                     degree = math.radians(direction_data[i][j])
@@ -743,11 +742,11 @@ class Display:
 
     def add_control_panel(self, controls: bool):
         radio_labels = ['--'] + self._environment.weather.weather_names
-        if "wind_speed" and "wind_direction" in radio_labels:
+        if any(x in radio_labels for x in ["wind_speed", "wind_direction"]):
             radio_labels.append("wind")
-        if "wave_height" and "wave_direction" in radio_labels:
+        if any(x in radio_labels for x in ["wave_height", "wave_direction"]):
             radio_labels.append("wave")
-        if "sea_current_speed" and "sea_current_direction" in radio_labels:
+        if any(x in radio_labels for x in ["sea_current_speed", "sea_current_direction"]):
             radio_labels.append("sea_current")
         if not controls: return
         
@@ -780,9 +779,6 @@ class Display:
 
         self.radio_buttons.on_clicked(on_radio_change)
         # VISIBLE LAYER PICKER END
-
-        # TODO: layer picked in such way should be saved to variable
-        # then we can add, analogically to date slider, opacity slider for picked weather layer
 
         # Set the window title and show the figure
         fig.canvas.manager.set_window_title('Controls')

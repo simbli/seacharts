@@ -35,6 +35,8 @@ def build_directory_structure(features: list[str], resources: list[str], parser:
     :param parser: An instance of DataParser used to get the source root name.
     """
     map_dir_name = parser.get_source_root_name()
+    if map_dir_name is None:
+        raise ValueError("Cannot build directory structure: source root name is None.")
     paths.shapefiles.mkdir(exist_ok=True)
     paths.shapefiles =  paths.shapefiles / map_dir_name
     paths.output.mkdir(exist_ok=True)

@@ -146,11 +146,11 @@ class DataParser:
         pass
     
     @abstractmethod
-    def get_source_root_name(self) -> str:
+    def get_source_root_name(self) -> str | None:
         """
-        Abstract method to retrieve the root name of the source data.
+        Abstract method to retrieve the root name of the source data. Returns None if not found.
 
-        :return: The root name of the source data.
+        :return: The root name of the source data or None.
         """
         pass
 

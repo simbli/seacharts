@@ -1,14 +1,17 @@
 """
 Contains the ENC class for reading, storing and plotting maritime spatial data.
 """
-import _warnings
 from pathlib import Path
-from shapely.geometry import Point, Polygon
+
+import _warnings
+from shapely.geometry import Point
+
 from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
 from seacharts.environment.weather import WeatherData
 from seacharts.layers import Layer
+
 
 class ENC:
     """

@@ -4,7 +4,7 @@ from typing import Generator
 
 import fiona
 
-from seacharts.core import DataParser, paths
+from seacharts.core import DataParser
 from seacharts.layers import Layer, labels
 
 
@@ -65,9 +65,11 @@ class FGDBParser(DataParser):
     def _is_map_type(self, path) -> bool:
         return path.is_dir() and path.suffix == ".gdb"
     
-    def get_source_root_name(self) -> str:
+    def get_source_root_name(self) -> str | None:
         """
-        Returns concatenated names of all FGDB directories found in resources (without .gdb suffix).
+        Returns concatenated names of all FGDB directories found in resources (without .gdb suffix) or None if not found.
+        
+        :return: The root name of the source data or None.
         """
         names = []
         for path in self._file_paths:
@@ -75,7 +77,7 @@ class FGDBParser(DataParser):
                 name = path.stem
                 if name not in names:
                     names.append(name)
-        return "_".join(names) if names else "unknown"
+        return "_".join(names) if names else None
 
     def _parse_layers(
         self, path: Path, external_labels: list[str], depth: int

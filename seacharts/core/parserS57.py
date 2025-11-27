@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from seacharts.core import DataParser
-from seacharts.layers import Layer, Land, Shore, Seabed
+from seacharts.layers import Land, Layer, Seabed, Shore
 
 
 class S57Parser(DataParser):
@@ -25,18 +25,21 @@ class S57Parser(DataParser):
     ):
         super().__init__(bounding_box, path_strings)
         self.epsg = epsg
+        
 
     def get_source_root_name(self) -> str:
         """ 
         Returns the stem (base filename without suffix) of the first valid S57 file 
         path in the given data paths.
+        Returns None if no valid S57 file is found.
 
-        :return: The stem of the first valid S57 file.
+        :return: The stem of the first valid S57 file or None.
         """
         for path in self._file_paths:
             path = self.get_s57_file_path(path)
             if path is not None:
                 return path.stem
+        raise FileNotFoundError("No valid S57 file found in the provided paths.")
 
     @staticmethod
     def __run_org2ogr(ogr2ogr_cmd, s57_file_path, shapefile_output_path) -> None:
