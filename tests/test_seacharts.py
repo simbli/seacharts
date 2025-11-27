@@ -1,7 +1,9 @@
-if __name__ == "__main__":
-    import shapely.geometry as geo
-    from seacharts.enc import ENC
+import shapely.geometry as geo
 
+from seacharts.enc import ENC
+
+
+def test_seacharts_enc() -> None:
     size = 9000, 5062
     center = 44300, 6956450
     enc = ENC(new_data=True, size=size, center=center)
@@ -31,21 +33,48 @@ if __name__ == "__main__":
     areas = box.difference(enc.seabed[10].geometry)
     enc.draw_circle(center, 1000, "yellow", thickness=2, edge_style="--", alpha=0.5)
     enc.draw_rectangle(center, (600, 1200), "blue", rotation=20, alpha=0.5)
-    enc.draw_circle(center, 700, "green", edge_style=(0, (5, 8)), thickness=3, fill=False)
-    enc.draw_line([(center[0], center[1] + 800), center, (center[0] - 300, center[1] - 400)], "white")
+    enc.draw_circle(
+        center, 700, "green", edge_style=(0, (5, 8)), thickness=3, fill=False
+    )
     enc.draw_line(
-        [(center[0] - 300, center[1] + 400), center, (center[0] + 200, center[1] - 600)],
+        [(center[0], center[1] + 800), center, (center[0] - 300, center[1] - 400)],
+        "white",
+    )
+    enc.draw_line(
+        [
+            (center[0] - 300, center[1] + 400),
+            center,
+            (center[0] + 200, center[1] - 600),
+        ],
         "magenta",
         buffer=0.0,
         linewidth=5.0,
         edge_style=(0, (1, 4)),
     )
-    enc.draw_arrow(center, (center[0] + 700, center[1] + 600), "orange", head_size=300, width=50, thickness=5)
+    enc.draw_arrow(
+        center,
+        (center[0] + 700, center[1] + 600),
+        "orange",
+        head_size=300,
+        width=50,
+        thickness=5,
+    )
     enc.draw_polygon(enc.seabed[100].geometry.geoms[-3], "cyan", alpha=0.5)
     enc.draw_polygon(enc.shore.geometry.geoms[56], "highlight", alpha=0.5)
     for idx in range(len(areas.geoms)):
         if idx in [3, 4, 5, 6, 7, 14, 17, 18, 19, 20]:
             enc.draw_polygon(areas.geoms[idx], "green", alpha=0.5)
-    enc.draw_rectangle(center, (width, height), "pink", fill=False, edge_style=(0, (10, 10)), thickness=1.5)
+    enc.draw_rectangle(
+        center,
+        (width, height),
+        "pink",
+        fill=False,
+        edge_style=(0, (10, 10)),
+        thickness=1.5,
+    )
 
     enc.save_image("example1", extension="svg")
+
+
+if __name__ == "__main__":
+    test_seacharts_enc()

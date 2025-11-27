@@ -1,11 +1,12 @@
+import platform
 from pathlib import Path
 from typing import Any, List, Tuple, Union
 
 import matplotlib
+
 import seacharts.display as dis
 import seacharts.environment as env
 import seacharts.utils as utils
-from cartopy.crs import UTM
 
 matplotlib.rcParams["pdf.fonttype"] = 42
 matplotlib.rcParams["ps.fonttype"] = 42
@@ -37,8 +38,17 @@ class ENC:
         :param figname: string of figure name for saving the environment plot
     """
 
-    def __init__(self, config_file: Path = utils.paths.config, multiprocessing=False, **kwargs):
-        matplotlib.use("TkAgg")
+    def __init__(
+        self, config_file: Path = utils.paths.config, multiprocessing=False, **kwargs
+    ):
+        system = platform.system()
+        if system == "Linux":
+            matplotlib.use("TkAgg")
+        elif system == "Darwin":  # macOS
+            try:
+                matplotlib.use("MacOSX")
+            except ImportError:
+                matplotlib.use("Agg")
         if multiprocessing:
             dis.Display.init_multiprocessing()
             return
@@ -167,7 +177,9 @@ class ENC:
         :param lat_scale: optional float scaling the lateral horizon
         :return: None
         """
-        self._environment.create_ownship(easting, northing, heading, hull_scale, lon_scale, lat_scale)
+        self._environment.create_ownship(
+            easting, northing, heading, hull_scale, lon_scale, lat_scale
+        )
         self._display.update_plot()
 
     def remove_ownship(self) -> None:
@@ -209,7 +221,9 @@ class ENC:
         :param head_size: float of head size (length) in meters
         :return: None
         """
-        return self._display.features.add_arrow(start, end, color, width, fill, head_size, thickness, edge_style)
+        return self._display.features.add_arrow(
+            start, end, color, width, fill, head_size, thickness, edge_style
+        )
 
     def draw_text(
         self,
@@ -251,7 +265,9 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: Featureartist
         """
-        return self._display.features.add_circle(center, radius, color, fill, thickness, edge_style, alpha)
+        return self._display.features.add_circle(
+            center, radius, color, fill, thickness, edge_style, alpha
+        )
 
     def draw_line(
         self,
@@ -276,7 +292,16 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: Featureartist
         """
-        self._display.features.add_line(points, color, buffer, linewidth, edge_style, marker_type, marker_size, alpha)
+        self._display.features.add_line(
+            points,
+            color,
+            buffer,
+            linewidth,
+            edge_style,
+            marker_type,
+            marker_size,
+            alpha,
+        )
 
     def draw_polygon(
         self,
@@ -299,7 +324,9 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: Featureartist
         """
-        self._display.features.add_polygon(geometry, color, interiors, fill, thickness, edge_style, alpha)
+        self._display.features.add_polygon(
+            geometry, color, interiors, fill, thickness, edge_style, alpha
+        )
 
     def draw_rectangle(
         self,
@@ -324,7 +351,9 @@ class ENC:
         :param alpha: float denoting the Matplotlib alpha value
         :return: Featureartist
         """
-        self._display.features.add_rectangle(center, size, color, rotation, fill, thickness, edge_style, alpha)
+        self._display.features.add_rectangle(
+            center, size, color, rotation, fill, thickness, edge_style, alpha
+        )
 
     def start_display(self) -> None:
         """

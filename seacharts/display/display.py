@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import platform
 import time
 import tkinter as tk
 from multiprocessing import Process
@@ -9,10 +10,11 @@ from typing import List, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
-import seacharts.environment as env
 from cartopy.crs import UTM
 from matplotlib.gridspec import GridSpec
 from matplotlib_scalebar.scalebar import ScaleBar
+
+import seacharts.environment as env
 
 from .colors import colorbar
 from .events import EventsManager
@@ -42,7 +44,9 @@ class Display:
             self.crs = UTM(self._utm_zone)
             self._background = None
             self.anchor_index = self._init_anchor_index(settings)
-            self.figure, self.sizes, self.spacing, widths = self._init_figure(settings, **kwargs)
+            self.figure, self.sizes, self.spacing, widths = self._init_figure(
+                settings, **kwargs
+            )
             self.axes, self.grid_spec, self._colorbar = self._init_axes(widths)
             self.events = EventsManager(self)
             self.features = FeaturesManager(self)
@@ -118,7 +122,10 @@ class Display:
         axes_widths = axes1_width, axes2_width
         figure_height2 = figure_height1 * 0.998
         figure_width2 = axes1_width + width_space + 2 * axes2_width
-        figure_sizes = [(figure_width1, figure_height1), (figure_width2, figure_height2)]
+        figure_sizes = [
+            (figure_width1, figure_height1),
+            (figure_width2, figure_height2),
+        ]
         sub1 = dict(
             right=(axes1_width + width_space + axes2_width) / figure_width1,
             wspace=2 * width_space / (axes1_width + axes2_width),
@@ -129,14 +136,27 @@ class Display:
         )
         subplot_spacing = sub1, sub2
 
-        figname = settings["display"]["figname"] if "figname" in settings["display"] else "SeaCharts"
+        figname = (
+            settings["display"]["figname"]
+            if "figname" in settings["display"]
+            else "SeaCharts"
+        )
         figure = plt.figure(num=figname, figsize=figure_sizes[0], dpi=self._dpi)
         # if not self._fullscreen_mode:
         # figure.canvas.toolbar.pack_forget()
         return figure, figure_sizes, subplot_spacing, axes_widths
 
     def _init_axes(self, axes_widths):
-        gs = GridSpec(1, 2, width_ratios=axes_widths, **self.spacing[0], left=0.0, top=1.0, bottom=0.0, hspace=0.0)
+        gs = GridSpec(
+            1,
+            2,
+            width_ratios=axes_widths,
+            **self.spacing[0],
+            left=0.0,
+            top=1.0,
+            bottom=0.0,
+            hspace=0.0,
+        )
         axes1 = self.figure.add_subplot(gs[0, 0], projection=self.crs)
         x_min, y_min, x_max, y_max = self.environment.scope.extent.bbox
         axes1.set_extent((x_min, x_max, y_min, y_max), crs=self.crs)
@@ -250,10 +270,25 @@ class Display:
         option = self.window_anchors[j][i]
         option = "right"
         if option != "default":
-            root = tk.Tk()
-            screen_width = int(root.winfo_screenwidth())
-            screen_height = int(root.winfo_screenheight())
-            root.destroy()
+            manager = plt.get_current_fig_manager()
+            try:
+                if platform.system() == "Darwin":  # macOS
+                    try:
+                        window = manager.window
+                        if hasattr(window, "winfo_screenwidth"):
+                            screen_width = int(window.winfo_screenwidth())
+                            screen_height = int(window.winfo_screenheight())
+                        else:
+                            return
+                    except (AttributeError, tk.TclError):
+                        return
+                else:
+                    root = tk.Tk()
+                    screen_width = int(root.winfo_screenwidth())
+                    screen_height = int(root.winfo_screenheight())
+                    root.destroy()
+            except (AttributeError, tk.TclError):
+                return
             x_margin, y_margin = -10, -73
             dpi = self._dpi
             size = self.sizes[int(self._colorbar_mode)]
@@ -280,10 +315,18 @@ class Display:
                 x, y = 4, y_shifted + y_margin
             else:
                 x, y = 4, 2
-            manager = plt.get_current_fig_manager()
-            manager.window.wm_geometry(f"+{x + x_margin}+{y}")
+            try:
+                manager.window.wm_geometry(f"+{x + x_margin}+{y}")
+            except (AttributeError, tk.TclError):
+                pass
 
-    def save_figure(self, name: str | None = None, path: Path | None = None, dpi: int = 100, extension: str = "png"):
+    def save_figure(
+        self,
+        name: str | None = None,
+        path: Path | None = None,
+        dpi: int = 100,
+        extension: str = "png",
+    ):
         if not self._show_figure:
             return
 
