@@ -19,198 +19,350 @@ Python-based API for Electronic Navigational Charts (ENC)
 - Access and manipulate standard geometric shapes such as points and polygon
   collections.
 - Visualize colorful seacharts features and vessels.
+- Integration with [PyThor](https://github.com/SanityRemnants/PyThor) library allowing for weather data access and display.  
 
 ## Code style
 
 This module follows the [PEP8](https://www.python.org/dev/peps/pep-0008/)
 convention for Python code.
 
+## Prerequisites
 
-## Prerequisites - For SeaCharts 4.0 see [this](#seacharts-40-setup-tips) section
+> **Important**: Current version requires Conda environment setup. Pip installation is currently not supported.
 
-### DEPRECATED - Linux (Virtual Environment)
+## Initial Setup
 
-First, ensure that you have the GDAL and GEOS libraries installed, as these are
-required in order to successfully install GDAL and Cartopy:
-```
-sudo apt-get install libgeos-dev libgdal-dev
-```
-
-From the root folder, one may then install an editable version of the package as
-follows:
-```
-pip install -e .
+1. Clone the repository:
+```bash
+git clone https://github.com/meeqn/seacharts_s57
 ```
 
-This should preferably be done inside a virtual environment in order to prevent
-Python packaging conflicts.
+2. Set up the Conda environment:
+   * Use the provided `conda_requirements.txt` file:
+   ```bash
+   conda create --name <envname> --file conda_requirements.txt
+   conda activate <envname>
+   ```
 
-### DEPRECATED - Anaconda
+3. Set up directory structure:
+   * **Windows users**: Use the provided `setup.ps1` PowerShell script
+   * **Other platforms**: Manually create these directories:
+     * `data`
+     * `data/db`
 
-Install an edition of the [Anaconda](
-https://www.anaconda.com/products/individual-d) package manager, and then create a new
-_conda environment_
-with [Python 3.11](https://www.python.org/downloads/) or higher using e.g. the
-graphical user interface of [PyCharm Professional](
-https://www.jetbrains.com/lp/pycharm-anaconda/) as detailed [here](
-https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html
-).
+4. Download map data:
+   * Download the `US1GC09M` map from [here](https://www.charts.noaa.gov/ENCs/US1GC09M.zip)
+   * Extract and place the `US1GC09M` directory (found in map's ENC_ROOT directory) inside `data/db` folder
 
-The required data processing libraries for spatial calculations and
-visualization may subsequently be installed simply by running the following
-commands in the terminal of your chosen environment:
+5. Test the installation:
+   * Run `test_seacharts_4_0.py`
+   * Expected result is shown below
 
-```
-conda install -c conda-forge fiona cartopy matplotlib
-conda install matplotlib-scalebar cerberys pyyaml
-```
 
-### DEPRECATED - Windows (Pipwin)
 
-First, ensure that [Python 3.11](https://www.python.org/downloads/) or higher
-is installed. Next, install all required packages using
-[Pipwin](https://pypi.org/project/pipwin/):
-```
-python -m pip install --upgrade pip
-pip install wheel
-pip install pipwin
-pipwin install numpy
-pipwin install gdal
-pipwin install fiona
-pipwin install shapely
-pip install cartopy
-pip install pyyaml
-pip install cerberus
-pip install matplotlib-scalebar
+![Expected output](images/test_results.svg "Expected test_seacharts_4_0.py output")
 
+
+### Weather Module Setup (Optional)
+
+If you need weather functionality:
+
+```bash
+git clone https://github.com/SanityRemnants/PyThor
+cd PyThor
+conda create --name <envname> --file requirements.txt
+conda activate -n <envname>
+# Remember to configure config.yaml file according to PyThor README
+python app.py
 ```
 
-Simply copy and paste the entire block above (including the empty line) into
-the terminal of your virtual environment, and go get a cup of coffee while it
-does its thing.
 
-## Installation
 
-After the necessary dependencies have been correctly installed, the SeaCharts
-package may be installed directly through the Python Package Index ([PyPI](
-https://pypi.org/
-)) by running the following command in the terminal:
+## Configuration Setup
 
+### Configuration File Structure
+
+The SeaCharts library is configured via `config.yaml` located in the seacharts directory (by default). Below are the detailed configuration options:
+
+### ENC (Electronic Navigation Chart) Configuration
+
+```yaml
+enc:
+  size: [width, height]        # Size of the chart in chosen CRS unit
+  origin: [x, y]           # Origin coordinates in chosen CRS unit (excludes center)
+  center: [x, y]           # Center point coordinates in chosen CRS unit (excludes origin)
+  crs: "coordinate_system"     # Coordinate reference system
+  S57_layers:                  # List of additional S-57 layers with display colors given in hex as value
+    "LAYER_NAME": "#COLOR_IN_HEX"     # e.g., "TSSLPT": "#8B0000"
+  resources: [data_paths]      # Path to ENC data root, is currently a list but expects one argument
 ```
-pip install seacharts
+
+#### Important Notes on ENC Configuration:
+- `origin` and `center` are mutually exclusive - use only one
+- For `CRS`, you can use:
+  - "WGS84" for **latitude/longitude coordinates** (required for `S57 maps`)
+  - "UTM" with zone and hemisphere, for **easting/northing coordinates** (e.g., "UTM33N" for UTM zone 33 North, used for `FGDB maps`)
+- `S57_layers` field is **required** for S57 maps (can be empty list)
+- Default S-57 layers (automatically included, dont need to be specified in `S57_layers` field):
+  - `LNDARE` (Land)
+  - `DEPARE` (Depth Areas)
+  - `COALNE` (Coastline)
+- A useful S57 layer catalogue can be found at: https://www.teledynecaris.com/s-57/frames/S57catalog.htm
+
+### Weather Configuration
+
+```yaml
+weather:
+  PyThor_address: "http://127.0.0.1:5000"  # PyThor server address
+  variables: [                              # Weather variables to display
+    "wave_direction",
+    "wave_height",
+    "wave_period",
+    "wind_direction",
+    "wind_speed",
+    "sea_current_speed",
+    "sea_current_direction",
+    "tide_height"
+  ]
 ```
 
-or locally inside the SeaCharts root folder as an editable package with `pip install
--e .`
+### Time Configuration
 
-## Usage
+```yaml
+time:
+  time_start: "DD-MM-YYYY HH:MM"  # Start time (must match format exactly)
+  time_end: "DD-MM-YYYY HH:MM"    # End time
+  period: String                  # Time period unit
+  period_multiplier: Integer      # Multiplier for time period
+```
 
-This module supports reading and processing `FGDB` and 'S-57' files for sea depth data.
+#### Time Configuration Notes:
+- Valid period values:
+  - "hour"
+  - "day"
+  - "week"
+  - "month"
+  - "year"
+- Period multiplier works with hour, day, and week periods
+- For example, for 2-hour intervals:
+  - period: "hour"
+  - period_multiplier: 2
+- Month and year periods **don't support** multipliers
 
-### Downloading regional datasets - FGDB
+### Display Configuration
 
-The Norwegian coastal data set used for demonstration purposes, found
-[here](
-https://kartkatalog.geonorge.no/metadata/2751aacf-5472-4850-a208-3532a51c529a).
-To visualize and access coastal data of Norway, follow the above link to download
-the `Depth data` (`Sjøkart - Dybdedata`) dataset from the [Norwegian Mapping Authority](
-https://kartkatalog.geonorge.no/?organization=Norwegian%20Mapping%20Authority) by adding
-it to the Download queue and navigating to the separate
-[download page](https://kartkatalog.geonorge.no/nedlasting). Choose one or more
-county areas (e.g. `Møre og Romsdal`), and select the
-`EUREF89 UTM sone 33, 2d` (`UTM zone 33N`) projection and `FGDB 10.0`
-format. Finally, select your appropriate user group and purpose, and click
-`Download` to obtain the ZIP file(s).
+```yaml
+display:
+  colorbar: Boolean            # Enable/disable depth colorbar (default: False)
+  dark_mode: Boolean           # Enable/disable dark mode (default: False)
+  fullscreen: Boolean          # Enable/disable fullscreen mode (default: False)
+  controls: Boolean            # Show/hide controls window (default: True)
+  resolution: Integer          # Display resolution (default: 640)
+  anchor: String               # Window position ("center", "top_left", etc.)
+  dpi: Integer                # Display DPI (default: 96)
+```
 
-### Configuration and startup
 
-Unpack the downloaded file(s) and place the extracted `.gdb` or 'S-57' folder in a suitable location,
-in which the SeaCharts setup may be configured to search. The current
-working directory as well as the relative `data/` and `data/db/` folders are
-included by default.
+## ENC Class for Maritime Spatial Data
 
-The minimal example below imports the `ENC` class from `seacharts.enc` with the
-default configuration found in `seacharts/config.yaml`, and shows the interactive
-SeaCharts display. Note that at least one database with spatial data (e.g. `Møre og
-Romsdal` from the Norwegian Mapping Authority) is required.
+> **Important API Note**: All SeaCharts API functions expect coordinates in **UTM CRS** (easting and northing), regardless of the CRS set in *config.yaml*.
+
+The ENC class provides methods for handling and visualizing maritime spatial data, including reading, storing, and plotting from specified regions.
+
+### Key Functionalities
+
+* **Initialization**
+    * The ENC object can be initialized with a path to a config.yaml file or a Config object.
+
+* **Geometric Data Access**
+    * The ENC provides attributes for accessing spatial layers:
+        * `land`: Contains land shapes.
+        * `shore`: Contains shorelines.
+        * `seabed`: Contains bathymetric (seafloor) data by depth.
+
+* **Coordinate and Depth Retrieval**
+    * `get_depth_at_coord(easting, northing)`: Returns the depth at a specific coordinate.
+    * `is_coord_in_layer(easting, northing, layer_name)`: Checks if a coordinate falls within a specified layer.
+
+* **Visualization**
+    * `display`: Returns a Display instance to visualize marine geometric data and vessels.
+
+* **Spatial Data Update**
+    * `update()`: Parses and updates ENC data from specified resources.
+
+### Example Usage
 
 ```python
-if __name__ == '__main__':
+from seacharts import ENC
 
-    from seacharts.enc import ENC
+# Initialize ENC with configuration
+enc = ENC("config.yaml")
 
-    enc = ENC()
-    enc.display.show()
+# Get depth at specific UTM coordinates
+depth = enc.get_depth_at_coord(easting, northing)
+
+# Check if coordinates are in a specific layer (e.g., TSSLPT)
+in_traffic_lane = enc.is_coord_in_layer(easting, northing, "TSSLPT")
+
+# Add a vessel and display
+display = enc.display
+display.add_vessels((1, easting, northing, 45, "red"))
+display.show()
 ```
 
-The `config.yaml` file specifies which file paths to open and which area to load. In the configuration file the desired map type can be specified by listring data to display - depths for 'FDGB', and [layers](https://www.teledynecaris.com/s-57/frames/S57catalog.htm) for 'S-57'.
-The corresponding `config_schema.yaml` specifies how the required setup parameters
-must be provided, using `cerberus`.
+## Display Features
 
+The Display class provides various methods to control the visualization:
 
-### API usage and accessing geometric shapes
-
-After the spatial data is parsed into shapefiles during setup, geometric
-shapes based on the [Shapely](https://pypi.org/project/Shapely/) library may be
-accessed and manipulated through various `ENC` attributes. The seacharts
-feature layers are stored in `seabed`, `shore` and `land`.
+### Basic Display Controls
 
 ```python
-if __name__ == '__main__':
-    from seacharts.enc import ENC
-
-    # Values set in user-defined 'seacharts.yaml'
-    # size = 9000, 5062
-    # center = 44300, 6956450
-    enc = ENC("seacharts.yaml")
-
-    print(enc.seabed[10])
-    print(enc.shore)
-    print(enc.land)
-
-    enc.display.show()
+display.start()              # Start the display
+display.show(duration=0.0)   # Show display for specified duration (0 = indefinite)
+display.close()              # Close the display window
 ```
 
-Note how custom settings may be set in a user-defined .yaml-file, if its path is
-provided to the ENC during initialization. One may also import and create an
-instance of the `seacharts.Config` dataclass, and provide it directly to the ENC.
+### View Modes
 
-### FGDB demonstration
-![](images/example2.svg "Example visualization of vessels and a
-colorbar with depth values in light mode.")
-
-### S-57 demonstration
-![](images/example3.png "Example visualization of S-57 map with TSS layer and a
-colorbar with depth values in light mode.")
-
-### Environment visualization
-The `ENC.start_display` method is used to show a Matplotlib figure plot of the
-loaded sea charts features. Zoom and pan the environment view using the mouse
-scroll button, and holding and dragging the plot with left click, respectively.
-
-Dark mode may be toggled using the `d` key, and an optional colorbar showing
-the various depth legends may be toggled using the `c` key. Images of the
-currently shown display may be saved in various resolutions by pressing
-Control + `s`, Shift + `s` or `s`.
-
-### SeaCharts 4.0 setup tips
-```
-Please be aware that these setup tips require setting up Conda environment.
-Possible support for pip installation will be resolved in the future.
+```python
+display.dark_mode(enabled=True)      # Toggle dark mode
+display.fullscreen(enabled=True)     # Toggle fullscreen mode
+display.colorbar(enabled=True)       # Toggle depth colorbar
 ```
 
-This is a short to-do list that might come useful when setting up SeaCharts 4.0 for the first time:
-1. Set up conda environment as instructed in `conda_requirements.txt` file
-2. Use `setup.ps1` (WINDOWS ONLY) to setup directory structure needed by SeaCharts or manually create directories: `data`, `data/db` and `data/shapefiles`
-3. Download US1GC09M map via [this link](https://www.charts.noaa.gov/ENCs/US1GC09M.zip), and put the `US1GC09M` directory (found in ENC_ROOT directory) inside data/db folder.
-4. Run `test_seacharts_4_0.py` code either by pasting code into some main.py file in root of your project directory or by running it directly (needs fixing the issues with importing seacharts in the test file)
-5. After execution you can expect such image to be displayed:
-![](images/test_results.svg
-"Example visualization with vessels and geometric shapes in dark mode.")
+### Plot Management
 
+```python
+display.redraw_plot()    # Redraw the entire plot
+display.update_plot()    # Update only animated elements
 ```
-For further experimentation options, look into files: `enc.py`, `config.yaml` and `config-schema.yaml` (for reference)
+
+## Weather Visualization
+
+Weather data can be visualized using various variables:
+
+* Wind (speed and direction)
+* Waves (height, direction, period)
+* Sea currents (speed and direction)
+* Tide height
+
+The visualization type is automatically selected based on the variable:
+
+* Scalar values: displayed as heatmaps
+* Vector values: displayed as arrow maps with direction indicators
+
+## Interactive Controls
+
+When `controls: True` in the config, a control panel provides:
+
+* **Time Slider**
+    * Allows navigation through different timestamps with labels for date and time.
+* **Layer Selection**
+    * Includes radio buttons to select weather variables such as wind, waves, and sea current.
+
+## Drawing Functions
+
+The Display class offers various drawing functions for maritime shapes:
+
+### Vessel Management
+
+```python
+display.add_vessels(*vessels)     # Add vessels to display
+# vessels format: (id, x, y, heading, color)
+display.clear_vessels()           # Remove all vessels
 ```
+
+### Shape Drawing
+
+#### Lines
+
+```python
+display.draw_line(
+    points=[(x1,y1), ...],   # List of coordinate pairs
+    color="color_string",     # Line color
+    width=float,             # Optional: line width
+    thickness=float,         # Optional: line thickness
+    edge_style=str|tuple,    # Optional: line style
+    marker_type=str          # Optional: point marker style
+)
+```
+#### Circles
+
+```python
+display.draw_circle(
+    center=(x, y),           # Center coordinates
+    radius=float,            # Circle radius
+    color="color_string",    # Circle color
+    fill=Boolean,            # Optional: fill circle (default: True)
+    thickness=float,         # Optional: line thickness
+    edge_style=str|tuple,    # Optional: line style
+    alpha=float             # Optional: transparency (0-1)
+)
+```
+
+#### Rectangles
+
+```python
+display.draw_rectangle(
+    center=(x, y),           # Center coordinates
+    size=(width, height),    # Rectangle dimensions
+    color="color_string",    # Rectangle color
+    rotation=float,          # Optional: rotation in degrees
+    fill=Boolean,            # Optional: fill rectangle (default: True)
+    thickness=float,         # Optional: line thickness
+    edge_style=str|tuple,    # Optional: line style
+    alpha=float              # Optional: transparency (0-1)
+)
+```
+
+#### Polygons
+
+```python
+display.draw_polygon(
+    geometry=shape_geometry,  # Shapely geometry or coordinate list
+    color="color_string",     # Polygon color
+    interiors=[[coords]],     # Optional: interior polygon coordinates
+    fill=Boolean,             # Optional: fill polygon (default: True)
+    thickness=float,          # Optional: line thickness
+    edge_style=str|tuple,     # Optional: line style
+    alpha=float              # Optional: transparency (0-1)
+)
+```
+
+#### Arrows
+
+```python
+display.draw_arrow(
+    start=(x1, y1),           # Start coordinates
+    end=(x2, y2),             # End coordinates
+    color="color_string",      # Arrow color
+    width=float,              # Optional: line width
+    fill=Boolean,             # Optional: fill arrow (default: False)
+    head_size=float,          # Optional: arrow head size
+    thickness=float,          # Optional: line thickness
+    edge_style=str|tuple      # Optional: line style
+)
+```
+
+## Image Export
+
+The `save_image` function allows you to export the current display or plot as an image file. This function offers several customizable options for setting the file name, location, resolution, and file format. It wraps around the internal `_save_figure` method, which handles the actual saving and setting of default values when specific parameters are not provided.
+
+### Usage
+
+```python
+display.save_image(
+    name=str,               # Optional: output filename (default: current window title)
+    path=Path,              # Optional: output directory path (default: "reports/")
+    scale=float,            # Optional: resolution scaling factor (default: 1.0)
+    extension=str           # Optional: file format extension (default: "png")
+)
+```
+
+## End note
+
+We recommend checking out files placed in `tests` directory as reference, to get familiar with the SeaCharts usage.
+
 ## License
 
 This project uses the [MIT](https://choosealicense.com/licenses/mit/) license.

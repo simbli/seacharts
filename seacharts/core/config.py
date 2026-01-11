@@ -100,26 +100,6 @@ class Config:
         self.validate_settings()
 
 
-    def override(self, section: str = "enc", **kwargs) -> None: # Can be deleted? Never used
-        """
-        Overrides settings in a specified section with new values.
-
-        :param section: The section of the configuration to override (default is "enc").
-        :param kwargs: Key-value pairs representing settings to be updated.
-        :raises ValueError: If no kwargs are provided or if the section does not exist.
-        """
-        if not kwargs:
-            return
-        if section not in self._valid_sections:
-            raise ValueError("Override settings in non-existing section!")
-
-        new_settings = self._settings
-        for key, value in kwargs.items():
-            new_settings[section][key] = value
-        self.validate_settings()
-        self._settings = new_settings
-
-
 def read_yaml_into_dict(file_name: Path | str = dcp.config) -> dict:
     """
     Reads a YAML file and converts it into a dictionary.

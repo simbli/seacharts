@@ -15,7 +15,7 @@ enc:
 
 display:
   colorbar: False
-  dark_mode: False
+  dark_mode: True
   fullscreen: False
   controls: True
   resolution: 640
