@@ -9,6 +9,40 @@ Python-based API for Electronic Navigational Charts (ENC)
 ![](images/example1.svg
 "Example visualization with vessels and geometric shapes in dark mode.")
 
+## Table of Contents
+
+- [Features](#features)
+- [Code Style](#code-style)
+- [Prerequisites](#prerequisites)
+  - [Initial Setup](#initial-setup)
+  - [Weather Module Setup (Optional)](#weather-module-setup-optional)
+- [Configuration Setup](#configuration-setup)
+  - [Configuration File Structure](#configuration-file-structure)
+  - [ENC (Electronic Navigation Chart) Configuration](#enc-electronic-navigation-chart-configuration)
+  - [Weather Configuration](#weather-configuration)
+  - [Time Configuration](#time-configuration)
+  - [Display Configuration](#display-configuration)
+- [ENC Class for Maritime Spatial Data](#enc-class-for-maritime-spatial-data)
+  - [Key Functionalities](#key-functionalities)
+  - [Example Usage](#example-usage)
+- [Display Features](#display-features)
+  - [Basic Display Controls](#basic-display-controls)
+  - [View Modes](#view-modes)
+  - [Plot Management](#plot-management)
+- [Weather Visualization](#weather-visualization)
+- [Interactive Controls](#interactive-controls)
+- [Drawing Functions](#drawing-functions)
+  - [Vessel Management](#vessel-management)
+  - [Shape Drawing](#shape-drawing)
+    - [Lines](#lines)
+    - [Circles](#circles)
+    - [Rectangles](#rectangles)
+    - [Polygons](#polygons)
+    - [Arrows](#arrows)
+- [Image Export](#image-export)
+- [End Note](#end-note)
+- [License](#license)
+
 ## Features
 
 - Read and process spatial depth data from
