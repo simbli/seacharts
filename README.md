@@ -68,7 +68,7 @@ convention for Python code.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/meeqn/seacharts_s57
+git clone https://github.com/simbli/seacharts
 ```
 
 2. Set up the Conda environment:
