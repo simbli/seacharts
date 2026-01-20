@@ -3,9 +3,13 @@ Contains the ENC class for reading, storing and plotting maritime spatial data.
 """
 from pathlib import Path
 
+import _warnings
+from shapely.geometry import Point
+
 from seacharts.core import Config
 from seacharts.display import Display
 from seacharts.environment import Environment
+from seacharts.environment.weather import WeatherData
 from seacharts.layers import Layer
 
 
@@ -21,10 +25,53 @@ class ENC:
     :param config: Config object or a valid path to a .yaml config file
     """
 
-    def __init__(self, config: Config | Path | str = None):
+    def __init__(self, config: Config | Path | str | None = None):
         self._config = config if isinstance(config, Config) else Config(config)
         self._environment = Environment(self._config.settings)
         self._display = None
+
+    def get_depth_at_coord(self, easting: float, northing: float) -> float | None:
+        """
+        Retrieves the seabed depth at a given coordinate.
+
+        :param easting: The easting (x-coordinate) in the coordinate system used by ENC.
+        :param northing: The northing (y-coordinate) in the coordinate system used by ENC.
+        :return: Depth as an integer if the point is within a seabed polygon, else None.
+        """
+        point = Point(easting, northing)
+        for seabed in reversed(self.seabed.values()):
+            if any(polygon.contains(point) for polygon in seabed.geometry.geoms):
+                return seabed.depth
+        return None
+    
+    def is_coord_in_layer(self, easting: int, northing: int, layer_name: str):
+        """
+        Checks if a coordinate is within a specified layer.
+
+        :param easting: The easting (x-coordinate) in the coordinate system used by ENC.
+        :param northing: The northing (y-coordinate) in the coordinate system used by ENC.
+        :param layer_name: The name of the layer to check, as a string.
+        :return: True if the coordinate is in the specified layer; False if not. Returns None if no matching layer was found.
+        """
+        layer = self._environment.get_layer_by_name(layer_name)
+        point = Point(easting, northing)
+        if layer is not None:
+            if any(polygon.contains(point) for polygon in layer.geometry.geoms):
+                return True
+        return False
+    
+    def get_param_value_at_coords(self, easting: int, northing: int, layer_name: str, param_name: str):
+        param_name = param_name.upper()
+        if self.is_coord_in_layer(easting, northing, layer_name):
+            layer: Layer = self._environment.get_layer_by_name(layer_name)
+            if layer is None:
+                _warnings.warn(f"Layer {layer_name} not found in ENC")
+                return None
+            parameters: dict | None = layer.get_params_at_coord(easting, northing)
+            if parameters is not None:
+                return parameters[param_name]
+            _warnings.warn(f"Couldn't find any value for parameter {param_name} in layer {layer_name}")
+        return None
 
     def update(self) -> None:
         """
@@ -64,25 +111,25 @@ class ENC:
         return self._environment.map.bathymetry
 
     @property
-    def size(self) -> tuple[int, int]:
+    def size(self) -> tuple[float, float]:
         """
         :return: tuple of ENC bounding box size
         """
-        return self._environment.scope.extent.size
+        return self._environment.scope.extent.size.to_tuple()
 
     @property
-    def origin(self) -> tuple[int, int]:
+    def origin(self) -> tuple[float, float]:
         """
         :return: tuple of ENC origin (lower left) coordinates.
         """
-        return self._environment.scope.extent.origin
+        return self._environment.scope.extent.origin.to_tuple()
 
     @property
-    def center(self) -> tuple[int, int]:
+    def center(self) -> tuple[float, float]:
         """
         :return: tuple of ENC center coordinates
         """
-        return self._environment.scope.extent.center
+        return self._environment.scope.extent.center.to_tuple()
 
     @property
     def bbox(self) -> tuple[int, int, int, int]:
@@ -97,3 +144,17 @@ class ENC:
         :return: list of considered depth bins
         """
         return self._environment.scope.depths
+
+    @property
+    def weather_names(self) -> list[str]:
+        """
+        :return: #TODO
+        """
+        return self._environment.weather.weather_names
+
+    @property
+    def weather_data(self) -> WeatherData:
+        """
+        :return: #TODO
+        """
+        return self._environment.weather

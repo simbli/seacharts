@@ -4,7 +4,6 @@ Contains the Shape base class for creating and manipulating shapes.
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
-
 from shapely import geometry as geo, ops
 
 
@@ -14,6 +13,7 @@ class Shape(ABC):
     color: str = None
     z_order: int = None
     artist: Any = None
+    # name: str = None
 
     def simplify(self, tolerance: int, preserve_topology: bool = True) -> None:
         self.geometry = self.geometry.simplify(tolerance, preserve_topology)
@@ -32,25 +32,28 @@ class Shape(ABC):
         return ops.nearest_points(self.geometry, geometry)[1]
 
     @property
-    def mapping(self) -> dict:
-        return geo.mapping(self.geometry)
-
-    @property
     def name(self) -> str:
         return self.__class__.__name__
+    @property
+    def mapping(self) -> dict:
+        return geo.mapping(self.geometry)
 
     @staticmethod
     def _record_to_geometry(record: dict) -> Any:
         return geo.shape(record["geometry"])
 
     @staticmethod
-    def as_multi(geometry: Any) -> Any:
-        if isinstance(geometry, geo.Point):
-            return geo.MultiPoint([geometry])
-        elif isinstance(geometry, geo.Polygon):
-            return geo.MultiPolygon([geometry])
-        elif isinstance(geometry, geo.LineString):
-            return geo.MultiLineString([geometry])
+    def as_multi(geometry: list) -> geo.base.BaseMultipartGeometry | None:
+        if len(geometry) == 0:
+            return None
+        if isinstance(geometry[0], geo.Point):
+            return geo.MultiPoint(geometry)
+        elif isinstance(geometry[0], geo.Polygon):
+            return geo.MultiPolygon(geometry)
+        elif isinstance(geometry[0], geo.LineString):
+            return geo.MultiLineString(geometry)
+        elif isinstance(geometry[0], geo.MultiPolygon):
+            return geometry[0]
         else:
             raise NotImplementedError(type(geometry))
 

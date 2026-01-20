@@ -1,0 +1,15 @@
+enc:
+  size: [ 9000, 5062 ]
+  center: [ 44300, 6956450 ]
+  depths: [ 0, 1, 2, 5, 10, 20, 50, 100, 200, 350, 500 ]
+  crs: "UTM33N"
+  resources: [ "data/db/More_og_Romsdal_utm33.gdb" ]
+
+display:
+  colorbar: False
+  dark_mode: True
+  fullscreen: False
+  controls: False
+  resolution: 640
+  anchor: "center"
+  dpi: 96

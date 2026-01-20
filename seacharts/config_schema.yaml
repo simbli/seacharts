@@ -2,40 +2,119 @@ enc:
   required: True
   type: dict
   schema:
+    # Size of displayed map
+    # Vertical, horizontal in degrees or UTM units
     size:
       required: True
       type: list
+      minlength: 2
       maxlength: 2
       schema:
         type: float
         min: 1.0
+
+    # That's where you want bottom-left corner to be
+    # Vertical, horizontal in degrees or UTM units
     origin:
       required: True
       excludes: center
       type: list
+      minlength: 2
       maxlength: 2
       schema:
         type: float
+
+    # That's where you want the center of a map to be
+    # Vertical, horizontal in degrees or UTM units
     center:
       required: True
       excludes: origin
       type: list
+      minlength: 2
       maxlength: 2
       schema:
         type: float
+
+    # UTM zone required for coordinates to work correctly
+    # Set to WGS84 for lat/lon coordinates, UTM otherwise
+    crs:
+      required: True
+      type: string
+
+    # Depths are required for both S57 and FGDB 
+    # If not set they will be assigned default values, can be negative
     depths:
       required: False
       type: list
       minlength: 1
       schema:
         type: integer
-        min: 0
-    resources:
+
+    # Add specific S-57 layers (key) you want to extract, and assign them colors in HEX format (value)
+    # KEEP IN MIND that LNDARE, COALNE and DEPARE are loaded on default as Land, Shore and Bathymetry
+    S57_layers:
       required: False
+      type: dict
+      minlength: 0
+      valuesrules:
+        type: string
+      keysrules:
+        type: string
+
+    # You must put paths to some resources
+    resources:
+      required: True
       type: list
       minlength: 1
       schema:
         type: string
+
+    weather:
+      required: False
+      type: dict
+      schema:
+        PyThor_address:
+          required: False
+          type: string
+        variables:
+          type: list
+          required: False
+          schema:
+            type: string
+            allowed:
+              - wave_direction
+              - wave_height
+              - wave_period
+              - wind_direction
+              - wind_speed
+              - sea_current_speed
+              - sea_current_direction
+              - tide_height
+    time:
+      required: False
+      type: dict
+      schema:
+        time_start:
+          required: True
+          type: string
+          regex: "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-[0-9]{4} [0-2][0-9]:[0-5][0-9]$"  # dd-mm-yyyy hh:mm
+        time_end:
+          required: True
+          type: string
+          regex: "^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-[0-9]{4} [0-2][0-9]:[0-5][0-9]$"  # dd-mm-yyyy hh:mm
+        period:
+          required: True
+          type: string
+          allowed:
+            - hour
+            - day
+            - week
+            - month
+            - year
+        period_multiplier:
+          required: True
+          type: float
+
 
 display:
   required: False
@@ -44,18 +123,27 @@ display:
     colorbar:
       required: False
       type: boolean
+
     dark_mode:
       required: False
       type: boolean
+
     fullscreen:
       required: False
       type: boolean
+
     resolution:
       required: False
       type: integer
+
     anchor:
       required: False
       type: string
+
     dpi:
       required: False
       type: integer
+
+    controls:
+      required: False
+      type: boolean
