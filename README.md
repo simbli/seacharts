@@ -53,7 +53,7 @@ Python-based API for Electronic Navigational Charts (ENC)
 - Access and manipulate standard geometric shapes such as points and polygon
   collections.
 - Visualize colorful seacharts features and vessels.
-- Integration with [PyThor](https://github.com/SanityRemnants/PyThor) library allowing for weather data access and display.  
+- Integration with [PyThor](https://anaconda.org/channels/pythor_WETI_GUT/packages/pythor/overview) library allowing for weather data access and display.  
 
 ## Code style
 
